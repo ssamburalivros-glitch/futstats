@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutStats - Login</title>
+    <style>
+        :root {
+            --primary-color: #001f3f;
+            --secondary-color: #003366;
+            --accent-color: #0074D9;
+            --highlight-color: #7FDBFF;
+            --text-color: #333;
+            --light-text: #fff;
+            --background-color: #f0f8ff;
+            --card-background: #fff;
+            --border-color: #c0d6e4;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Tela de Login */
+        #login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 20px;
+        }
+
+        .login-container {
+            background-color: var(--card-background);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .switch-form {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .switch-form a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <div class="logo">
+                <h1>FutStats</h1>
+                <p>Estatísticas detalhadas de futebol</p>
+            </div>
+            <form id="login-form">
+                <h2>Login</h2>
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit">Entrar</button>
+                <p class="switch-form">Não tem uma conta? <a href="#" id="show-register">Cadastre-se</a></p>
+            </form>
+
+            <form id="register-form" class="hidden">
+                <h2>Cadastro</h2>
+                <div class="form-group">
+                    <label for="reg-username">Usuário</label>
+                    <input type="text" id="reg-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">E-mail</label>
+                    <input type="email" id="reg-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Senha</label>
+                    <input type="password" id="reg-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-confirm-password">Confirmar Senha</label>
+                    <input type="password" id="reg-confirm-password" required>
+                </div>
+                <button type="submit">Cadastrar</button>
+                <p class="switch-form">Já tem uma conta? <a href="#" id="show-login">Faça login</a></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Credenciais de administrador
+        const ADMIN_USERNAME = 'admindev';
+        const ADMIN_PASSWORD = '3369';
+
+        // Elementos da tela de login
+        const loginScreen = document.getElementById('login-screen');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const showRegisterLink = document.getElementById('show-register');
+        const showLoginLink = document.getElementById('show-login');
+
+        // Dados de usuários (em um sistema real, isso viria de um backend)
+        let users = JSON.parse(localStorage.getItem('futstats_users')) || [];
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Verificar se há usuário logado
+            const savedUser = localStorage.getItem('futstats_current_user');
+            if (savedUser) {
+                // Redirecionar para a página principal
+                window.location.href = 'home.html';
+            }
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            handleLogin(username, password);
+        });
+
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+            
+            handleRegister(username, email, password, confirmPassword);
+        });
+
+        showRegisterLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+        });
+
+        showLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
+
+        // Funções de autenticação
+        function handleLogin(username, password) {
+            // Verificar credenciais de administrador
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                const currentUser = { username: ADMIN_USERNAME, isAdmin: true };
+                localStorage.setItem('futstats_current_user', JSON.stringify(currentUser));
+                window.location.href = 'home.html';
+                return;
+            }
+            
+            // Verificar usuários cadastrados
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                const currentUser = { username: user.username, isAdmin: false };
+                localStorage.setItem('futstats_current_user', JSON.stringify(currentUser));
+                window.location.href = 'home.html';
+            } else {
+                alert('Usuário ou senha incorretos.');
+            }
+        }
+
+        function handleRegister(username, email, password, confirmPassword) {
+            if (password !== confirmPassword) {
+                alert('As senhas não coincidem.');
+                return;
+            }
+            
+            if (users.find(u => u.username === username)) {
+                alert('Nome de usuário já existe.');
+                return;
+            }
+            
+            if (users.find(u => u.email === email)) {
+                alert('E-mail já cadastrado.');
+                return;
+            }
+            
+            users.push({ username, email, password });
+            localStorage.setItem('futstats_users', JSON.stringify(users));
+            
+            alert('Cadastro realizado com sucesso! Faça login para continuar.');
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            registerForm.reset();
+        }
+    </script>
+</body>
+</html>

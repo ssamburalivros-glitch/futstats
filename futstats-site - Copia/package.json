@@ -1,0 +1,10 @@
+{
+  "name": "futstats-football-data",
+  "version": "1.0.0",
+  "description": "Estatísticas de futebol com Football-Data.org",
+  "type": "module",
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
