@@ -10,7 +10,7 @@
       "summary": "2 x 1",
       "is_live": true,
       "country": "Brasil 🇧🇷",
-      "timestamp": "2025-12-18T18:36:07.390796",
+      "timestamp": "2025-12-18T18:49:35.669257",
       "is_brasileirao": true
     },
     {
@@ -22,7 +22,7 @@
       "summary": "1 x 1",
       "is_live": true,
       "country": "Espanha 🇪🇸",
-      "timestamp": "2025-12-18T18:36:07.390802",
+      "timestamp": "2025-12-18T18:49:35.669264",
       "is_brasileirao": false
     },
     {
@@ -34,7 +34,7 @@
       "summary": "0 x 0",
       "is_live": true,
       "country": "Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-      "timestamp": "2025-12-18T18:36:07.390804",
+      "timestamp": "2025-12-18T18:49:35.669265",
       "is_brasileirao": false
     },
     {
@@ -46,7 +46,7 @@
       "summary": "1 x 0",
       "is_live": true,
       "country": "Alemanha 🇩🇪",
-      "timestamp": "2025-12-18T18:36:07.390805",
+      "timestamp": "2025-12-18T18:49:35.669267",
       "is_brasileirao": false
     },
     {
@@ -58,14 +58,14 @@
       "summary": "1 x 1",
       "is_live": true,
       "country": "França 🇫🇷",
-      "timestamp": "2025-12-18T18:36:07.390809",
+      "timestamp": "2025-12-18T18:49:35.669270",
       "is_brasileirao": false
     }
   ],
   "total": 5,
   "live_games": 5,
   "brasileirao_games": 1,
-  "updated_at": "2025-12-18 18:36:07",
+  "updated_at": "2025-12-18 18:49:35",
   "source": "exemplo-vercel",
   "server": "Vercel"
 }
