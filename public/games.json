@@ -2,6 +2,34 @@
   "success": true,
   "games": [
     {
+      "match": "Real Murcia x Real Betis",
+      "status": "INTERVALO",
+      "league": "Copa do Rei",
+      "home_team": "Real Murcia",
+      "away_team": "Real Betis",
+      "home_score": "0",
+      "away_score": "1",
+      "summary": "0 x 1",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:56:51.768134"
+    },
+    {
+      "match": "Mainz 05 x Samsunspor",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "Mainz 05",
+      "away_team": "Samsunspor",
+      "home_score": "1",
+      "away_score": "0",
+      "summary": "1 x 0",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:56:51.769445"
+    },
+    {
       "match": "Sparta Praha x Aberdeen",
       "status": "INTERVALO",
       "league": "Liga Conferência Europa da UEFA",
@@ -13,7 +41,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:49:14.496800"
+      "timestamp": "2025-12-18T20:56:51.769625"
     },
     {
       "match": "AEK Athens x Universitatea Craiova",
@@ -27,7 +55,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:49:14.496988"
+      "timestamp": "2025-12-18T20:56:51.769839"
     },
     {
       "match": "AEK Larnaca x Skendija 79",
@@ -41,7 +69,21 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:49:14.497161"
+      "timestamp": "2025-12-18T20:56:51.770008"
+    },
+    {
+      "match": "AZ x Jagiellonia Białystok",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "AZ",
+      "away_team": "Jagiellonia Białystok",
+      "home_score": "0",
+      "away_score": "0",
+      "summary": "0 x 0",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:56:51.770171"
     },
     {
       "match": "Crystal Palace x KuPS",
@@ -55,7 +97,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:49:14.497350"
+      "timestamp": "2025-12-18T20:56:51.770336"
     },
     {
       "match": "Dynamo Kyiv x Artsakh",
@@ -69,7 +111,35 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:49:14.497510"
+      "timestamp": "2025-12-18T20:56:51.770505"
+    },
+    {
+      "match": "Lausanne Sport x Fiorentina",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "Lausanne Sport",
+      "away_team": "Fiorentina",
+      "home_score": "0",
+      "away_score": "0",
+      "summary": "0 x 0",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:56:51.770668"
+    },
+    {
+      "match": "Zrinjski x Rapid Wien",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "Zrinjski",
+      "away_team": "Rapid Wien",
+      "home_score": "0",
+      "away_score": "1",
+      "summary": "0 x 1",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:56:51.770850"
     },
     {
       "match": "Legia Warszawa x Lincoln Red Imps",
@@ -83,7 +153,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:49:14.497731"
+      "timestamp": "2025-12-18T20:56:51.771017"
     },
     {
       "match": "Celje x Shelbourne",
@@ -97,7 +167,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:49:14.497895"
+      "timestamp": "2025-12-18T20:56:51.771178"
     },
     {
       "match": "Omonia Nicosia x Raków Częstochowa",
@@ -111,7 +181,21 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:49:14.498076"
+      "timestamp": "2025-12-18T20:56:51.771338"
+    },
+    {
+      "match": "Rayo Vallecano x Drita",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "Rayo Vallecano",
+      "away_team": "Drita",
+      "home_score": "1",
+      "away_score": "0",
+      "summary": "1 x 0",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:56:51.771499"
     },
     {
       "match": "Strasbourg x Breidablik",
@@ -125,7 +209,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:49:14.498264"
+      "timestamp": "2025-12-18T20:56:51.771659"
     },
     {
       "match": "Shakhtar Donetsk x Rijeka",
@@ -139,7 +223,35 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:49:14.498423"
+      "timestamp": "2025-12-18T20:56:51.771846"
+    },
+    {
+      "match": "Shamrock Rovers x Hamrun Spartans",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "Shamrock Rovers",
+      "away_team": "Hamrun Spartans",
+      "home_score": "2",
+      "away_score": "1",
+      "summary": "2 x 1",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:56:51.772016"
+    },
+    {
+      "match": "Sigma Olomouc x Lech Poznań",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "Sigma Olomouc",
+      "away_team": "Lech Poznań",
+      "home_score": "0",
+      "away_score": "2",
+      "summary": "0 x 2",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:56:51.772182"
     },
     {
       "match": "Slovan Bratislava x Häcken",
@@ -153,12 +265,12 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:49:14.498636"
+      "timestamp": "2025-12-18T20:56:51.772348"
     }
   ],
-  "total": 11,
-  "live_games": 11,
+  "total": 19,
+  "live_games": 19,
   "brasileirao_games": 0,
-  "updated_at": "2025-12-18 20:49:14",
+  "updated_at": "2025-12-18 20:56:51",
   "source": "placardefutebol.com.br"
 }
