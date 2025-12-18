@@ -13,7 +13,7 @@
       "is_live": true,
       "is_brasileirao": true,
       "country": "Brasil",
-      "timestamp": "2025-12-18T17:43:21.191017"
+      "timestamp": "2025-12-18T17:52:02.649563"
     },
     {
       "match": "Real Madrid x Barcelona",
@@ -27,7 +27,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Espanha",
-      "timestamp": "2025-12-18T17:43:21.191026"
+      "timestamp": "2025-12-18T17:52:02.649568"
     },
     {
       "match": "Manchester United x Liverpool",
@@ -41,12 +41,12 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Inglaterra",
-      "timestamp": "2025-12-18T17:43:21.191028"
+      "timestamp": "2025-12-18T17:52:02.649570"
     }
   ],
   "total": 3,
   "live_games": 3,
   "brasileirao_games": 1,
-  "updated_at": "2025-12-18 17:43:21",
+  "updated_at": "2025-12-18 17:52:02",
   "source": "exemplo"
 }
