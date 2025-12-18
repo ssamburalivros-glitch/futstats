@@ -25,23 +25,14 @@ jobs:
       with:
         python-version: '3.10'
         
-    - name: Install dependencies
-      run: pip install requests beautifulsoup4
-        
     - name: Run crawler
-      run: python crawler.py
-        
-    - name: Check created file
       run: |
-        echo "Arquivos na raiz:"
-        ls -la
-        echo "Conteúdo do games.json:"
-        head -20 games.json
+        python crawler.py
         
     - name: Commit and push changes
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
-        git add games.json
+        git add public/games.json
         git commit -m "🤖 Atualização: $(date +'%d/%m %H:%M')" || echo "Sem mudanças"
         git push
