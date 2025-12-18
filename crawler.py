@@ -1,108 +1,77 @@
-import requests
-from bs4 import BeautifulSoup
+#!/usr/bin/env python3
 import json
 from datetime import datetime
-import re
+import os
 
-def get_live_games():
-    """Busca todos os jogos ao vivo"""
-    try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-        
-        response = requests.get('https://www.placardefutebol.com.br/', headers=headers, timeout=15)
-        response.raise_for_status()
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        games = []
-        
-        # Buscar todos os campeonatos
-        championships = soup.find_all('div', class_='container content')
-        
-        for champ in championships:
-            # Encontrar título do campeonato
-            title_elem = champ.find_previous('h3', class_='match-list_league-name')
-            league = title_elem.text.strip() if title_elem else "Campeonato"
-            
-            # Encontrar jogos
-            matches = champ.find_all('div', class_='row align-items-center content')
-            
-            for match in matches:
-                # Verificar status
-                status_elem = match.find('span', class_='status-name')
-                if status_elem:
-                    status = status_elem.text.strip()
-                    
-                    # Filtrar apenas jogos ao vivo ou em andamento
-                    if not any(term in status.upper() for term in ['AO VIVO', 'INTERVALO', "'"]):
-                        continue
-                    
-                    # Obter times
-                    teams = match.find_all('div', class_='team-name')
-                    if len(teams) >= 2:
-                        home_team = teams[0].text.strip()
-                        away_team = teams[1].text.strip()
-                        
-                        # Obter placar
-                        scores = match.find_all('span', class_='badge badge-default')
-                        home_score = "0"
-                        away_score = "0"
-                        
-                        if len(scores) >= 2:
-                            home_score = scores[0].text.strip()
-                            away_score = scores[1].text.strip()
-                        
-                        # Verificar se é brasileirão
-                        is_brasileirao = any(term in league.upper() for term in ['BRASILEIRO', 'SÉRIE A'])
-                        
-                        # Determinar país
-                        country = "Brasil" if is_brasileirao else "Internacional"
-                        
-                        game_data = {
-                            'match': f'{home_team} x {away_team}',
-                            'status': status,
-                            'league': league,
-                            'home_team': home_team,
-                            'away_team': away_team,
-                            'home_score': home_score,
-                            'away_score': away_score,
-                            'summary': f'{home_score} x {away_score}',
-                            'is_live': True,
-                            'is_brasileirao': is_brasileirao,
-                            'country': country,
-                            'timestamp': datetime.now().isoformat()
-                        }
-                        
-                        games.append(game_data)
-        
-        return {
-            'success': True,
-            'games': games,
-            'total': len(games),
-            'live_games': len(games),
-            'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'source': 'placardefutebol.com.br'
-        }
-        
-    except Exception as e:
-        return {
-            'success': False,
-            'error': str(e),
-            'games': [],
-            'total': 0,
-            'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        }
-
-if __name__ == '__main__':
-    print("🚀 Iniciando crawler de jogos ao vivo...")
+def main():
+    print("🚀 Iniciando gerador de dados de exemplo...")
     
-    result = get_live_games()
+    # Dados de exemplo
+    data = {
+        "success": True,
+        "games": [
+            {
+                "match": "Flamengo x Palmeiras",
+                "status": "AO VIVO 45'",
+                "league": "Brasileirão Série A",
+                "home_team": "Flamengo",
+                "away_team": "Palmeiras",
+                "home_score": "2",
+                "away_score": "1",
+                "summary": "2 x 1",
+                "is_live": True,
+                "is_brasileirao": True,
+                "country": "Brasil",
+                "timestamp": datetime.now().isoformat()
+            },
+            {
+                "match": "Real Madrid x Barcelona",
+                "status": "AO VIVO 65'",
+                "league": "La Liga",
+                "home_team": "Real Madrid",
+                "away_team": "Barcelona",
+                "home_score": "1",
+                "away_score": "1",
+                "summary": "1 x 1",
+                "is_live": True,
+                "is_brasileirao": False,
+                "country": "Espanha",
+                "timestamp": datetime.now().isoformat()
+            },
+            {
+                "match": "Manchester United x Liverpool",
+                "status": "INTERVALO",
+                "league": "Premier League",
+                "home_team": "Manchester United",
+                "away_team": "Liverpool",
+                "home_score": "0",
+                "away_score": "0",
+                "summary": "0 x 0",
+                "is_live": True,
+                "is_brasileirao": False,
+                "country": "Inglaterra",
+                "timestamp": datetime.now().isoformat()
+            }
+        ],
+        "total": 3,
+        "live_games": 3,
+        "brasileirao_games": 1,
+        "updated_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        "source": "exemplo"
+    }
     
-    # Salvar dados em arquivo JSON
+    # Criar diretório public se não existir
+    os.makedirs('public', exist_ok=True)
+    
+    # Salvar em public/games.json
     with open('public/games.json', 'w', encoding='utf-8') as f:
-        json.dump(result, f, ensure_ascii=False, indent=2)
+        json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print(f"✅ Crawler executado com sucesso!")
-    print(f"📊 Total de jogos encontrados: {result['total']}")
-    print(f"🕐 Atualizado em: {result['updated_at']}")
+    print(f" Dados criados com sucesso em public/games.json")
+    print(f" Total de jogos: {data['total']}")
+    print(f" Jogos ao vivo: {data['live_games']}")
+    print(f" Brasileirão: {data['brasileirao_games']}")
+    print(f" Atualizado em: {data['updated_at']}")
+
+if __name__ == "__main__":
+    main()
