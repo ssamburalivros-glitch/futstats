@@ -2,6 +2,34 @@
   "success": true,
   "games": [
     {
+      "match": "Sparta Praha x Aberdeen",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "Sparta Praha",
+      "away_team": "Aberdeen",
+      "home_score": "2",
+      "away_score": "0",
+      "summary": "2 x 0",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:49:14.496800"
+    },
+    {
+      "match": "AEK Athens x Universitatea Craiova",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "AEK Athens",
+      "away_team": "Universitatea Craiova",
+      "home_score": "0",
+      "away_score": "1",
+      "summary": "0 x 1",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:49:14.496988"
+    },
+    {
       "match": "AEK Larnaca x Skendija 79",
       "status": "INTERVALO",
       "league": "Liga Conferência Europa da UEFA",
@@ -13,7 +41,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:48:58.097654"
+      "timestamp": "2025-12-18T20:49:14.497161"
     },
     {
       "match": "Crystal Palace x KuPS",
@@ -27,7 +55,21 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:48:58.097870"
+      "timestamp": "2025-12-18T20:49:14.497350"
+    },
+    {
+      "match": "Dynamo Kyiv x Artsakh",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "Dynamo Kyiv",
+      "away_team": "Artsakh",
+      "home_score": "1",
+      "away_score": "0",
+      "summary": "1 x 0",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:49:14.497510"
     },
     {
       "match": "Legia Warszawa x Lincoln Red Imps",
@@ -41,7 +83,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:48:58.098113"
+      "timestamp": "2025-12-18T20:49:14.497731"
     },
     {
       "match": "Celje x Shelbourne",
@@ -55,7 +97,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:48:58.098274"
+      "timestamp": "2025-12-18T20:49:14.497895"
     },
     {
       "match": "Omonia Nicosia x Raków Częstochowa",
@@ -69,12 +111,54 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:48:58.098468"
+      "timestamp": "2025-12-18T20:49:14.498076"
+    },
+    {
+      "match": "Strasbourg x Breidablik",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "Strasbourg",
+      "away_team": "Breidablik",
+      "home_score": "1",
+      "away_score": "1",
+      "summary": "1 x 1",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:49:14.498264"
+    },
+    {
+      "match": "Shakhtar Donetsk x Rijeka",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "Shakhtar Donetsk",
+      "away_team": "Rijeka",
+      "home_score": "0",
+      "away_score": "0",
+      "summary": "0 x 0",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:49:14.498423"
+    },
+    {
+      "match": "Slovan Bratislava x Häcken",
+      "status": "INTERVALO",
+      "league": "Liga Conferência Europa da UEFA",
+      "home_team": "Slovan Bratislava",
+      "away_team": "Häcken",
+      "home_score": "0",
+      "away_score": "0",
+      "summary": "0 x 0",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T20:49:14.498636"
     }
   ],
-  "total": 5,
-  "live_games": 5,
+  "total": 11,
+  "live_games": 11,
   "brasileirao_games": 0,
-  "updated_at": "2025-12-18 20:48:58",
+  "updated_at": "2025-12-18 20:49:14",
   "source": "placardefutebol.com.br"
 }
