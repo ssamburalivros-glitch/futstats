@@ -1,13 +1,27 @@
 {
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 10
-    }
-  },
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/public/index.html"
+    },
+    {
       "source": "/api/games",
-      "destination": "/api/index.js"
+      "destination": "/api/games.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/public/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
     }
   ]
 }
