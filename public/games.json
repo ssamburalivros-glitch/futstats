@@ -1,0 +1,52 @@
+{
+  "success": true,
+  "games": [
+    {
+      "match": "Flamengo x Palmeiras",
+      "status": "AO VIVO 45'",
+      "league": "Brasileirão Série A",
+      "home_team": "Flamengo",
+      "away_team": "Palmeiras",
+      "home_score": "2",
+      "away_score": "1",
+      "summary": "2 x 1",
+      "is_live": true,
+      "is_brasileirao": true,
+      "country": "Brasil",
+      "timestamp": "2025-12-18T17:41:35.777301"
+    },
+    {
+      "match": "Real Madrid x Barcelona",
+      "status": "AO VIVO 65'",
+      "league": "La Liga",
+      "home_team": "Real Madrid",
+      "away_team": "Barcelona",
+      "home_score": "1",
+      "away_score": "1",
+      "summary": "1 x 1",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Espanha",
+      "timestamp": "2025-12-18T17:41:35.777308"
+    },
+    {
+      "match": "Manchester United x Liverpool",
+      "status": "INTERVALO",
+      "league": "Premier League",
+      "home_team": "Manchester United",
+      "away_team": "Liverpool",
+      "home_score": "0",
+      "away_score": "0",
+      "summary": "0 x 0",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Inglaterra",
+      "timestamp": "2025-12-18T17:41:35.777309"
+    }
+  ],
+  "total": 3,
+  "live_games": 3,
+  "brasileirao_games": 1,
+  "updated_at": "2025-12-18 17:41:35",
+  "source": "exemplo"
+}
