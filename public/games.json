@@ -2,70 +2,23 @@
   "success": true,
   "games": [
     {
-      "match": "Flamengo x Palmeiras",
-      "status": "AO VIVO 45'",
-      "league": "Brasileirão Série A",
-      "home_score": "2",
-      "away_score": "1",
-      "summary": "2 x 1",
-      "is_live": true,
-      "country": "Brasil 🇧🇷",
-      "timestamp": "2025-12-18T19:39:39.566248",
-      "is_brasileirao": true
-    },
-    {
-      "match": "Real Madrid x Barcelona",
-      "status": "AO VIVO 65'",
-      "league": "La Liga",
-      "home_score": "1",
-      "away_score": "1",
-      "summary": "1 x 1",
-      "is_live": true,
-      "country": "Espanha 🇪🇸",
-      "timestamp": "2025-12-18T19:39:39.566253",
-      "is_brasileirao": false
-    },
-    {
-      "match": "Manchester City x Arsenal",
+      "match": "Napoli x Milan",
       "status": "INTERVALO",
-      "league": "Premier League",
-      "home_score": "0",
-      "away_score": "0",
-      "summary": "0 x 0",
-      "is_live": true,
-      "country": "Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-      "timestamp": "2025-12-18T19:39:39.566255",
-      "is_brasileirao": false
-    },
-    {
-      "match": "Bayern Munich x Borussia Dortmund",
-      "status": "AO VIVO 30'",
-      "league": "Bundesliga",
+      "league": "Supercopa da Itália",
+      "home_team": "Napoli",
+      "away_team": "Milan",
       "home_score": "1",
       "away_score": "0",
       "summary": "1 x 0",
       "is_live": true,
-      "country": "Alemanha 🇩🇪",
-      "timestamp": "2025-12-18T19:39:39.566256",
-      "is_brasileirao": false
-    },
-    {
-      "match": "Paris Saint-Germain x Olympique de Marseille",
-      "status": "AO VIVO 55'",
-      "league": "Ligue 1",
-      "home_score": "1",
-      "away_score": "1",
-      "summary": "1 x 1",
-      "is_live": true,
-      "country": "França 🇫🇷",
-      "timestamp": "2025-12-18T19:39:39.566259",
-      "is_brasileirao": false
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-18T19:49:52.043908"
     }
   ],
-  "total": 5,
-  "live_games": 5,
-  "brasileirao_games": 1,
-  "updated_at": "2025-12-18 19:39:39",
-  "source": "exemplo-vercel",
-  "server": "Vercel"
+  "total": 1,
+  "live_games": 1,
+  "brasileirao_games": 0,
+  "updated_at": "2025-12-18 19:49:52",
+  "source": "placardefutebol.com.br"
 }
