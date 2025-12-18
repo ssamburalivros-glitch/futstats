@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutStats LIVE - Todos os Jogos Ao Vivo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-satellite-dish"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>FutStats <span class="live-badge">LIVE</span></h1>
+                    <p class="subtitle">Todos os jogos ao vivo em tempo real</p>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat">
+                    <i class="fas fa-sync-alt spin"></i>
+                    <span id="updateTimer">Atualizando em 0:00</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-globe-americas"></i>
+                    <span id="totalCountries">0 países</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Controles -->
+    <div class="controls">
+        <div class="container">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-globe"></i> TODOS
+                </button>
+                <button class="filter-btn" data-filter="brasil">
+                    <i class="fas fa-futbol"></i> BRASIL
+                </button>
+                <button class="filter-btn" data-filter="europa">
+                    <i class="fas fa-flag"></i> EUROPA
+                </button>
+                <button class="filter-btn" data-filter="live">
+                    <i class="fas fa-broadcast-tower"></i> AO VIVO
+                </button>
+            </div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar time ou campeonato...">
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Estatísticas em Destaque -->
+            <div class="highlight-stats">
+                <div class="stat-card highlight">
+                    <div class="stat-icon">
+                        <i class="fas fa-tv"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>JOGOS AO VIVO</h3>
+                        <p id="liveCount">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-flag"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>CAMP. ATIVOS</h3>
+                        <p id="leaguesCount">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-futbol"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>TOTAL GOLS</h3>
+                        <p id="totalGoals">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>ATUALIZADO</h3>
+                        <p id="lastUpdate">Agora</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Jogos -->
+            <div class="games-section">
+                <h2><i class="fas fa-list"></i> JOGOS EM ANDAMENTO</h2>
+                <div class="games-container" id="gamesContainer">
+                    <!-- Jogos serão carregados aqui -->
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Buscando jogos ao vivo...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mapa de Campeonatos -->
+            <div class="leagues-section">
+                <h2><i class="fas fa-map"></i> CAMP. AO VIVO POR PAÍS</h2>
+                <div class="countries-grid" id="countriesGrid">
+                    <!-- Países serão carregados aqui -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <div class="footer-logo">
+                        <i class="fas fa-satellite"></i>
+                        <span>FutStats LIVE</span>
+                    </div>
+                    <p class="footer-desc">
+                        Dados atualizados automaticamente a cada 5 minutos
+                    </p>
+                </div>
+                <div class="footer-center">
+                    <p>
+                        <i class="fas fa-robot"></i>
+                        Crawler automático via GitHub Actions
+                    </p>
+                    <p class="update-info">
+                        <i class="fas fa-history"></i>
+                        Próxima atualização: <span id="nextUpdate">5 min</span>
+                    </p>
+                </div>
+                <div class="footer-right">
+                    <div class="status-indicator">
+                        <div class="status-dot active"></div>
+                        <span>SISTEMA ATIVO</span>
+                    </div>
+                    <a href="https://github.com/seu-usuario/futstats-live" class="github-link" target="_blank">
+                        <i class="fab fa-github"></i> Ver no GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal para detalhes -->
+    <div class="modal" id="gameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Detalhes do Jogo</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Conteúdo será preenchido via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
