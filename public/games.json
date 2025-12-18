@@ -5,48 +5,67 @@
       "match": "Flamengo x Palmeiras",
       "status": "AO VIVO 45'",
       "league": "Brasileirão Série A",
-      "home_team": "Flamengo",
-      "away_team": "Palmeiras",
       "home_score": "2",
       "away_score": "1",
       "summary": "2 x 1",
       "is_live": true,
-      "is_brasileirao": true,
-      "country": "Brasil",
-      "timestamp": "2025-12-18T17:52:38.365748"
+      "country": "Brasil 🇧🇷",
+      "timestamp": "2025-12-18T18:04:19.651443",
+      "is_brasileirao": true
     },
     {
       "match": "Real Madrid x Barcelona",
       "status": "AO VIVO 65'",
       "league": "La Liga",
-      "home_team": "Real Madrid",
-      "away_team": "Barcelona",
       "home_score": "1",
       "away_score": "1",
       "summary": "1 x 1",
       "is_live": true,
-      "is_brasileirao": false,
-      "country": "Espanha",
-      "timestamp": "2025-12-18T17:52:38.365755"
+      "country": "Espanha 🇪🇸",
+      "timestamp": "2025-12-18T18:04:19.651450",
+      "is_brasileirao": false
     },
     {
-      "match": "Manchester United x Liverpool",
+      "match": "Manchester City x Arsenal",
       "status": "INTERVALO",
       "league": "Premier League",
-      "home_team": "Manchester United",
-      "away_team": "Liverpool",
       "home_score": "0",
       "away_score": "0",
       "summary": "0 x 0",
       "is_live": true,
-      "is_brasileirao": false,
-      "country": "Inglaterra",
-      "timestamp": "2025-12-18T17:52:38.365757"
+      "country": "Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+      "timestamp": "2025-12-18T18:04:19.651452",
+      "is_brasileirao": false
+    },
+    {
+      "match": "Bayern Munich x Borussia Dortmund",
+      "status": "AO VIVO 30'",
+      "league": "Bundesliga",
+      "home_score": "1",
+      "away_score": "0",
+      "summary": "1 x 0",
+      "is_live": true,
+      "country": "Alemanha 🇩🇪",
+      "timestamp": "2025-12-18T18:04:19.651453",
+      "is_brasileirao": false
+    },
+    {
+      "match": "Paris Saint-Germain x Olympique de Marseille",
+      "status": "AO VIVO 55'",
+      "league": "Ligue 1",
+      "home_score": "1",
+      "away_score": "1",
+      "summary": "1 x 1",
+      "is_live": true,
+      "country": "França 🇫🇷",
+      "timestamp": "2025-12-18T18:04:19.651457",
+      "is_brasileirao": false
     }
   ],
-  "total": 3,
-  "live_games": 3,
+  "total": 5,
+  "live_games": 5,
   "brasileirao_games": 1,
-  "updated_at": "2025-12-18 17:52:38",
-  "source": "exemplo"
+  "updated_at": "2025-12-18 18:04:19",
+  "source": "exemplo-vercel",
+  "server": "Vercel"
 }
