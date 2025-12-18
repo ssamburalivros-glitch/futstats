@@ -10,7 +10,7 @@
       "summary": "2 x 1",
       "is_live": true,
       "country": "Brasil",
-      "timestamp": "2025-12-18T17:55:20.245243"
+      "timestamp": "2025-12-18T17:56:40.453195"
     },
     {
       "match": "Real Madrid x Barcelona",
@@ -21,7 +21,7 @@
       "summary": "1 x 1",
       "is_live": true,
       "country": "Espanha",
-      "timestamp": "2025-12-18T17:55:20.245248"
+      "timestamp": "2025-12-18T17:56:40.453199"
     },
     {
       "match": "Manchester City x Arsenal",
@@ -32,11 +32,11 @@
       "summary": "0 x 0",
       "is_live": true,
       "country": "Inglaterra",
-      "timestamp": "2025-12-18T17:55:20.245250"
+      "timestamp": "2025-12-18T17:56:40.453201"
     }
   ],
   "total": 3,
   "live_games": 3,
-  "updated_at": "2025-12-18 17:55:20",
+  "updated_at": "2025-12-18 17:56:40",
   "source": "exemplo"
 }
