@@ -3,205 +3,941 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats - Jogos Ao Vivo e Estatísticas</title>
-    <link rel="stylesheet" href="style.css">
+    <title>FutStats LIVE - Todos os Jogos Ao Vivo em Tempo Real</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+    <style>
+        /* ===== VARIÁVEIS DE CORES ===== */
+        :root {
+            --primary: #0a0e17;
+            --secondary: #1a2433;
+            --accent: #00d4ff;
+            --live: #ff0055;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --danger: #ff4444;
+            --card-bg: rgba(30, 30, 46, 0.95);
+            --card-border: rgba(0, 212, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            --radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ===== RESET E BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ===== ANIMAÇÕES ===== */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes livePulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.7);
+            }
+            70% { 
+                box-shadow: 0 0 0 10px rgba(255, 0, 85, 0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: rgba(10, 14, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--accent);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent), #0099ff);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            animation: pulse 3s infinite;
+        }
+
+        .logo-text h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--accent), var(--text-primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+        }
+
+        .live-badge {
+            background: var(--live);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+            vertical-align: middle;
+            animation: livePulse 2s infinite;
+        }
+
+        .subtitle {
+            color: var(--accent);
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 212, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 25px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            font-size: 0.9rem;
+        }
+
+        .stat-item i {
+            color: var(--accent);
+        }
+
+        /* ===== CONTROLES ===== */
+        .controls {
+            background: rgba(26, 36, 51, 0.9);
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .controls-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--accent), #0099ff);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 300px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 25px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        /* ===== ESTATÍSTICAS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: var(--transition);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+
+        .stat-info h3 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .stat-info p {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        /* ===== GRID DE JOGOS ===== */
+        .games-section {
+            margin: 3rem 0;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent);
+        }
+
+        .refresh-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .refresh-btn:hover {
+            background: #0099ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 25px;
+            transition: var(--transition);
+            animation: fadeIn 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .game-card::before {
+            content: '•';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: var(--live);
+            font-size: 2rem;
+            animation: pulse 1.5s infinite;
+        }
+
+        .game-card.brasil {
+            border-left: 5px solid var(--success);
+        }
+
+        .game-card.europa {
+            border-left: 5px solid #ffaa00;
+        }
+
+        .game-status {
+            background: var(--live);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .game-teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .team {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .team.home {
+            justify-content: flex-start;
+        }
+
+        .team.away {
+            justify-content: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .team-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 212, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--accent);
+            font-size: 1rem;
+            border: 2px solid var(--accent);
+        }
+
+        .team-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .score {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin: 0 25px;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.95rem;
+        }
+
+        .league-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .country-flag {
+            font-size: 1.2rem;
+        }
+
+        .game-time {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* ===== PAÍSES ===== */
+        .countries-section {
+            margin: 4rem 0;
+        }
+
+        .countries-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 2rem;
+        }
+
+        .country-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: var(--transition);
+        }
+
+        .country-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .country-flag-large {
+            width: 45px;
+            height: 45px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .country-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .country-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* ===== LOADING E ERROS ===== */
+        .loading {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            color: var(--accent);
+        }
+
+        .loading i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading p {
+            font-size: 1.2rem;
+        }
+
+        .error-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            background: rgba(255, 68, 68, 0.1);
+            border-radius: var(--radius);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .error-message i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .no-games {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            color: var(--text-secondary);
+        }
+
+        .no-games i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: rgba(10, 14, 23, 0.95);
+            border-top: 1px solid var(--accent);
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .footer-info p {
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .footer-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-stat {
+            text-align: center;
+        }
+
+        .footer-stat h4 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .footer-stat p {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid var(--accent);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-game-details .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .detail-row strong {
+            color: var(--text-secondary);
+        }
+
+        .detail-row span {
+            font-weight: 600;
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 1200px) {
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .controls-content {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .countries-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .game-teams {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .team {
+                width: 100%;
+                justify-content: space-between !important;
+            }
+            
+            .score {
+                order: -1;
+                margin: 15px 0;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .countries-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-buttons {
+                justify-content: center;
+            }
+            
+            .filter-btn {
+                flex: 1;
+                min-width: 140px;
+                justify-content: center;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .section-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* ===== UTILITÁRIOS ===== */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-1 { margin-top: 1rem; }
+        .mt-2 { margin-top: 2rem; }
+        .mt-3 { margin-top: 3rem; }
+        .mb-1 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 2rem; }
+        .mb-3 { margin-bottom: 3rem; }
+    </style>
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="container">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-futbol"></i>
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-satellite-dish"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>FutStats <span class="live-badge">LIVE</span></h1>
+                        <p class="subtitle">Jogos de futebol ao vivo em tempo real</p>
+                    </div>
                 </div>
-                <h1>FutStats <span class="beta">LIVE</span></h1>
-            </div>
-            <div class="last-update">
-                <i class="fas fa-sync-alt"></i>
-                <span id="lastUpdate">Atualizado agora</span>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-sync-alt spin"></i>
+                        <span id="updateTimer">Atualizando em 0:00</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-server"></i>
+                        <span>API Vercel</span>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- Menu de Navegação -->
-    <nav class="nav-tabs">
+    <!-- Controles -->
+    <section class="controls">
         <div class="container">
-            <button class="nav-tab active" data-tab="ao-vivo">
-                <i class="fas fa-tv"></i> AO VIVO
-            </button>
-            <button class="nav-tab" data-tab="classificacao">
-                <i class="fas fa-table"></i> CLASSIFICAÇÃO
-            </button>
-            <button class="nav-tab" data-tab="estatisticas">
-                <i class="fas fa-chart-bar"></i> ESTATÍSTICAS
-            </button>
-        </div>
-    </nav>
-
-    <!-- Conteúdo Principal -->
-    <main class="main-content">
-        <div class="container">
-            <!-- Aba: Ao Vivo -->
-            <section id="ao-vivo" class="tab-content active">
-                <div class="section-header">
-                    <h2><i class="fas fa-broadcast-tower"></i> JOGOS AO VIVO</h2>
-                    <button class="refresh-btn" id="refreshLive">
-                        <i class="fas fa-redo"></i> Atualizar
+            <div class="controls-content">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-globe-americas"></i> TODOS
+                    </button>
+                    <button class="filter-btn" data-filter="brasil">
+                        <i class="fas fa-futbol"></i> BRASIL
+                    </button>
+                    <button class="filter-btn" data-filter="europa">
+                        <i class="fas fa-flag"></i> EUROPA
+                    </button>
+                    <button class="filter-btn" data-filter="live">
+                        <i class="fas fa-broadcast-tower"></i> AO VIVO
                     </button>
                 </div>
-                
-                <div class="live-games-container" id="liveGames">
-                    <!-- Jogos ao vivo serão carregados aqui -->
-                    <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        Buscando jogos ao vivo...
-                    </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar time, campeonato ou país...">
                 </div>
-                
-                <div class="live-stats">
-                    <div class="stat-card">
-                        <i class="fas fa-running"></i>
-                        <h3>JOGOS ATIVOS</h3>
-                        <p id="activeGames">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-futbol"></i>
-                        <h3>GOLS HOJE</h3>
-                        <p id="totalGoals">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-stopwatch"></i>
-                        <h3>ATUALIZAÇÃO</h3>
-                        <p id="updateTime">Agora</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Aba: Classificação -->
-            <section id="classificacao" class="tab-content">
-                <div class="section-header">
-                    <h2><i class="fas fa-trophy"></i> BRASILEIRÃO SÉRIE A 2025</h2>
-                    <div class="league-info">
-                        <span class="champion-badge">CAMPEÃO: FLAMENGO</span>
-                    </div>
-                </div>
-                
-                <div class="table-container">
-                    <table class="standings-table" id="standingsTable">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>TIME</th>
-                                <th>PTS</th>
-                                <th>J</th>
-                                <th>V</th>
-                                <th>E</th>
-                                <th>D</th>
-                                <th>GP</th>
-                                <th>GC</th>
-                                <th>SG</th>
-                                <th>STATUS</th>
-                            </tr>
-                        </thead>
-                        <tbody id="standingsBody">
-                            <!-- Classificação será carregada aqui -->
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="league-summary">
-                    <div class="summary-card">
-                        <h3><i class="fas fa-info-circle"></i> RESUMO DO CAMPEONATO</h3>
-                        <div class="summary-grid">
-                            <div class="summary-item">
-                                <span>Campeão:</span>
-                                <strong>Flamengo</strong>
-                            </div>
-                            <div class="summary-item">
-                                <span>Vice:</span>
-                                <strong>Palmeiras</strong>
-                            </div>
-                            <div class="summary-item">
-                                <span>Libertadores:</span>
-                                <strong>Flamengo, Palmeiras, Cruzeiro, Mirassol</strong>
-                            </div>
-                            <div class="summary-item">
-                                <span>Sul-Americana:</span>
-                                <strong>Fluminense, Botafogo, Bahia</strong>
-                            </div>
-                            <div class="summary-item">
-                                <span>Rebaixados:</span>
-                                <strong>Ceará, Fortaleza, Juventude, Sport</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Aba: Estatísticas -->
-            <section id="estatisticas" class="tab-content">
-                <div class="section-header">
-                    <h2><i class="fas fa-chart-line"></i> ESTATÍSTICAS DETALHADAS</h2>
-                </div>
-                
-                <div class="stats-filters">
-                    <button class="filter-btn active" data-stat="escanteios">Escanteios</button>
-                    <button class="filter-btn" data-stat="cartoes">Cartões</button>
-                    <button class="filter-btn" data-stat="faltas">Faltas</button>
-                </div>
-                
-                <div class="stats-container">
-                    <div class="stats-card">
-                        <h3><i class="fas fa-flag"></i> ESCANTEIOS (TOP 10)</h3>
-                        <div class="stats-list" id="escanteiosList">
-                            <!-- Lista de estatísticas será carregada aqui -->
-                        </div>
-                    </div>
-                    
-                    <div class="stats-card">
-                        <h3><i class="fas fa-running"></i> MÉDIAS POR JOGO</h3>
-                        <div class="averages-grid">
-                            <div class="average-item">
-                                <span>Escanteios/Jogo</span>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 65%"></div>
-                                </div>
-                                <strong>9.8</strong>
-                            </div>
-                            <div class="average-item">
-                                <span>Cartões/Jogo</span>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 40%"></div>
-                                </div>
-                                <strong>4.9</strong>
-                            </div>
-                            <div class="average-item">
-                                <span>Faltas/Jogo</span>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 70%"></div>
-                                </div>
-                                <strong>14.5</strong>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="stats-card">
-                        <h3><i class="fas fa-crown"></i> ARTILHARIA (TOP 10)</h3>
-                        <div class="stats-list" id="artilhariaList">
-                            <!-- Artilharia será carregada aqui -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="last-games">
-                    <h3><i class="fas fa-history"></i> ÚLTIMOS JOGOS (RODADA 38)</h3>
-                    <div class="games-list" id="lastGames">
-                        <!-- Últimos jogos serão carregados aqui -->
-                    </div>
-                </div>
-            </section>
+            </div>
         </div>
+    </section>
+
+    <!-- Conteúdo Principal -->
+    <main class="container">
+        <!-- Estatísticas -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tv"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>JOGOS AO VIVO</h3>
+                    <p id="liveCount">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-flag"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>CAMP. ATIVOS</h3>
+                    <p id="leaguesCount">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-futbol"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>TOTAL GOLS</h3>
+                    <p id="goalsCount">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>ATUALIZADO</h3>
+                    <p id="lastUpdate">--:--</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jogos -->
+        <section class="games-section">
+            <div class="section-header">
+                <h2><i class="fas fa-list"></i> JOGOS EM ANDAMENTO</h2>
+                <button class="refresh-btn" id="refreshBtn">
+                    <i class="fas fa-redo"></i> ATUALIZAR AGORA
+                </button>
+            </div>
+            <div class="games-grid" id="gamesGrid">
+                <!-- Jogos serão carregados aqui -->
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Conectando à API do Vercel...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Países -->
+        <section class="countries-section">
+            <div class="section-header">
+                <h2><i class="fas fa-globe-americas"></i> CAMP. POR PAÍS</h2>
+            </div>
+            <div class="countries-grid" id="countriesGrid">
+                <!-- Países serão carregados aqui -->
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
@@ -209,22 +945,28 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-logo">
-                    <i class="fas fa-futbol"></i>
-                    <span>FutStats</span>
+                    <i class="fas fa-satellite"></i>
+                    <span>FutStats LIVE</span>
                 </div>
                 <div class="footer-info">
-                    <p>Estatísticas em tempo real do futebol brasileiro</p>
-                    <p class="copyright">© 2025 FutStats - Dados atualizados do Brasileirão Série A 2025</p>
+                    <p>Dados em tempo real via API Serverless do Vercel</p>
+                    <p>Atualizado automaticamente a cada 30 segundos</p>
                 </div>
-                <div class="footer-update">
-                    <i class="fas fa-clock"></i>
-                    <span>Dados completos da temporada 2025</span>
+                <div class="footer-stats">
+                    <div class="footer-stat">
+                        <h4>STATUS</h4>
+                        <p id="apiStatus" class="success">ONLINE</p>
+                    </div>
+                    <div class="footer-stat">
+                        <h4>LATÊNCIA</h4>
+                        <p id="latency">0ms</p>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Modal para detalhes do jogo -->
+    <!-- Modal de Detalhes -->
     <div class="modal" id="gameModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -232,13 +974,553 @@
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body" id="modalBody">
-                <!-- Conteúdo do modal será preenchido via JS -->
+                <!-- Conteúdo será preenchido dinamicamente -->
             </div>
         </div>
     </div>
 
-    <!-- Incluir dados do campeonato -->
-    <script src="dados.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // ===== CONFIGURAÇÕES =====
+        const API_URL = '/api/games';  // API do Vercel
+        const FALLBACK_URL = '/games.json';  // Fallback estático
+        const UPDATE_INTERVAL = 30000;  // 30 segundos
+        const COUNTDOWN_INTERVAL = 1000;  // 1 segundo
+
+        // ===== VARIÁVEIS GLOBAIS =====
+        let allGames = [];
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let updateCountdown = 30;
+        let updateTimer = null;
+        let lastUpdateTime = null;
+        let apiLatency = 0;
+
+        // ===== ELEMENTOS DOM =====
+        const gamesGrid = document.getElementById('gamesGrid');
+        const countriesGrid = document.getElementById('countriesGrid');
+        const searchInput = document.getElementById('searchInput');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const updateTimerSpan = document.getElementById('updateTimer');
+        const apiStatusSpan = document.getElementById('apiStatus');
+        const latencySpan = document.getElementById('latency');
+
+        // ===== INICIALIZAÇÃO =====
+        document.addEventListener('DOMContentLoaded', () => {
+            // Carregar dados iniciais
+            loadGamesData();
+            
+            // Configurar eventos
+            setupEventListeners();
+            
+            // Iniciar atualização automática
+            startAutoUpdate();
+            
+            // Iniciar contador
+            startCountdown();
+        });
+
+        // ===== FUNÇÕES PRINCIPAIS =====
+        async function loadGamesData() {
+            try {
+                showLoading();
+                const startTime = performance.now();
+                
+                // Tentar API do Vercel primeiro
+                const response = await fetch(API_URL + '?t=' + Date.now());
+                apiLatency = Math.round(performance.now() - startTime);
+                
+                if (!response.ok) throw new Error('API não respondeu');
+                
+                const data = await response.json();
+                
+                if (data.success && data.games) {
+                    allGames = data.games;
+                    updateUI(data);
+                    updateApiStatus(true);
+                } else {
+                    throw new Error('Dados inválidos da API');
+                }
+                
+            } catch (error) {
+                console.warn('API falhou, usando fallback:', error.message);
+                
+                try {
+                    // Fallback para arquivo estático
+                    const fallbackResponse = await fetch(FALLBACK_URL);
+                    const fallbackData = await fallbackResponse.json();
+                    
+                    if (fallbackData.games) {
+                        allGames = fallbackData.games;
+                        updateUI(fallbackData);
+                        updateApiStatus(false, 'Fallback');
+                    } else {
+                        showError('Nenhuma fonte de dados disponível');
+                    }
+                } catch (fallbackError) {
+                    showError('Erro ao carregar dados');
+                    updateApiStatus(false, 'Offline');
+                }
+            }
+        }
+
+        function updateUI(data) {
+            // Atualizar estatísticas
+            updateStats(data);
+            
+            // Atualizar países
+            updateCountries(data.games);
+            
+            // Renderizar jogos
+            renderGames(data.games);
+            
+            // Atualizar timestamp
+            lastUpdateTime = data.updated_at || new Date().toLocaleString('pt-BR');
+            document.getElementById('lastUpdate').textContent = 
+                formatTime(lastUpdateTime);
+            
+            // Atualizar latência
+            latencySpan.textContent = `${apiLatency}ms`;
+            latencySpan.style.color = apiLatency < 500 ? '#00ff88' : 
+                                     apiLatency < 1000 ? '#ffaa00' : '#ff4444';
+        }
+
+        function updateStats(data) {
+            // Contar jogos ao vivo
+            const liveGames = data.games.filter(g => g.is_live).length;
+            document.getElementById('liveCount').textContent = liveGames;
+            
+            // Contar campeonatos únicos
+            const leagues = [...new Set(data.games.map(g => g.league))];
+            document.getElementById('leaguesCount').textContent = leagues.length;
+            
+            // Calcular total de gols
+            const totalGoals = data.games.reduce((sum, game) => {
+                const home = parseInt(game.home_score) || 0;
+                const away = parseInt(game.away_score) || 0;
+                return sum + home + away;
+            }, 0);
+            document.getElementById('goalsCount').textContent = totalGoals;
+            
+            // Atualizar título da página
+            document.title = `FutStats LIVE (${liveGames} jogos)`;
+        }
+
+        function updateCountries(games) {
+            // Agrupar por país
+            const countries = {};
+            games.forEach(game => {
+                const country = game.country || 'Internacional';
+                if (!countries[country]) {
+                    countries[country] = {
+                        count: 0,
+                        leagues: new Set()
+                    };
+                }
+                countries[country].count++;
+                countries[country].leagues.add(game.league);
+            });
+            
+            // Ordenar por quantidade de jogos
+            const sortedCountries = Object.entries(countries)
+                .sort((a, b) => b[1].count - a[1].count);
+            
+            // Renderizar países
+            countriesGrid.innerHTML = sortedCountries.map(([country, data]) => {
+                const flag = getCountryFlag(country);
+                const leagueCount = data.leagues.size;
+                
+                return `
+                    <div class="country-card fade-in">
+                        <div class="country-flag-large">${flag}</div>
+                        <div class="country-info">
+                            <h4>${country}</h4>
+                            <p>${data.count} jogos • ${leagueCount} camp.</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderGames(games) {
+            // Aplicar filtros
+            const filteredGames = filterGames(games);
+            
+            if (filteredGames.length === 0) {
+                gamesGrid.innerHTML = `
+                    <div class="no-games">
+                        <i class="fas fa-search"></i>
+                        <h3>Nenhum jogo encontrado</h3>
+                        <p>Tente ajustar os filtros ou buscar por outro termo</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Ordenar jogos (Brasileirão primeiro, depois ao vivo)
+            const sortedGames = [...filteredGames].sort((a, b) => {
+                if (a.is_brasileirao && !b.is_brasileirao) return -1;
+                if (!a.is_brasileirao && b.is_brasileirao) return 1;
+                if (a.is_live && !b.is_live) return -1;
+                if (!a.is_live && b.is_live) return 1;
+                return 0;
+            });
+            
+            // Renderizar cards
+            gamesGrid.innerHTML = sortedGames.map(game => createGameCard(game)).join('');
+            
+            // Adicionar eventos de clique
+            document.querySelectorAll('.game-card').forEach(card => {
+                card.addEventListener('click', () => showGameDetails(card.dataset.match));
+            });
+        }
+
+        function createGameCard(game) {
+            const isLive = game.is_live;
+            const isBrasil = game.is_brasileirao || game.country.includes('Brasil');
+            const isEuropa = ['Espanha', 'Inglaterra', 'Itália', 'Alemanha', 'França', 'Portugal']
+                .some(country => game.country.includes(country));
+            
+            let cardClass = 'game-card fade-in';
+            if (isLive) cardClass += ' live';
+            if (isBrasil) cardClass += ' brasil';
+            if (isEuropa) cardClass += ' europa';
+            
+            const flag = getCountryFlag(game.country);
+            const homeTeam = game.match.split(' x ')[0];
+            const awayTeam = game.match.split(' x ')[1];
+            
+            return `
+                <div class="${cardClass}" data-match="${game.match}">
+                    <div class="game-status">${game.status}</div>
+                    <div class="game-teams">
+                        <div class="team home">
+                            <div class="team-logo">${getTeamInitials(homeTeam)}</div>
+                            <div class="team-name" title="${homeTeam}">${homeTeam}</div>
+                        </div>
+                        <div class="score">${game.home_score} - ${game.away_score}</div>
+                        <div class="team away">
+                            <div class="team-logo">${getTeamInitials(awayTeam)}</div>
+                            <div class="team-name" title="${awayTeam}">${awayTeam}</div>
+                        </div>
+                    </div>
+                    <div class="game-info">
+                        <div class="league-info">
+                            <span class="country-flag">${flag}</span>
+                            <span title="${game.league}">${truncateText(game.league, 25)}</span>
+                        </div>
+                        <div class="game-time">${formatRelativeTime(game.timestamp)}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== FUNÇÕES DE FILTRO =====
+        function filterGames(games) {
+            return games.filter(game => {
+                // Aplicar filtro selecionado
+                let passesFilter = true;
+                if (currentFilter === 'brasil') {
+                    passesFilter = game.is_brasileirao || game.country.includes('Brasil');
+                } else if (currentFilter === 'europa') {
+                    passesFilter = ['Espanha', 'Inglaterra', 'Itália', 'Alemanha', 'França', 'Portugal']
+                        .some(country => game.country.includes(country));
+                } else if (currentFilter === 'live') {
+                    passesFilter = game.is_live;
+                }
+                
+                // Aplicar busca
+                const passesSearch = !currentSearch || 
+                    game.match.toLowerCase().includes(currentSearch) ||
+                    game.league.toLowerCase().includes(currentSearch) ||
+                    game.country.toLowerCase().includes(currentSearch);
+                
+                return passesFilter && passesSearch;
+            });
+        }
+
+        // ===== FUNÇÕES DE UI =====
+        function showLoading() {
+            gamesGrid.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Buscando dados da API...</p>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            gamesGrid.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>${message}</h3>
+                    <p>Tente novamente em alguns instantes</p>
+                    <button class="refresh-btn mt-2" onclick="loadGamesData()">
+                        <i class="fas fa-redo"></i> Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }
+
+        function updateApiStatus(online, mode = 'API') {
+            if (online) {
+                apiStatusSpan.textContent = 'ONLINE';
+                apiStatusSpan.style.color = '#00ff88';
+                apiStatusSpan.title = `Conectado via ${mode}`;
+            } else {
+                apiStatusSpan.textContent = mode;
+                apiStatusSpan.style.color = '#ffaa00';
+                apiStatusSpan.title = 'Usando dados locais';
+            }
+        }
+
+        // ===== FUNÇÕES DE TEMPO =====
+        function startAutoUpdate() {
+            clearInterval(updateTimer);
+            updateTimer = setInterval(loadGamesData, UPDATE_INTERVAL);
+        }
+
+        function startCountdown() {
+            setInterval(() => {
+                updateCountdown--;
+                if (updateCountdown <= 0) {
+                    updateCountdown = UPDATE_INTERVAL / 1000;
+                }
+                
+                const minutes = Math.floor(updateCountdown / 60);
+                const seconds = updateCountdown % 60;
+                updateTimerSpan.textContent = 
+                    `Atualizando em ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, COUNTDOWN_INTERVAL);
+        }
+
+        function formatTime(timestamp) {
+            try {
+                const date = new Date(timestamp);
+                return date.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } catch {
+                return timestamp;
+            }
+        }
+
+        function formatRelativeTime(timestamp) {
+            try {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diff = Math.floor((now - date) / 1000);
+                
+                if (diff < 60) return 'Agora mesmo';
+                if (diff < 3600) return `Há ${Math.floor(diff / 60)} min`;
+                if (diff < 86400) return `Há ${Math.floor(diff / 3600)}h`;
+                return date.toLocaleDateString('pt-BR');
+            } catch {
+                return '--:--';
+            }
+        }
+
+        // ===== FUNÇÕES UTILITÁRIAS =====
+        function getCountryFlag(country) {
+            const flags = {
+                'Brasil': '🇧🇷',
+                'Espanha': '🇪🇸',
+                'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+                'Itália': '🇮🇹',
+                'Alemanha': '🇩🇪',
+                'França': '🇫🇷',
+                'Portugal': '🇵🇹',
+                'Argentina': '🇦🇷',
+                'Holanda': '🇳🇱'
+            };
+            return flags[country] || '🌍';
+        }
+
+        function getTeamInitials(teamName) {
+            const words = teamName.split(' ');
+            if (words.length === 1) return teamName.substring(0, 3).toUpperCase();
+            
+            // Times brasileiros comuns
+            const brasilTeams = {
+                'Flamengo': 'FLA',
+                'Palmeiras': 'PAL',
+                'Corinthians': 'COR',
+                'São Paulo': 'SAO',
+                'Santos': 'SAN',
+                'Grêmio': 'GRE',
+                'Internacional': 'INT',
+                'Atlético-MG': 'CAM',
+                'Cruzeiro': 'CRU',
+                'Fluminense': 'FLU',
+                'Vasco': 'VAS',
+                'Botafogo': 'BOT',
+                'Bahia': 'BAH'
+            };
+            
+            if (brasilTeams[teamName]) return brasilTeams[teamName];
+            
+            // Times europeus comuns
+            const euroTeams = {
+                'Real Madrid': 'RMA',
+                'Barcelona': 'BAR',
+                'Manchester United': 'MUN',
+                'Manchester City': 'MCI',
+                'Liverpool': 'LIV',
+                'Chelsea': 'CHE',
+                'Arsenal': 'ARS',
+                'Bayern Munich': 'BAY',
+                'Borussia Dortmund': 'BVB',
+                'Juventus': 'JUV',
+                'Milan': 'MIL',
+                'Inter': 'INT',
+                'Paris Saint-Germain': 'PSG'
+            };
+            
+            if (euroTeams[teamName]) return euroTeams[teamName];
+            
+            // Sigla padrão
+            if (words.length >= 2) {
+                return (words[0][0] + words[1][0]).toUpperCase();
+            }
+            
+            return teamName.substring(0, 3).toUpperCase();
+        }
+
+        function truncateText(text, maxLength) {
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        }
+
+        // ===== EVENT LISTENERS =====
+        function setupEventListeners() {
+            // Botão de atualização
+            refreshBtn.addEventListener('click', () => {
+                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ATUALIZANDO...';
+                loadGamesData().finally(() => {
+                    refreshBtn.innerHTML = '<i class="fas fa-redo"></i> ATUALIZAR AGORA';
+                });
+            });
+            
+            // Filtros
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    renderGames(allGames);
+                });
+            });
+            
+            // Busca
+            searchInput.addEventListener('input', (e) => {
+                currentSearch = e.target.value.toLowerCase().trim();
+                renderGames(allGames);
+            });
+            
+            // Modal
+            document.querySelector('.close-modal').addEventListener('click', closeModal);
+            document.getElementById('gameModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeModal();
+            });
+            
+            // Fechar modal com ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+            
+            // Atualizar quando a página ganha foco
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    loadGamesData();
+                    updateCountdown = UPDATE_INTERVAL / 1000;
+                }
+            });
+            
+            // Recarregar com F5
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                    e.preventDefault();
+                    loadGamesData();
+                }
+            });
+        }
+
+        // ===== MODAL =====
+        function showGameDetails(match) {
+            const game = allGames.find(g => g.match === match);
+            if (!game) return;
+            
+            const modal = document.getElementById('gameModal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+            
+            title.textContent = game.match;
+            
+            const homeTeam = game.match.split(' x ')[0];
+            const awayTeam = game.match.split(' x ')[1];
+            
+            body.innerHTML = `
+                <div class="modal-game-details">
+                    <div class="detail-row">
+                        <strong>Status:</strong>
+                        <span class="game-status" style="margin: 0">${game.status}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Campeonato:</strong>
+                        <span>${game.league}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>País:</strong>
+                        <span>${getCountryFlag(game.country)} ${game.country}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Placar:</strong>
+                        <span style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">
+                            ${game.home_score} - ${game.away_score}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Time da Casa:</strong>
+                        <span>${homeTeam}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Time Visitante:</strong>
+                        <span>${awayTeam}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Iniciado:</strong>
+                        <span>${formatRelativeTime(game.timestamp)}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Fonte:</strong>
+                        <span>${game.source || 'API Vercel'}</span>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="refresh-btn" onclick="loadGamesData(); closeModal();">
+                            <i class="fas fa-redo"></i> Atualizar Dados
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('gameModal').classList.remove('active');
+        }
+
+        // ===== INICIALIZAR =====
+        // Expor funções para o console (debug)
+        window.debug = {
+            reload: loadGamesData,
+            games: () => allGames,
+            filter: (type) => {
+                currentFilter = type;
+                renderGames(allGames);
+            }
+        };
+    </script>
 </body>
 </html>
