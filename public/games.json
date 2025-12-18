@@ -13,7 +13,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:48:42.298793"
+      "timestamp": "2025-12-18T20:48:58.097654"
     },
     {
       "match": "Crystal Palace x KuPS",
@@ -27,7 +27,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:48:42.299019"
+      "timestamp": "2025-12-18T20:48:58.097870"
     },
     {
       "match": "Legia Warszawa x Lincoln Red Imps",
@@ -41,7 +41,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:48:42.299270"
+      "timestamp": "2025-12-18T20:48:58.098113"
     },
     {
       "match": "Celje x Shelbourne",
@@ -55,7 +55,7 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:48:42.299434"
+      "timestamp": "2025-12-18T20:48:58.098274"
     },
     {
       "match": "Omonia Nicosia x Raków Częstochowa",
@@ -69,12 +69,12 @@
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-18T20:48:42.299602"
+      "timestamp": "2025-12-18T20:48:58.098468"
     }
   ],
   "total": 5,
   "live_games": 5,
   "brasileirao_games": 0,
-  "updated_at": "2025-12-18 20:48:42",
+  "updated_at": "2025-12-18 20:48:58",
   "source": "placardefutebol.com.br"
 }
