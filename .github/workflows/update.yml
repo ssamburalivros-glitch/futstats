@@ -2,13 +2,13 @@ name: Update Games Data
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # A cada 5 minutos
-  workflow_dispatch:  # Permite execução manual
+    - cron: '*/10 * * * *'  # A cada 10 minutos
+  workflow_dispatch:  # Execução manual
   push:
     branches: [ main ]
 
 permissions:
-  contents: write  # Dá permissão para fazer commit
+  contents: write
 
 jobs:
   update:
@@ -26,25 +26,22 @@ jobs:
         python-version: '3.10'
         
     - name: Install dependencies
-      run: |
-        pip install --upgrade pip
+      run: pip install requests beautifulsoup4
         
     - name: Run crawler
-      run: |
-        echo "Executando crawler..."
-        python crawler.py
+      run: python crawler.py
         
-    - name: Check if file was created
+    - name: Check created file
       run: |
-        echo "Verificando arquivos..."
-        ls -la public/
+        echo "Arquivos na raiz:"
+        ls -la
         echo "Conteúdo do games.json:"
-        head -20 public/games.json
+        head -20 games.json
         
     - name: Commit and push changes
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
-        git add public/games.json
-        git commit -m "🤖 Atualização automática de jogos - $(date +'%Y-%m-%d %H:%M:%S')" || echo "Sem mudanças para commitar"
+        git add games.json
+        git commit -m "🤖 Atualização: $(date +'%d/%m %H:%M')" || echo "Sem mudanças"
         git push
