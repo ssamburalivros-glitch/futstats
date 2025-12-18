@@ -1,24 +1,9 @@
 {
   "success": true,
-  "games": [
-    {
-      "match": "Napoli x Milan",
-      "status": "INTERVALO",
-      "league": "Supercopa da Itália",
-      "home_team": "Napoli",
-      "away_team": "Milan",
-      "home_score": "1",
-      "away_score": "0",
-      "summary": "1 x 0",
-      "is_live": true,
-      "is_brasileirao": false,
-      "country": "Internacional",
-      "timestamp": "2025-12-18T20:04:00.086161"
-    }
-  ],
-  "total": 1,
-  "live_games": 1,
+  "games": [],
+  "total": 0,
+  "live_games": 0,
   "brasileirao_games": 0,
-  "updated_at": "2025-12-18 20:04:00",
+  "updated_at": "2025-12-18 20:07:47",
   "source": "placardefutebol.com.br"
 }
