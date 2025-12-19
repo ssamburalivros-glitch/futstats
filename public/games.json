@@ -1,38 +1,9 @@
 {
   "success": true,
-  "games": [
-    {
-      "match": "Valência x Mallorca",
-      "status": "INTERVALO",
-      "league": "Campeonato Espanhol",
-      "home_team": "Valência",
-      "away_team": "Mallorca",
-      "home_score": "0",
-      "away_score": "1",
-      "summary": "0 x 1",
-      "is_live": true,
-      "is_brasileirao": false,
-      "country": "Internacional",
-      "timestamp": "2025-12-19T20:57:46.339926"
-    },
-    {
-      "match": "Swansea City x Wrexham",
-      "status": "INTERVALO",
-      "league": "EFL Championship",
-      "home_team": "Swansea City",
-      "away_team": "Wrexham",
-      "home_score": "0",
-      "away_score": "1",
-      "summary": "0 x 1",
-      "is_live": true,
-      "is_brasileirao": false,
-      "country": "Internacional",
-      "timestamp": "2025-12-19T20:57:46.340648"
-    }
-  ],
-  "total": 2,
-  "live_games": 2,
+  "games": [],
+  "total": 0,
+  "live_games": 0,
   "brasileirao_games": 0,
-  "updated_at": "2025-12-19 20:57:46",
+  "updated_at": "2025-12-19 21:26:17",
   "source": "placardefutebol.com.br"
 }
