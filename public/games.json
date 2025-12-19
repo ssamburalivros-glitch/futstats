@@ -1,9 +1,24 @@
 {
   "success": true,
-  "games": [],
-  "total": 0,
-  "live_games": 0,
+  "games": [
+    {
+      "match": "Borussia Dortmund x Borussia M'gladbach",
+      "status": "INTERVALO",
+      "league": "Campeonato Alemão - Bundesliga",
+      "home_team": "Borussia Dortmund",
+      "away_team": "Borussia M'gladbach",
+      "home_score": "1",
+      "away_score": "0",
+      "summary": "1 x 0",
+      "is_live": true,
+      "is_brasileirao": false,
+      "country": "Internacional",
+      "timestamp": "2025-12-19T20:26:40.476291"
+    }
+  ],
+  "total": 1,
+  "live_games": 1,
   "brasileirao_games": 0,
-  "updated_at": "2025-12-19 19:50:58",
+  "updated_at": "2025-12-19 20:26:40",
   "source": "placardefutebol.com.br"
 }
