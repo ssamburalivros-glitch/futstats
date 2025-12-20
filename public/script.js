@@ -1,37 +1,38 @@
-// --- CONFIGURAÇÃO ---
+// --- CONFIGURAÇÃO DO SUPABASE ---
 const SUPABASE_URL = 'https://vqocdowjdutfzmnvxqvz.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm';
 
-// Inicialização segura
-let _supabase = null;
-try {
-    _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    console.log("🚀 Supabase: Cliente iniciado.");
-} catch (e) {
-    console.error("🚀 Supabase: Erro na inicialização:", e);
-}
+// Inicialização do Cliente
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 FutStats: Iniciando sistema...");
     initNavigation();
     
-    // Sincroniza dados do dados.js
+    // 1. Carrega dados estáticos do dados.js (Tabela e Estatísticas)
     if (window.CAMPEONATO_DATA) {
-        console.log("✅ Dados estáticos detectados.");
+        console.log("✅ Dados estáticos detectados!");
         renderStandings();
         renderStatsList('escanteios');
         renderArtilharia();
+    } else {
+        console.warn("⚠️ Atenção: dados.js não carregado ou variável CAMPEONATO_DATA ausente.");
     }
 
-    // Chama a função de jogos ao vivo
+    // 2. Carrega Jogos ao Vivo do Supabase
     loadLiveGames();
-    setInterval(loadLiveGames, 30000); // Atualiza a cada 30 seg
+    
+    // Atualiza os jogos a cada 30 segundos
+    setInterval(loadLiveGames, 30000);
 });
 
+// --- FUNÇÃO PRINCIPAL: JOGOS AO VIVO ---
 async function loadLiveGames() {
     const container = document.getElementById('liveGames');
+    const activeCounter = document.getElementById('activeGames');
     if (!container) return;
 
-    console.log("📡 Tentando buscar jogos do banco...");
+    console.log("📡 Buscando atualizações no Supabase...");
 
     try {
         const { data, error } = await _supabase
@@ -39,91 +40,38 @@ async function loadLiveGames() {
             .select('*');
 
         if (error) {
-            console.error("📡 Erro na consulta:", error.message);
-            container.innerHTML = `<p style="color:orange; text-align:center;">Erro de permissão no banco (RLS).</p>`;
+            console.error("❌ Erro Supabase:", error.message);
+            container.innerHTML = `<p style="color:orange; text-align:center;">Erro de conexão com o Banco.</p>`;
             return;
         }
-
-        console.log("📡 Dados recebidos:", data);
 
         if (!data || data.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">Nenhum jogo cadastrado no banco de dados no momento.</p>';
+            console.log("📡 Banco conectado, mas está vazio (0 registros).");
+            container.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">Nenhum jogo disponível no momento.</p>';
             return;
         }
 
-        let htmlFinal = "";
+        console.log("📡 Sucesso! Jogos encontrados:", data.length);
+        // Log do primeiro jogo para conferir nomes das colunas no F12
+        console.log("📋 Formato do dado:", data[0]); 
+
         let htmlAoVivo = "";
         let htmlEncerrados = "";
+        let countAoVivo = 0;
 
         data.forEach(jogo => {
-            const status = (jogo.status || "").toUpperCase();
-            // Lógica: Se tem minuto (') ou Intervalo ou é tempo real
-            const isLive = status.includes("'") || status.includes("INT") || status.includes("1T") || status.includes("2T");
+            // MAPEAMENTO DE COLUNAS (Tenta vários nomes possíveis)
+            const casa = jogo.home_team || jogo.time_casa || jogo.mandante || jogo.team_home || "Time A";
+            const fora = jogo.away_team || jogo.time_fora || jogo.visitante || jogo.team_away || "Time B";
+            const placarC = jogo.home_score ?? jogo.gols_casa ?? jogo.placar_mandante ?? 0;
+            const placarF = jogo.away_score ?? jogo.gols_fora ?? jogo.placar_visitante ?? 0;
+            const statusRaw = jogo.status || jogo.tempo || jogo.periodo || "";
+            
+            const statusU = statusRaw.toUpperCase();
+            // Define se o jogo está rolando: tem minuto ('), é intervalo (INT) ou tempos (1T/2T)
+            const isLive = statusU.includes("'") || statusU.includes("INT") || statusU.includes("1T") || statusU.includes("2T") || statusU.includes("AO VIVO");
 
-            const card = `
+            const cardHtml = `
                 <div class="live-game-card" style="border-left: 4px solid ${isLive ? '#00ff00' : '#444'}">
                     <div class="game-teams">
-                        <span>${jogo.home_team}</span>
-                        <span class="score" style="color: ${isLive ? '#00ff00' : '#fff'}">
-                            ${jogo.home_score} x ${jogo.away_score}
-                        </span>
-                        <span>${jogo.away_team}</span>
-                    </div>
-                    <div class="game-status ${isLive ? 'live-blink' : ''}">
-                        ${isLive ? '● ' + status : 'FIM'}
-                    </div>
-                </div>`;
-
-            if (isLive) htmlAoVivo += card;
-            else htmlEncerrados += card;
-        });
-
-        htmlFinal = (htmlAoVivo ? '<h4 style="color:#00ff00; margin:15px 0;">🔥 AO VIVO</h4>' + htmlAoVivo : '') +
-                    (htmlEncerrados ? '<h4 style="color:#888; margin:25px 0 15px 0;">✅ ENCERRADOS</h4>' + htmlEncerrados : '');
-
-        container.innerHTML = htmlFinal;
-
-    } catch (e) {
-        console.error("📡 Erro crítico no JS:", e);
-        container.innerHTML = '<p style="color:red; text-align:center;">Erro ao carregar dados.</p>';
-    }
-}
-
-// --- OUTRAS FUNÇÕES ---
-function initNavigation() {
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-        tab.onclick = () => {
-            document.querySelectorAll('.nav-tab, .tab-content').forEach(el => el.classList.remove('active'));
-            tab.classList.add('active');
-            const target = document.getElementById(tab.dataset.tab);
-            if (target) target.classList.add('active');
-        };
-    });
-}
-
-function renderStandings() {
-    const tbody = document.getElementById('standingsBody');
-    if (!tbody || !window.CAMPEONATO_DATA) return;
-    tbody.innerHTML = window.CAMPEONATO_DATA.classificacao.map(item => `
-        <tr>
-            <td>${item.posicao}º</td>
-            <td><strong>${item.clube}</strong></td>
-            <td>${item.pontos}</td>
-            <td>${item.jogos}</td>
-            <td>${item.saldoGols}</td>
-        </tr>`).join('');
-}
-
-function renderStatsList(tipo) {
-    const list = document.getElementById('statsList');
-    if (!list) return;
-    const campo = tipo === 'escanteios' ? 'escanteios_total' : 'total_cartoes';
-    const dados = [...window.CAMPEONATO_DATA.estatisticas].sort((a, b) => b[campo] - a[campo]).slice(0, 10);
-    list.innerHTML = dados.map((item, idx) => `<div><span>${idx+1}. ${item.time}</span><strong>${item[campo]}</strong></div>`).join('');
-}
-
-function renderArtilharia() {
-    const list = document.getElementById('artilhariaList');
-    if (!list) return;
-    list.innerHTML = window.CAMPEONATO_DATA.artilharia.map(art => `<div><span>${art.jogador} (${art.clube})</span><strong>${art.gols}</strong></div>`).join('');
-}
+                        <span class="team-
