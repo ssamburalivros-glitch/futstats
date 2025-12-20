@@ -2,37 +2,23 @@
   "success": true,
   "games": [
     {
-      "match": "Newcastle x Chelsea",
+      "match": "Real Oviedo x Celta de Vigo",
       "status": "INTERVALO",
-      "league": "Campeonato Inglês",
-      "home_team": "Newcastle",
-      "away_team": "Chelsea",
-      "home_score": "2",
-      "away_score": "0",
-      "summary": "2 x 0",
-      "is_live": true,
-      "is_brasileirao": false,
-      "country": "Internacional",
-      "timestamp": "2025-12-20T13:36:09.645555"
-    },
-    {
-      "match": "Preston North End x Norwich City",
-      "status": "INTERVALO",
-      "league": "EFL Championship",
-      "home_team": "Preston North End",
-      "away_team": "Norwich City",
+      "league": "Campeonato Espanhol",
+      "home_team": "Real Oviedo",
+      "away_team": "Celta de Vigo",
       "home_score": "0",
       "away_score": "0",
       "summary": "0 x 0",
       "is_live": true,
       "is_brasileirao": false,
       "country": "Internacional",
-      "timestamp": "2025-12-20T13:36:09.648770"
+      "timestamp": "2025-12-20T13:49:07.958279"
     }
   ],
-  "total": 2,
-  "live_games": 2,
+  "total": 1,
+  "live_games": 1,
   "brasileirao_games": 0,
-  "updated_at": "2025-12-20 13:36:09",
+  "updated_at": "2025-12-20 13:49:07",
   "source": "placardefutebol.com.br"
 }
