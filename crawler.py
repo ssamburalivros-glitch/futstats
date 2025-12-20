@@ -6,8 +6,8 @@ from supabase import create_client
 from datetime import datetime
 
 # COLOQUE SUAS CHAVES DIRETAMENTE AQUI SE NÃO ESTIVER USANDO VAR DE AMBIENTE
-SUPABASE_URL = "SUA_URL_AQUI"
-SUPABASE_KEY = "SUA_CHAVE_AQUI"
+SUPABASE_URL = "https://vqocdowjdutfzmnvxqvz.supabase.co"
+SUPABASE_KEY = "sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm"
 
 def get_live_games():
     try:
