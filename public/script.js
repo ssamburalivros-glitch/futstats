@@ -1,151 +1,160 @@
-// script.js - Final e Corrigido
-const SUPABASE_URL = https://vqocdowjdutfzmnvxqvz.supabase.co;
+// script.js - Sincronizado com seu dados.js
+const SUPABASE_URL = https://vqocdowjdutfzmnvxqvz.supabase.co; 
 const SUPABASE_KEY = sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm;
 
-// Inicialização segura do cliente Supabase
 let _supabase = null;
-try {
-    if (SUPABASE_URL !== 'SUA_URL_DO_SUPABASE') {
-        _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    }
-} catch (e) { console.error("Erro ao iniciar Supabase:", e); }
+if (SUPABASE_URL !== 'SUA_URL_AQUI' && SUPABASE_URL !== '') {
+    _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     
     if (window.CAMPEONATO_DATA) {
         loadStandings();
-        loadEstatisticas();
         loadArtilharia();
-        initTeamSearch();
+        initSearchAndStats(); // Agora funciona com seus dados
     }
 
-    // Tenta carregar do Supabase; se falhar ou estiver vazio, chama o modo demonstração
-    loadLiveGames();
-    setInterval(loadLiveGames, 30000); 
+    // Carregar Jogos ao Vivo do Supabase
+    if (_supabase) {
+        loadLiveGames();
+        setInterval(loadLiveGames, 30000);
+    } else {
+        document.getElementById('liveGames').innerHTML = '<p class="msg-demo">Conecte o Supabase para ver placares em tempo real.</p>';
+    }
     
     updateTime();
 });
 
-// --- SISTEMA DE JOGOS AO VIVO ---
-async function loadLiveGames() {
-    const container = document.getElementById('liveGames');
-    if (!container) return;
-
-    if (_supabase) {
-        try {
-            const { data, error } = await _supabase.from('partidas_ao_vivo').select('*');
-            if (error) throw error;
-
-            if (data && data.length > 0) {
-                renderGames(data);
-                return;
-            }
-        } catch (err) {
-            console.warn("Erro Supabase, carregando modo offline/demo:", err);
-        }
-    }
-
-    // Se chegou aqui, não há dados no banco. Mostraremos um aviso ou jogo demo.
-    container.innerHTML = `
-        <div class="no-games">
-            <i class="fas fa-clock"></i>
-            <p>Aguardando início das partidas ou erro de conexão com Supabase.</p>
-        </div>
-    `;
-}
-
-function renderGames(jogos) {
-    const container = document.getElementById('liveGames');
-    container.innerHTML = '';
-
-    jogos.forEach(jogo => {
-        const card = document.createElement('div');
-        card.className = 'live-game-card';
-        card.innerHTML = `
-            <div class="game-teams">
-                <div class="team"><strong>${jogo.home_team}</strong></div>
-                <div class="game-score">
-                    <span class="score">${jogo.home_score}</span>
-                    <span class="divider">x</span>
-                    <span class="score">${jogo.away_score}</span>
-                </div>
-                <div class="team"><strong>${jogo.away_team}</strong></div>
-            </div>
-            <div class="game-info">
-                <span class="status-live">● ${jogo.status || 'AO VIVO'}</span>
-                <span class="league-name">${jogo.league || 'Série A'}</span>
-            </div>
-        `;
-        container.appendChild(card);
-    });
+// --- CLASSIFICAÇÃO ---
+function loadStandings() {
+    const tbody = document.getElementById('standingsBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
     
-    document.getElementById('activeGames').textContent = jogos.length;
+    window.CAMPEONATO_DATA.classificacao.forEach(clube => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${clube.posicao}</td>
+            <td class="team-name"><strong>${clube.clube}</strong></td>
+            <td><strong>${clube.pontos}</strong></td>
+            <td>${clube.jogos}</td>
+            <td>${clube.vitorias}</td>
+            <td>${clube.empates}</td>
+            <td>${clube.derrotas}</td>
+            <td>${clube.golsPro}</td>
+            <td>${clube.saldoGols}</td>
+            <td><span class="status-tag ${clube.posicao <= 6 ? 'blue' : clube.posicao >= 17 ? 'red' : ''}">${clube.posicao <= 6 ? 'LIB' : clube.posicao >= 17 ? 'Z4' : '-'}</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
-// --- PESQUISA DE TIMES ---
-function initTeamSearch() {
+// --- BUSCA E ESTATÍSTICAS (Baseado no seu dados.js) ---
+function initSearchAndStats() {
     const input = document.getElementById('teamSearch');
     const panel = document.getElementById('teamStatsPanel');
     const general = document.getElementById('generalStats');
 
-    if (!input) return;
-
+    // Função de Busca
     input.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase().trim();
-        if (term === "") {
-            hideTeamStatsPanel();
-            return;
-        }
+        const termo = e.target.value.toLowerCase().trim();
+        const time = window.CAMPEONATO_DATA.classificacao.find(t => t.clube.toLowerCase().includes(termo));
 
-        const time = window.CAMPEONATO_DATA.estatisticas.find(t => t.time.toLowerCase().includes(term));
-        
-        if (time) {
+        if (time && termo !== "") {
             panel.style.display = 'block';
             general.style.display = 'none';
-            document.getElementById('teamInfoHeader').innerHTML = `<h3>${time.time}</h3>`;
-            document.getElementById('totalCorners').textContent = time.escanteios_total;
-            // Adicione os outros campos (yellowCards, etc) conforme seu HTML
+            
+            document.getElementById('teamInfoHeader').innerHTML = `<h3>${time.clube}</h3>`;
+            document.getElementById('totalCorners').textContent = "---"; // Dado não existe no seu JS
+            document.getElementById('yellowCards').textContent = time.cartoesAmarelos;
+            document.getElementById('redCards').textContent = time.cartoesVermelhos;
+            document.getElementById('possession').textContent = time.aproveitamento + "%";
+            document.getElementById('foulsCommitted').textContent = "---";
+        } else {
+            panel.style.display = 'none';
+            general.style.display = 'block';
         }
     });
 
-    document.getElementById('closePanel').onclick = hideTeamStatsPanel;
+    // Filtros de Estatísticas Rápidas
+    updateStatsList('gols'); // Inicial
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateStatsList(btn.dataset.stat);
+        };
+    });
 }
 
-function hideTeamStatsPanel() {
-    document.getElementById('teamStatsPanel').style.display = 'none';
-    document.getElementById('generalStats').style.display = 'block';
-    document.getElementById('teamSearch').value = '';
+function updateStatsList(tipo) {
+    const list = document.getElementById('statsList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    // Ordenar com base no que você tem no dados.js
+    let campo = tipo === 'gols' ? 'golsPro' : tipo === 'cartoes' ? 'cartoesAmarelos' : 'vitorias';
+    const top10 = [...window.CAMPEONATO_DATA.classificacao].sort((a, b) => b[campo] - a[campo]).slice(0, 10);
+
+    top10.forEach((item, idx) => {
+        list.innerHTML += `
+            <div class="stats-item">
+                <span>${idx + 1}. ${item.clube}</span>
+                <strong>${item[campo]}</strong>
+            </div>`;
+    });
 }
 
-// --- FUNÇÕES DE INTERFACE RESTANTES ---
-function loadStandings() {
-    const body = document.getElementById('standingsBody');
-    if (!body) return;
-    body.innerHTML = '';
-    window.CAMPEONATO_DATA.classificacao.forEach(c => {
-        body.innerHTML += `<tr>
-            <td>${c.posicao}</td>
-            <td><strong>${c.clube}</strong></td>
-            <td>${c.pontos}</td>
-            <td>${c.jogos}</td>
-            <td>${c.vitorias}</td>
-            <td>${c.empates}</td>
-            <td>${c.derrotas}</td>
-            <td>${c.golsPro}</td>
-            <td>${c.golsContra}</td>
-            <td>${c.saldoGols}</td>
-            <td>-</td>
-        </tr>`;
+// --- JOGOS AO VIVO (SUPABASE) ---
+async function loadLiveGames() {
+    const container = document.getElementById('liveGames');
+    try {
+        const { data, error } = await _supabase.from('partidas_ao_vivo').select('*');
+        if (error) throw error;
+
+        container.innerHTML = '';
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p class="no-live">Nenhum jogo ao vivo agora.</p>';
+            return;
+        }
+
+        data.forEach(jogo => {
+            container.innerHTML += `
+                <div class="live-game-card">
+                    <div class="game-teams">
+                        <span>${jogo.home_team}</span>
+                        <span class="score">${jogo.home_score} x ${jogo.away_score}</span>
+                        <span>${jogo.away_team}</span>
+                    </div>
+                    <div class="game-status">${jogo.status}</div>
+                </div>`;
+        });
+        document.getElementById('activeGames').textContent = data.length;
+    } catch (e) {
+        console.error("Erro ao carregar Live:", e);
+    }
+}
+
+// --- ARTILHARIA ---
+function loadArtilharia() {
+    const list = document.getElementById('artilhariaList');
+    if (!list) return;
+    list.innerHTML = '';
+    window.CAMPEONATO_DATA.artilharia.slice(0, 10).forEach(art => {
+        list.innerHTML += `
+            <div class="stats-item">
+                <span>${art.jogador} (${art.clube})</span>
+                <strong>${art.gols}</strong>
+            </div>`;
     });
 }
 
 function initNavigation() {
-    const tabs = document.querySelectorAll('.nav-tab');
-    tabs.forEach(tab => {
+    document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.onclick = () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-tab, .tab-content').forEach(el => el.classList.remove('active'));
             tab.classList.add('active');
             document.getElementById(tab.dataset.tab).classList.add('active');
         };
@@ -153,10 +162,6 @@ function initNavigation() {
 }
 
 function updateTime() {
-    const el = document.getElementById('updateTime');
-    if (el) el.textContent = new Date().toLocaleTimeString('pt-BR');
+    const el = document.getElementById('lastUpdate');
+    if (el) el.textContent = "Última atualização: " + new Date().toLocaleTimeString();
 }
-
-function loadEstatisticas() { /* Lógica de filtros similar ao enviado antes */ }
-function loadArtilharia() { /* Lógica de artilharia similar ao enviado antes */ }
-function setupModal() {}
