@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats - Jogos Ao Vivo e Estatísticas</title>
+    <title>FutStats - LIVE 2025</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -11,48 +11,26 @@
     <header class="header">
         <div class="container">
             <div class="logo">
-                <div class="logo-icon"><i class="fas fa-futbol"></i></div>
+                <i class="fas fa-futbol"></i>
                 <h1>FutStats <span class="beta">LIVE</span></h1>
-            </div>
-            <div class="last-update">
-                <i class="fas fa-sync-alt"></i>
-                <span id="lastUpdate">Atualizado agora</span>
             </div>
         </div>
     </header>
 
     <nav class="nav-tabs">
         <div class="container">
-            <button class="nav-tab active" data-tab="ao-vivo"><i class="fas fa-tv"></i> AO VIVO</button>
-            <button class="nav-tab" data-tab="classificacao"><i class="fas fa-table"></i> CLASSIFICAÇÃO</button>
-            <button class="nav-tab" data-tab="estatisticas"><i class="fas fa-chart-bar"></i> ESTATÍSTICAS</button>
+            <button class="nav-tab active" data-tab="ao-vivo">AO VIVO</button>
+            <button class="nav-tab" data-tab="classificacao">CLASSIFICAÇÃO</button>
+            <button class="nav-tab" data-tab="estatisticas">ESTATÍSTICAS</button>
         </div>
     </nav>
 
     <main class="main-content">
         <div class="container">
+            
             <section id="ao-vivo" class="tab-content active">
-                <div class="section-header">
-                    <h2><i class="fas fa-broadcast-tower"></i> JOGOS NO RADAR</h2>
-                </div>
-                
                 <div class="live-games-container" id="liveGames">
-                    <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i> Buscando jogos...
-                    </div>
-                </div>
-                
-                <div class="live-stats">
-                    <div class="stat-card">
-                        <i class="fas fa-running"></i>
-                        <h3>AO VIVO</h3>
-                        <p id="activeGames">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-futbol"></i>
-                        <h3>GOLS HOJE</h3>
-                        <p id="totalGoals">0</p>
-                    </div>
+                    <p class="loading">Buscando jogos em tempo real...</p>
                 </div>
             </section>
 
@@ -60,23 +38,47 @@
                 <div class="table-container">
                     <table class="standings-table">
                         <thead>
-                            <tr><th>#</th><th>TIME</th><th>PTS</th><th>J</th><th>SG</th></tr>
+                            <tr>
+                                <th>#</th>
+                                <th>TIME</th>
+                                <th>PTS</th>
+                                <th>J</th>
+                                <th>SG</th>
+                            </tr>
                         </thead>
-                        <tbody id="standingsBody"></tbody>
+                        <tbody id="standingsBody">
+                            </tbody>
                     </table>
                 </div>
             </section>
 
             <section id="estatisticas" class="tab-content">
-                <div id="generalStats">
-                    <div class="stats-list" id="statsList"></div>
+                <div class="stats-container">
+                    <div class="stats-card">
+                        <h3><i class="fas fa-chart-bar"></i> TOP 10 ESCANTEIOS</h3>
+                        <div id="statsList" class="stats-list">
+                            </div>
+                    </div>
+                    
+                    <div class="stats-card" style="margin-top: 20px;">
+                        <h3><i class="fas fa-crown"></i> ARTILHARIA</h3>
+                        <div id="artilhariaList" class="stats-list">
+                            </div>
+                    </div>
                 </div>
             </section>
+
         </div>
     </main>
 
+    <footer class="footer">
+        <p>© 2025 FutStats - Dados Atualizados</p>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script src="dados.js"></script>
+    
     <script src="script.js"></script>
 </body>
 </html>
