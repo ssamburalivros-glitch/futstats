@@ -11,68 +11,58 @@ SUPABASE_KEY = "sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm"
 
 def get_live_games():
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-        }
-        
-        response = requests.get('https://www.placardefutebol.com.br/', headers=headers, timeout=15)
-        response.raise_for_status()
-        
+        # ... (headers e requests continuam iguais)
         soup = BeautifulSoup(response.text, 'html.parser')
         games = []
         
-        # O seletor correto do placardefutebol geralmente é .match-list-container
-        championships = soup.find_all('div', class_='container content')
+        # BUSCA DIRETO PELAS LINHAS DE PARTIDA
+        matches = soup.find_all('div', class_='row align-items-center content')
         
-        for championship in championships:
-            title_elem = championship.find_previous('h3', class_='match-list_league-name')
-            league = title_elem.text.strip() if title_elem else "Outros"
+        for match in matches:
+            status_elem = match.find('span', class_='status-name')
+            if not status_elem: continue
             
-            matches = championship.find_all('div', class_='row align-items-center content')
+            status = status_elem.text.strip()
             
-            for match in matches:
-                status_elem = match.find('span', class_='status-name')
-                if not status_elem: continue
-                
-                status = status_elem.text.strip()
-                
-                # Filtra apenas jogos realmente em andamento
-                if not re.search(r'AO VIVO|INTERVALO|\d+\'', status, re.IGNORECASE):
-                    continue
-                
-                teams = match.find_all('div', class_='team-name')
-                if len(teams) < 2: continue
-                
-                home_team = teams[0].text.strip()
-                away_team = teams[1].text.strip()
-                
-                scores = match.find_all('span', class_='badge badge-default')
-                
-                # Garante que o placar seja número inteiro para não dar erro no banco
-                try:
-                    h_score = int(scores[0].text.strip()) if len(scores) >= 2 else 0
-                    a_score = int(scores[1].text.strip()) if len(scores) >= 2 else 0
-                except:
-                    h_score, a_score = 0, 0
-                
-                is_brasileirao = any(term in league.upper() for term in ['BRASILEIRO', 'SÉRIE A', 'SÉRIE B'])
-                
-                games.append({
-                    'status': status,
-                    'league': league,
-                    'home_team': home_team,
-                    'away_team': away_team,
-                    'home_score': h_score,
-                    'away_score': a_score,
-                    'updated_at': datetime.now().isoformat()
-                })
+            # Adicionamos "FIM" e "ENCERRADO" para garantir que o 4º jogo apareça se ele acabou de acabar
+            if not re.search(r'AO VIVO|INTERVALO|\d+\'|FIM|ENCERRADO', status, re.IGNORECASE):
+                continue
+            
+            teams = match.find_all('div', class_='team-name')
+            if len(teams) < 2: continue
+            
+            home_team = teams[0].text.strip()
+            away_team = teams[1].text.strip()
+            
+            # Pega o placar
+            scores = match.find_all('span', class_='badge badge-default')
+            try:
+                h_score = int(scores[0].text.strip()) if len(scores) >= 2 else 0
+                a_score = int(scores[1].text.strip()) if len(scores) >= 2 else 0
+            except:
+                h_score, a_score = 0, 0
+
+            # Tenta pegar a liga (opcional, sobe um nível no HTML)
+            league_div = match.find_parent('div', class_='container content')
+            league = "Campeonato"
+            if league_div:
+                prev_h3 = league_div.find_previous('h3', class_='match-list_league-name')
+                if prev_h3: league = prev_h3.text.strip()
+
+            games.append({
+                'status': status,
+                'league': league,
+                'home_team': home_team,
+                'away_team': away_team,
+                'home_score': h_score,
+                'away_score': a_score,
+                'updated_at': datetime.now().isoformat()
+            })
         
         return games
-        
     except Exception as e:
-        print(f"Erro no scraping: {e}")
+        print(f"Erro: {e}")
         return []
-
 def sync_to_supabase(games_list):
     # Tenta pegar da variável de ambiente, se não houver, usa a string direta
     url = os.environ.get("SUPABASE_URL") or SUPABASE_URL
