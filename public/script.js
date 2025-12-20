@@ -1,47 +1,188 @@
-// --- CONFIGURAÇÃO DO SUPABASE ---
+// ==========================================
+// 1. CONFIGURAÇÕES
+// ==========================================
+
+// SUPABASE (Para jogos ao vivo - Crawler)
 const SUPABASE_URL = 'https://vqocdowjdutfzmnvxqvz.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm';
-
-// Inicialização do Cliente
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// API FOOTBALL (Para Tabelas e Estatísticas)
+const API_KEY = '8238d6b41d6cd9deb1a027865989c3e4'; // <--- INSIRA SUA CHAVE AQUI
+const BASE_URL = 'https://v3.football.api-sports.io';
+
+// IDs das Ligas (Temporada 2024 ou 2025 conforme disponibilidade)
+const LEAGUES = {
+    71:  { name: "Brasileirão Série A", season: 2024 }, // Verifique se 2025 já começou
+    39:  { name: "Premier League", season: 2024 },
+    140: { name: "La Liga", season: 2024 },
+    78:  { name: "Bundesliga", season: 2024 }
+};
+
+let currentLeagueId = 71; // Começa com Brasileirão
+
+// ==========================================
+// 2. INICIALIZAÇÃO
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 FutStats: Sistema Iniciado.");
-    
-    // Inicializa a navegação de abas
     initNavigation();
     
-    // Tenta carregar a classificação (dados.js)
-    try {
-        if (window.CAMPEONATO_DATA) {
-            console.log("✅ dados.js carregado com sucesso.");
-            renderStandings();
-            renderStatsList('escanteios');
-            renderArtilharia();
-        } else {
-            console.error("❌ Erro: Variável CAMPEONATO_DATA não encontrada. Verifique se o arquivo dados.js existe e está correto.");
-        }
-    } catch (err) {
-        console.error("❌ Erro ao processar dados.js:", err);
-    }
-
-    // Carrega Jogos ao Vivo (Supabase)
+    // Inicia Ao Vivo (Supabase)
     loadLiveGames();
     setInterval(loadLiveGames, 30000);
+
+    // Inicia Dados da API Football (Cacheada)
+    loadLeagueData(currentLeagueId);
 });
 
-// --- FUNÇÃO JOGOS AO VIVO ---
+// ==========================================
+// 3. API FOOTBALL COM CACHE (IMPORTANTE)
+// ==========================================
+
+// Função global para mudar a liga pelos botões
+window.mudarLiga = function(id) {
+    currentLeagueId = id;
+    
+    // Atualiza botões visuais
+    document.querySelectorAll('.league-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active'); // O botão clicado
+    
+    // Atualiza Título
+    document.getElementById('leagueTitle').textContent = LEAGUES[id].name;
+    
+    // Carrega dados
+    loadLeagueData(id);
+}
+
+async function loadLeagueData(id) {
+    const season = LEAGUES[id].season;
+    
+    // Carrega Classificação
+    const standingsData = await fetchWithCache(`standings_${id}`, `/standings?league=${id}&season=${season}`);
+    if(standingsData) renderStandings(standingsData);
+
+    // Carrega Artilharia
+    const scorersData = await fetchWithCache(`scorers_${id}`, `/players/topscorers?league=${id}&season=${season}`);
+    if(scorersData) renderStats(scorersData, 'scorersList');
+    
+    // Carrega Assistências (opcional, gasta +1 req se não estiver em cache)
+    // const assistsData = await fetchWithCache(`assists_${id}`, `/players/topassists?league=${id}&season=${season}`);
+    // if(assistsData) renderStats(assistsData, 'assistsList');
+}
+
+// SISTEMA DE CACHE INTELIGENTE
+// Só faz a requisição se não tiver dados ou se os dados tiverem mais de 24 horas
+async function fetchWithCache(key, endpoint) {
+    const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 horas em milissegundos
+    const cached = localStorage.getItem(key);
+    
+    if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        const age = Date.now() - timestamp;
+        
+        if (age < CACHE_DURATION) {
+            console.log(`⚡ Usando Cache para ${key} (Economizou requisição)`);
+            return data;
+        }
+    }
+
+    console.log(`🌍 Baixando dados novos da API para ${key}...`);
+    
+    try {
+        const response = await fetch(`${BASE_URL}${endpoint}`, {
+            "method": "GET",
+            "headers": {
+                "x-rapidapi-host": "v3.football.api-sports.io",
+                "x-rapidapi-key": API_KEY
+            }
+        });
+
+        const json = await response.json();
+        
+        if (json.errors && Object.keys(json.errors).length > 0) {
+            console.error("Erro API Football:", json.errors);
+            return null;
+        }
+
+        // Salva no Cache
+        const saveObject = { data: json.response, timestamp: Date.now() };
+        localStorage.setItem(key, JSON.stringify(saveObject));
+        
+        return json.response;
+    } catch (e) {
+        console.error("Erro de conexão API:", e);
+        return null;
+    }
+}
+
+// ==========================================
+// 4. RENDERIZAÇÃO (TABELAS E ESTATÍSTICAS)
+// ==========================================
+
+function renderStandings(data) {
+    const tbody = document.getElementById('standingsBody');
+    if (!data || !data[0]) return;
+    
+    const table = data[0].league.standings[0]; // Pega o primeiro grupo
+    
+    tbody.innerHTML = table.map(time => `
+        <tr>
+            <td>
+                <span style="color:${getZoneColor(time.description)}">${time.rank}</span>
+            </td>
+            <td style="display:flex; align-items:center; gap:10px;">
+                <img src="${time.team.logo}" width="25">
+                ${time.team.name}
+            </td>
+            <td><strong>${time.points}</strong></td>
+            <td>${time.all.played}</td>
+            <td>${time.all.win}</td>
+            <td>${time.goalsDiff}</td>
+        </tr>
+    `).join('');
+}
+
+function renderStats(data, elementId) {
+    const list = document.getElementById(elementId);
+    if (!data || !list) return;
+
+    list.innerHTML = data.slice(0, 10).map((player, idx) => `
+        <div class="stat-item">
+            <div class="stat-rank">${idx + 1}</div>
+            <img src="${player.player.photo}" class="player-face">
+            <div class="player-info">
+                <span class="p-name">${player.player.name}</span>
+                <span class="p-team"><img src="${player.statistics[0].team.logo}" width="15"> ${player.statistics[0].team.name}</span>
+            </div>
+            <div class="stat-value">
+                ${elementId === 'scorersList' ? player.statistics[0].goals.total : (player.statistics[0].goals.assists || 0)}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Auxiliar para cores da tabela (Libertadores, Rebaixamento, etc)
+function getZoneColor(desc) {
+    if (!desc) return '#fff';
+    if (desc.includes('Libertadores') || desc.includes('Champions')) return '#00ff00';
+    if (desc.includes('Sul-Americana') || desc.includes('Europa')) return '#0088ff';
+    if (desc.includes('Relegation')) return '#ff4444';
+    return '#fff';
+}
+
+// ==========================================
+// 5. SUPABASE - JOGOS AO VIVO (SEU CRAWLER)
+// ==========================================
 async function loadLiveGames() {
     const container = document.getElementById('liveGames');
     if (!container) return;
 
     try {
         const { data, error } = await _supabase.from('partidas_ao_vivo').select('*');
-
         if (error) throw error;
 
         if (!data || data.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">Nenhum jogo no banco de dados.</p>';
+            container.innerHTML = '<p class="empty-msg">Nenhum jogo ao vivo encontrado no momento.</p>';
             return;
         }
 
@@ -49,71 +190,45 @@ async function loadLiveGames() {
         let htmlEncerrados = "";
 
         data.forEach(jogo => {
-            // Auto-detecção de colunas
-            const casa = jogo.home_team || jogo.time_casa || jogo.mandante || "Time A";
-            const fora = jogo.away_team || jogo.time_fora || jogo.visitante || "Time B";
-            const placarC = jogo.home_score ?? jogo.gols_casa ?? 0;
-            const placarF = jogo.away_score ?? jogo.gols_fora ?? 0;
+            // Auto-detecção de campos
+            const casa = jogo.home_team || jogo.time_casa || "Mandante";
+            const fora = jogo.away_team || jogo.time_fora || "Visitante";
+            const placarC = jogo.home_score ?? 0;
+            const placarF = jogo.away_score ?? 0;
             const statusRaw = jogo.status || jogo.tempo || "";
+            const status = statusRaw.toUpperCase();
             
-            const statusU = statusRaw.toUpperCase();
-            const isLive = statusU.includes("'") || statusU.includes("INT") || statusU.includes("1T") || statusU.includes("2T");
+            const isLive = status.includes("'") || status.includes("INT") || status.includes("1T");
 
+            // Tenta pegar logo da API Football (se tiver salvo) ou usa placeholder
+            // Nota: Para ter logos perfeitos aqui, precisaríamos cruzar dados, mas usaremos placeholder por enquanto
+            
             const card = `
-                <div class="live-game-card" style="border-left: 4px solid ${isLive ? '#00ff00' : '#444'}">
-                    <div class="game-teams">
-                        <span class="team-name">${casa}</span>
-                        <span class="score" style="color: ${isLive ? '#00ff00' : '#fff'}">${placarC} x ${placarF}</span>
-                        <span class="team-name">${fora}</span>
+                <div class="live-card ${isLive ? 'active-match' : 'ended-match'}">
+                    <div class="match-info">
+                        <div class="team-block">
+                            <span class="t-name">${casa}</span>
+                        </div>
+                        <div class="score-block">
+                            <span class="score-display">${placarC} - ${placarF}</span>
+                            <span class="status-badge ${isLive ? 'blink' : ''}">${isLive ? statusRaw : 'FIM'}</span>
+                        </div>
+                        <div class="team-block">
+                            <span class="t-name">${fora}</span>
+                        </div>
                     </div>
-                    <div class="game-status ${isLive ? 'live-blink' : ''}">${isLive ? '● ' + statusRaw : 'FINALIZADO'}</div>
                 </div>`;
 
             if (isLive) htmlAoVivo += card;
             else htmlEncerrados += card;
         });
 
-        container.innerHTML = (htmlAoVivo ? '<h4>🔥 AO VIVO</h4>' + htmlAoVivo : '') + 
-                             (htmlEncerrados ? '<h4 style="margin-top:20px;">✅ ENCERRADOS</h4>' + htmlEncerrados : '');
+        container.innerHTML = (htmlAoVivo ? '<h4>🔥 EM ANDAMENTO</h4>' + htmlAoVivo : '') + 
+                              (htmlEncerrados ? '<h4 style="margin-top:20px; opacity:0.7">🏁 ENCERRADOS</h4>' + htmlEncerrados : '');
 
-    } catch (err) {
-        console.error("❌ Erro no Supabase:", err);
-        container.innerHTML = '<p style="color:red; text-align:center;">Erro ao carregar jogos ao vivo.</p>';
+    } catch (e) {
+        console.error("Erro Supabase:", e);
     }
-}
-
-// --- FUNÇÕES DE RENDERIZAÇÃO ---
-function renderStandings() {
-    const tbody = document.getElementById('standingsBody');
-    if (!tbody) return;
-    tbody.innerHTML = window.CAMPEONATO_DATA.classificacao.map(item => `
-        <tr>
-            <td>${item.posicao}º</td>
-            <td><strong>${item.clube}</strong></td>
-            <td>${item.pontos}</td>
-            <td>${item.jogos}</td>
-            <td>${item.saldoGols}</td>
-        </tr>`).join('');
-}
-
-function renderStatsList(tipo) {
-    const list = document.getElementById('statsList');
-    if (!list) return;
-    const campo = tipo === 'escanteios' ? 'escanteios_total' : 'total_cartoes';
-    const top = [...window.CAMPEONATO_DATA.estatisticas].sort((a,b) => b[campo] - a[campo]).slice(0,10);
-    list.innerHTML = top.map((item, i) => `
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #333;">
-            <span>${i+1}. ${item.time}</span><strong>${item[campo]}</strong>
-        </div>`).join('');
-}
-
-function renderArtilharia() {
-    const list = document.getElementById('artilhariaList');
-    if (!list) return;
-    list.innerHTML = window.CAMPEONATO_DATA.artilharia.slice(0,10).map(art => `
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #333;">
-            <span>${art.jogador} (${art.clube})</span><strong>${art.gols}</strong>
-        </div>`).join('');
 }
 
 function initNavigation() {
