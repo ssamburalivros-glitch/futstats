@@ -1,24 +1,16 @@
-name: Update Games Data
+name: Update Supabase Data
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # A cada 10 minutos
-  workflow_dispatch:  # Execução manual
-  push:
-    branches: [ main ]
-
-permissions:
-  contents: write
+    - cron: '*/5 * * * *' # Diminuído para 5 min para ser mais "ao vivo"
+  workflow_dispatch:
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Setup Python
       uses: actions/setup-python@v4
@@ -27,16 +19,10 @@ jobs:
         
     - name: Install dependencies
       run: |
-        pip install beautifulsoup4 requests lxml
+        pip install beautifulsoup4 requests lxml supabase
         
     - name: Run crawler
-      run: |
-        python crawler.py
-        
-    - name: Commit and push changes
-      run: |
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git config --global user.name "github-actions[bot]"
-        git add public/games.json
-        git commit -m "🤖 Atualização: $(date +'%d/%m %H:%M')" || echo "Sem mudanças"
-        git push
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      run: python crawler.py
