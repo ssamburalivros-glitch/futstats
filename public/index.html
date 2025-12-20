@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats - LIVE 2025</title>
+    <title>FutStats - LIVE</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+
     <header class="header">
         <div class="container">
             <div class="logo">
@@ -19,9 +20,15 @@
 
     <nav class="nav-tabs">
         <div class="container">
-            <button class="nav-tab active" data-tab="ao-vivo">AO VIVO</button>
-            <button class="nav-tab" data-tab="classificacao">CLASSIFICAÇÃO</button>
-            <button class="nav-tab" data-tab="estatisticas">ESTATÍSTICAS</button>
+            <button class="nav-tab active" data-tab="ao-vivo">
+                <i class="fas fa-broadcast-tower"></i> AO VIVO
+            </button>
+            <button class="nav-tab" data-tab="classificacao">
+                <i class="fas fa-table"></i> TABELA
+            </button>
+            <button class="nav-tab" data-tab="estatisticas">
+                <i class="fas fa-chart-line"></i> ESTATS
+            </button>
         </div>
     </nav>
 
@@ -29,18 +36,20 @@
         <div class="container">
             
             <section id="ao-vivo" class="tab-content active">
-                <div class="live-games-container" id="liveGames">
-                    <p class="loading">Buscando jogos em tempo real...</p>
+                <div id="liveGames">
+                    <p class="loading" style="text-align:center; padding:20px;">
+                        <i class="fas fa-spinner fa-spin"></i> Conectando ao banco de dados...
+                    </p>
                 </div>
             </section>
 
             <section id="classificacao" class="tab-content">
                 <div class="table-container">
-                    <table class="standings-table">
+                    <table>
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>TIME</th>
+                                <th>CLUBE</th>
                                 <th>PTS</th>
                                 <th>J</th>
                                 <th>SG</th>
@@ -53,18 +62,16 @@
             </section>
 
             <section id="estatisticas" class="tab-content">
-                <div class="stats-container">
-                    <div class="stats-card">
-                        <h3><i class="fas fa-chart-bar"></i> TOP 10 ESCANTEIOS</h3>
-                        <div id="statsList" class="stats-list">
-                            </div>
-                    </div>
-                    
-                    <div class="stats-card" style="margin-top: 20px;">
-                        <h3><i class="fas fa-crown"></i> ARTILHARIA</h3>
-                        <div id="artilhariaList" class="stats-list">
-                            </div>
-                    </div>
+                <div class="stats-card">
+                    <h3><i class="fas fa-bullseye"></i> TOP ESCANTEIOS</h3>
+                    <div id="statsList" class="stats-list">
+                        </div>
+                </div>
+                
+                <div class="stats-card" style="margin-top: 20px;">
+                    <h3><i class="fas fa-user-ninja"></i> ARTILHARIA</h3>
+                    <div id="artilhariaList" class="stats-list">
+                        </div>
                 </div>
             </section>
 
@@ -72,7 +79,7 @@
     </main>
 
     <footer class="footer">
-        <p>© 2025 FutStats - Dados Atualizados</p>
+        <p>© 2025 FutStats - Todos os direitos reservados</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -80,5 +87,6 @@
     <script src="dados.js"></script>
     
     <script src="script.js"></script>
+
 </body>
 </html>
