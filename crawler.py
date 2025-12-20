@@ -101,3 +101,4 @@ if __name__ == "__main__":
     print("🚀 Iniciando processamento...")
     dados = get_live_games()
     sync_to_supabase(dados)
+    supabase.table("partidas_ao_vivo").insert(data).execute()
