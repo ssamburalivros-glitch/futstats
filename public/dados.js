@@ -1,6 +1,4 @@
-// dados.js - Dados completos do Campeonato Brasileiro Série A 2025
-
-const CAMPEONATO_DATA = {
+window.CAMPEONATO_DATA = {
     classificacao: [
         { posicao: 1, clube: "Flamengo", pontos: 79, jogos: 38, vitorias: 24, empates: 7, derrotas: 7, golsPro: 79, golsContra: 27, saldoGols: 52, cartoesAmarelos: 81, cartoesVermelhos: 5, aproveitamento: 69.3 },
         { posicao: 2, clube: "Palmeiras", pontos: 76, jogos: 38, vitorias: 23, empates: 7, derrotas: 8, golsPro: 69, golsContra: 35, saldoGols: 34, cartoesAmarelos: 76, cartoesVermelhos: 5, aproveitamento: 66.7 },
