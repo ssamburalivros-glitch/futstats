@@ -1,6 +1,6 @@
 // script.js - Versão Final Otimizada para seus Dados
-const SUPABASE_URL = https://vqocdowjdutfzmnvxqvz.supabase.co; 
-const SUPABASE_KEY = sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm;
+const SUPABASE_URL = 'https://vqocdowjdutfzmnvxqvz.supabase.co'; 
+const SUPABASE_KEY = 'sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm';
 
 let _supabase = null;
 try {
@@ -166,3 +166,4 @@ function initNavigation() {
         };
     });
 }
+
