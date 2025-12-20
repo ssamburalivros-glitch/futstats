@@ -1,4 +1,4 @@
-// script.js - Versão Final Otimizada para seus Dados
+// script.js - Versão Final Otimizada com Separação de Jogos
 const SUPABASE_URL = 'https://vqocdowjdutfzmnvxqvz.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm';
 
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.CAMPEONATO_DATA) {
         renderStandings();
         renderArtilharia();
-        renderStatsList('escanteios'); // Inicia com escanteios por padrão
+        renderStatsList('escanteios'); 
         initSearch();
         initStatsFilters();
     }
@@ -54,6 +54,8 @@ function initSearch() {
     const panel = document.getElementById('teamStatsPanel');
     const general = document.getElementById('generalStats');
 
+    if (!input) return;
+
     input.addEventListener('input', (e) => {
         const termo = e.target.value.toLowerCase().trim();
         const timeData = window.CAMPEONATO_DATA.estatisticas.find(t => t.time.toLowerCase().includes(termo));
@@ -67,7 +69,6 @@ function initSearch() {
             document.getElementById('yellowCards').textContent = timeData.cartao_amarelo;
             document.getElementById('redCards').textContent = timeData.cartao_vermelho;
             document.getElementById('foulsCommitted').textContent = timeData.faltas_cometidas;
-            // Usando pontos da classificação para o aproveitamento no painel se necessário
         } else {
             panel.style.display = 'none';
             general.style.display = 'block';
@@ -91,7 +92,6 @@ function renderStatsList(tipo) {
     if (!list) return;
     list.innerHTML = '';
 
-    // Mapeia o clique do botão para o nome da coluna no seu dados.js
     const mapa = {
         'escanteios': 'escanteios_total',
         'cartoes': 'total_cartoes',
@@ -126,7 +126,7 @@ function renderArtilharia() {
     });
 }
 
-// --- JOGOS AO VIVO ---
+// --- JOGOS AO VIVO (COM SEPARAÇÃO) ---
 async function loadLiveGames() {
     const container = document.getElementById('liveGames');
     if (!container) return;
@@ -134,25 +134,63 @@ async function loadLiveGames() {
     if (_supabase) {
         try {
             const { data, error } = await _supabase.from('partidas_ao_vivo').select('*');
+            
             if (data && data.length > 0) {
-                container.innerHTML = '';
-                data.forEach(jogo => {
-                    container.innerHTML += `
-                        <div class="live-game-card">
-                            <div class="game-teams">
-                                <span>${jogo.home_team}</span>
-                                <span class="score">${jogo.home_score} x ${jogo.away_score}</span>
-                                <span>${jogo.away_team}</span>
-                            </div>
-                            <div class="game-status live-blink">${jogo.status || 'AO VIVO'}</div>
-                        </div>`;
+                // Filtros blindados para separar Ao Vivo de Encerrados
+                const aoVivo = data.filter(j => {
+                    const s = (j.status || "").toUpperCase().trim();
+                    return !s.includes('FIM') && !s.includes('ENCERRADO');
                 });
-                document.getElementById('activeGames').textContent = data.length;
+
+                const encerrados = data.filter(j => {
+                    const s = (j.status || "").toUpperCase().trim();
+                    return s.includes('FIM') || s.includes('ENCERRADO');
+                });
+
+                let htmlContent = '';
+
+                // Renderiza Jogos em Andamento
+                if (aoVivo.length > 0) {
+                    htmlContent += '<h4 style="color:#ffcc00; margin-bottom:10px; border-left:3px solid #ffcc00; padding-left:10px;">🔥 AO VIVO AGORA</h4>';
+                    aoVivo.forEach(jogo => {
+                        htmlContent += `
+                            <div class="live-game-card">
+                                <div class="game-teams">
+                                    <span>${jogo.home_team}</span>
+                                    <span class="score" style="color:#00ff00;">${jogo.home_score} x ${jogo.away_score}</span>
+                                    <span>${jogo.away_team}</span>
+                                </div>
+                                <div class="game-status live-blink">${jogo.status || 'AO VIVO'}</div>
+                            </div>`;
+                    });
+                }
+
+                // Renderiza Jogos Encerrados
+                if (encerrados.length > 0) {
+                    htmlContent += '<h4 style="color:#888; margin-top:20px; margin-bottom:10px; border-left:3px solid #555; padding-left:10px;">✅ ENCERRADOS</h4>';
+                    encerrados.forEach(jogo => {
+                        htmlContent += `
+                            <div class="live-game-card" style="opacity:0.6; background: #1a1a1a;">
+                                <div class="game-teams">
+                                    <span>${jogo.home_team}</span>
+                                    <span class="score">${jogo.home_score} x ${jogo.away_score}</span>
+                                    <span>${jogo.away_team}</span>
+                                </div>
+                                <div class="game-status">FIM</div>
+                            </div>`;
+                    });
+                }
+
+                container.innerHTML = htmlContent;
+                
+                const activeCounter = document.getElementById('activeGames');
+                if (activeCounter) activeCounter.textContent = aoVivo.length;
+                
                 return;
             }
-        } catch (e) { console.error("Erro Live"); }
+        } catch (e) { console.error("Erro Live:", e); }
     }
-    container.innerHTML = '<p style="text-align:center;color:#888;">Nenhum jogo ao vivo no momento.</p>';
+    container.innerHTML = '<p style="text-align:center;color:#888;">Nenhum jogo disponível.</p>';
 }
 
 // --- NAVEGAÇÃO ---
@@ -166,4 +204,3 @@ function initNavigation() {
         };
     });
 }
-
