@@ -8,13 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="container">
             <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-futbol"></i>
-                </div>
+                <div class="logo-icon"><i class="fas fa-futbol"></i></div>
                 <h1>FutStats <span class="beta">LIVE</span></h1>
             </div>
             <div class="last-update">
@@ -24,45 +21,31 @@
         </div>
     </header>
 
-    <!-- Menu de Navegação -->
     <nav class="nav-tabs">
         <div class="container">
-            <button class="nav-tab active" data-tab="ao-vivo">
-                <i class="fas fa-tv"></i> AO VIVO
-            </button>
-            <button class="nav-tab" data-tab="classificacao">
-                <i class="fas fa-table"></i> CLASSIFICAÇÃO
-            </button>
-            <button class="nav-tab" data-tab="estatisticas">
-                <i class="fas fa-chart-bar"></i> ESTATÍSTICAS
-            </button>
+            <button class="nav-tab active" data-tab="ao-vivo"><i class="fas fa-tv"></i> AO VIVO</button>
+            <button class="nav-tab" data-tab="classificacao"><i class="fas fa-table"></i> CLASSIFICAÇÃO</button>
+            <button class="nav-tab" data-tab="estatisticas"><i class="fas fa-chart-bar"></i> ESTATÍSTICAS</button>
         </div>
     </nav>
 
-    <!-- Conteúdo Principal -->
     <main class="main-content">
         <div class="container">
-            <!-- Aba: Ao Vivo -->
             <section id="ao-vivo" class="tab-content active">
                 <div class="section-header">
-                    <h2><i class="fas fa-broadcast-tower"></i> JOGOS AO VIVO</h2>
-                    <button class="refresh-btn" id="refreshLive">
-                        <i class="fas fa-redo"></i> Atualizar
-                    </button>
+                    <h2><i class="fas fa-broadcast-tower"></i> JOGOS NO RADAR</h2>
                 </div>
                 
                 <div class="live-games-container" id="liveGames">
-                    <!-- Jogos ao vivo serão carregados aqui -->
                     <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        Buscando jogos ao vivo...
+                        <i class="fas fa-spinner fa-spin"></i> Buscando jogos...
                     </div>
                 </div>
                 
                 <div class="live-stats">
                     <div class="stat-card">
                         <i class="fas fa-running"></i>
-                        <h3>JOGOS ATIVOS</h3>
+                        <h3>AO VIVO</h3>
                         <p id="activeGames">0</p>
                     </div>
                     <div class="stat-card">
@@ -70,289 +53,18 @@
                         <h3>GOLS HOJE</h3>
                         <p id="totalGoals">0</p>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-stopwatch"></i>
-                        <h3>ATUALIZAÇÃO</h3>
-                        <p id="updateTime">Agora</p>
-                    </div>
                 </div>
             </section>
 
-            <!-- Aba: Classificação -->
             <section id="classificacao" class="tab-content">
-                <div class="section-header">
-                    <h2><i class="fas fa-trophy"></i> BRASILEIRÃO SÉRIE A 2025</h2>
-                    <div class="league-info">
-                        <span class="champion-badge">CAMPEÃO: FLAMENGO</span>
-                    </div>
-                </div>
-                
                 <div class="table-container">
-                    <table class="standings-table" id="standingsTable">
+                    <table class="standings-table">
                         <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>TIME</th>
-                                <th>PTS</th>
-                                <th>J</th>
-                                <th>V</th>
-                                <th>E</th>
-                                <th>D</th>
-                                <th>GP</th>
-                                <th>GC</th>
-                                <th>SG</th>
-                                <th>STATUS</th>
-                            </tr>
+                            <tr><th>#</th><th>TIME</th><th>PTS</th><th>J</th><th>SG</th></tr>
                         </thead>
-                        <tbody id="standingsBody">
-                            <!-- Classificação será carregada aqui -->
-                        </tbody>
+                        <tbody id="standingsBody"></tbody>
                     </table>
                 </div>
-                
-                <div class="league-summary">
-                    <div class="summary-card">
-                        <h3><i class="fas fa-info-circle"></i> RESUMO DO CAMPEONATO</h3>
-                        <div class="summary-grid">
-                            <div class="summary-item">
-                                <span>Campeão:</span>
-                                <strong>Flamengo</strong>
-                            </div>
-                            <div class="summary-item">
-                                <span>Vice:</span>
-                                <strong>Palmeiras</strong>
-                            </div>
-                            <div class="summary-item">
-                                <span>Libertadores:</span>
-                                <strong>Flamengo, Palmeiras, Cruzeiro, Mirassol</strong>
-                            </div>
-                            <div class="summary-item">
-                                <span>Sul-Americana:</span>
-                                <strong>Fluminense, Botafogo, Bahia</strong>
-                            </div>
-                            <div class="summary-item">
-                                <span>Rebaixados:</span>
-                                <strong>Ceará, Fortaleza, Juventude, Sport</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </section>
 
-            <!-- Aba: Estatísticas -->
-            <section id="estatisticas" class="tab-content">
-                <div class="section-header">
-                    <h2><i class="fas fa-chart-line"></i> ESTATÍSTICAS DETALHADAS</h2>
-                    <div class="search-container">
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="teamSearch" placeholder="Pesquisar time...">
-                            <button class="clear-search" id="clearSearch" style="display: none;">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Painel de estatísticas do time selecionado -->
-                <div class="team-stats-panel" id="teamStatsPanel" style="display: none;">
-                    <div class="panel-header">
-                        <h3><i class="fas fa-chart-bar"></i> ESTATÍSTICAS DO TIME</h3>
-                        <button class="close-panel" id="closePanel">&times;</button>
-                    </div>
-                    <div class="team-info-header" id="teamInfoHeader">
-                        <!-- Informações do time serão carregadas aqui -->
-                    </div>
-                    
-                    <div class="team-stats-grid">
-                        <div class="team-stat-card">
-                            <h4><i class="fas fa-flag"></i> Escanteios</h4>
-                            <div class="stat-breakdown">
-                                <div class="stat-item">
-                                    <span>Total:</span>
-                                    <strong id="totalCorners">0</strong>
-                                </div>
-                                <div class="stat-item">
-                                    <span>Por jogo:</span>
-                                    <strong id="cornersPerGame">0</strong>
-                                </div>
-                                <div class="stat-item">
-                                    <span>Ranking:</span>
-                                    <span class="rank" id="cornersRank">-</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="team-stat-card">
-                            <h4><i class="fas fa-card"></i> Cartões</h4>
-                            <div class="stat-breakdown">
-                                <div class="stat-item">
-                                    <span>Amarelos:</span>
-                                    <strong id="yellowCards">0</strong>
-                                </div>
-                                <div class="stat-item">
-                                    <span>Vermelhos:</span>
-                                    <strong id="redCards">0</strong>
-                                </div>
-                                <div class="stat-item">
-                                    <span>Total:</span>
-                                    <strong id="totalCards">0</strong>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="team-stat-card">
-                            <h4><i class="fas fa-running"></i> Faltas</h4>
-                            <div class="stat-breakdown">
-                                <div class="stat-item">
-                                    <span>Cometidas:</span>
-                                    <strong id="foulsCommitted">0</strong>
-                                </div>
-                                <div class="stat-item">
-                                    <span>Sofridas:</span>
-                                    <strong id="foulsSuffered">0</strong>
-                                </div>
-                                <div class="stat-item">
-                                    <span>Por jogo:</span>
-                                    <strong id="foulsPerGame">0</strong>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="team-stat-card">
-                            <h4><i class="fas fa-futbol"></i> Desempenho</h4>
-                            <div class="stat-breakdown">
-                                <div class="stat-item">
-                                    <span>Posse de bola:</span>
-                                    <strong id="possession">0%</strong>
-                                </div>
-                                <div class="stat-item">
-                                    <span>Chutes por jogo:</span>
-                                    <strong id="shotsPerGame">0</strong>
-                                </div>
-                                <div class="stat-item">
-                                    <span>Precisão:</span>
-                                    <strong id="shotAccuracy">0%</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Últimos jogos do time -->
-                    <div class="team-recent-games">
-                        <h4><i class="fas fa-history"></i> ÚLTIMOS JOGOS</h4>
-                        <div class="recent-games-list" id="recentGamesList">
-                            <!-- Últimos jogos serão carregados aqui -->
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Estatísticas gerais (visível quando nenhum time está selecionado) -->
-                <div class="general-stats" id="generalStats">
-                    <div class="stats-filters">
-                        <button class="filter-btn active" data-stat="escanteios">Escanteios</button>
-                        <button class="filter-btn" data-stat="cartoes">Cartões</button>
-                        <button class="filter-btn" data-stat="faltas">Faltas</button>
-                        <button class="filter-btn" data-stat="posse">Posse de Bola</button>
-                    </div>
-                    
-                    <div class="stats-container">
-                        <div class="stats-card">
-                            <h3><i class="fas fa-chart-bar"></i> ESTATÍSTICAS GERAIS (TOP 10)</h3>
-                            <div class="stats-list" id="statsList">
-                                <!-- Lista de estatísticas será carregada aqui -->
-                            </div>
-                        </div>
-                        
-                        <div class="stats-card">
-                            <h3><i class="fas fa-running"></i> MÉDIAS POR JOGO</h3>
-                            <div class="averages-grid">
-                                <div class="average-item">
-                                    <span>Escanteios/Jogo</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 65%"></div>
-                                    </div>
-                                    <strong>9.8</strong>
-                                </div>
-                                <div class="average-item">
-                                    <span>Cartões/Jogo</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 40%"></div>
-                                    </div>
-                                    <strong>4.9</strong>
-                                </div>
-                                <div class="average-item">
-                                    <span>Faltas/Jogo</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 70%"></div>
-                                    </div>
-                                    <strong>14.5</strong>
-                                </div>
-                                <div class="average-item">
-                                    <span>Posse/Jogo</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 50%"></div>
-                                    </div>
-                                    <strong>52%</strong>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="stats-card">
-                            <h3><i class="fas fa-crown"></i> ARTILHARIA (TOP 10)</h3>
-                            <div class="stats-list" id="artilhariaList">
-                                <!-- Artilharia será carregada aqui -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="quick-teams">
-                        <h3><i class="fas fa-users"></i> TIMES MAIS PESQUISADOS</h3>
-                        <div class="quick-teams-grid" id="quickTeams">
-                            <!-- Times populares serão carregados aqui -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <i class="fas fa-futbol"></i>
-                    <span>FutStats</span>
-                </div>
-                <div class="footer-info">
-                    <p>Estatísticas em tempo real do futebol brasileiro</p>
-                    <p class="copyright">© 2025 FutStats - Dados atualizados do Brasileirão Série A 2025</p>
-                </div>
-                <div class="footer-update">
-                    <i class="fas fa-clock"></i>
-                    <span>Dados completos da temporada 2025</span>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Modal para detalhes do jogo -->
-    <div class="modal" id="gameModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Detalhes do Jogo</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Conteúdo do modal será preenchido via JS -->
-            </div>
-        </div>
-    </div>
-
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <script src="dados.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+            <section id="estatistic
