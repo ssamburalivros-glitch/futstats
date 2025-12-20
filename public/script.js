@@ -6,72 +6,122 @@ const SUPABASE_KEY = 'sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 FutStats: Iniciando sistema...");
+    console.log("🚀 FutStats: Sistema Iniciado.");
+    
+    // Inicializa a navegação de abas
     initNavigation();
     
-    // 1. Carrega dados estáticos do dados.js (Tabela e Estatísticas)
-    if (window.CAMPEONATO_DATA) {
-        console.log("✅ Dados estáticos detectados!");
-        renderStandings();
-        renderStatsList('escanteios');
-        renderArtilharia();
-    } else {
-        console.warn("⚠️ Atenção: dados.js não carregado ou variável CAMPEONATO_DATA ausente.");
+    // Tenta carregar a classificação (dados.js)
+    try {
+        if (window.CAMPEONATO_DATA) {
+            console.log("✅ dados.js carregado com sucesso.");
+            renderStandings();
+            renderStatsList('escanteios');
+            renderArtilharia();
+        } else {
+            console.error("❌ Erro: Variável CAMPEONATO_DATA não encontrada. Verifique se o arquivo dados.js existe e está correto.");
+        }
+    } catch (err) {
+        console.error("❌ Erro ao processar dados.js:", err);
     }
 
-    // 2. Carrega Jogos ao Vivo do Supabase
+    // Carrega Jogos ao Vivo (Supabase)
     loadLiveGames();
-    
-    // Atualiza os jogos a cada 30 segundos
     setInterval(loadLiveGames, 30000);
 });
 
-// --- FUNÇÃO PRINCIPAL: JOGOS AO VIVO ---
+// --- FUNÇÃO JOGOS AO VIVO ---
 async function loadLiveGames() {
     const container = document.getElementById('liveGames');
-    const activeCounter = document.getElementById('activeGames');
     if (!container) return;
 
-    console.log("📡 Buscando atualizações no Supabase...");
-
     try {
-        const { data, error } = await _supabase
-            .from('partidas_ao_vivo')
-            .select('*');
+        const { data, error } = await _supabase.from('partidas_ao_vivo').select('*');
 
-        if (error) {
-            console.error("❌ Erro Supabase:", error.message);
-            container.innerHTML = `<p style="color:orange; text-align:center;">Erro de conexão com o Banco.</p>`;
-            return;
-        }
+        if (error) throw error;
 
         if (!data || data.length === 0) {
-            console.log("📡 Banco conectado, mas está vazio (0 registros).");
-            container.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">Nenhum jogo disponível no momento.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">Nenhum jogo no banco de dados.</p>';
             return;
         }
-
-        console.log("📡 Sucesso! Jogos encontrados:", data.length);
-        // Log do primeiro jogo para conferir nomes das colunas no F12
-        console.log("📋 Formato do dado:", data[0]); 
 
         let htmlAoVivo = "";
         let htmlEncerrados = "";
-        let countAoVivo = 0;
 
         data.forEach(jogo => {
-            // MAPEAMENTO DE COLUNAS (Tenta vários nomes possíveis)
-            const casa = jogo.home_team || jogo.time_casa || jogo.mandante || jogo.team_home || "Time A";
-            const fora = jogo.away_team || jogo.time_fora || jogo.visitante || jogo.team_away || "Time B";
-            const placarC = jogo.home_score ?? jogo.gols_casa ?? jogo.placar_mandante ?? 0;
-            const placarF = jogo.away_score ?? jogo.gols_fora ?? jogo.placar_visitante ?? 0;
-            const statusRaw = jogo.status || jogo.tempo || jogo.periodo || "";
+            // Auto-detecção de colunas
+            const casa = jogo.home_team || jogo.time_casa || jogo.mandante || "Time A";
+            const fora = jogo.away_team || jogo.time_fora || jogo.visitante || "Time B";
+            const placarC = jogo.home_score ?? jogo.gols_casa ?? 0;
+            const placarF = jogo.away_score ?? jogo.gols_fora ?? 0;
+            const statusRaw = jogo.status || jogo.tempo || "";
             
             const statusU = statusRaw.toUpperCase();
-            // Define se o jogo está rolando: tem minuto ('), é intervalo (INT) ou tempos (1T/2T)
-            const isLive = statusU.includes("'") || statusU.includes("INT") || statusU.includes("1T") || statusU.includes("2T") || statusU.includes("AO VIVO");
+            const isLive = statusU.includes("'") || statusU.includes("INT") || statusU.includes("1T") || statusU.includes("2T");
 
-            const cardHtml = `
+            const card = `
                 <div class="live-game-card" style="border-left: 4px solid ${isLive ? '#00ff00' : '#444'}">
                     <div class="game-teams">
-                        <span class="team-
+                        <span class="team-name">${casa}</span>
+                        <span class="score" style="color: ${isLive ? '#00ff00' : '#fff'}">${placarC} x ${placarF}</span>
+                        <span class="team-name">${fora}</span>
+                    </div>
+                    <div class="game-status ${isLive ? 'live-blink' : ''}">${isLive ? '● ' + statusRaw : 'FINALIZADO'}</div>
+                </div>`;
+
+            if (isLive) htmlAoVivo += card;
+            else htmlEncerrados += card;
+        });
+
+        container.innerHTML = (htmlAoVivo ? '<h4>🔥 AO VIVO</h4>' + htmlAoVivo : '') + 
+                             (htmlEncerrados ? '<h4 style="margin-top:20px;">✅ ENCERRADOS</h4>' + htmlEncerrados : '');
+
+    } catch (err) {
+        console.error("❌ Erro no Supabase:", err);
+        container.innerHTML = '<p style="color:red; text-align:center;">Erro ao carregar jogos ao vivo.</p>';
+    }
+}
+
+// --- FUNÇÕES DE RENDERIZAÇÃO ---
+function renderStandings() {
+    const tbody = document.getElementById('standingsBody');
+    if (!tbody) return;
+    tbody.innerHTML = window.CAMPEONATO_DATA.classificacao.map(item => `
+        <tr>
+            <td>${item.posicao}º</td>
+            <td><strong>${item.clube}</strong></td>
+            <td>${item.pontos}</td>
+            <td>${item.jogos}</td>
+            <td>${item.saldoGols}</td>
+        </tr>`).join('');
+}
+
+function renderStatsList(tipo) {
+    const list = document.getElementById('statsList');
+    if (!list) return;
+    const campo = tipo === 'escanteios' ? 'escanteios_total' : 'total_cartoes';
+    const top = [...window.CAMPEONATO_DATA.estatisticas].sort((a,b) => b[campo] - a[campo]).slice(0,10);
+    list.innerHTML = top.map((item, i) => `
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #333;">
+            <span>${i+1}. ${item.time}</span><strong>${item[campo]}</strong>
+        </div>`).join('');
+}
+
+function renderArtilharia() {
+    const list = document.getElementById('artilhariaList');
+    if (!list) return;
+    list.innerHTML = window.CAMPEONATO_DATA.artilharia.slice(0,10).map(art => `
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #333;">
+            <span>${art.jogador} (${art.clube})</span><strong>${art.gols}</strong>
+        </div>`).join('');
+}
+
+function initNavigation() {
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.onclick = () => {
+            document.querySelectorAll('.nav-tab, .tab-content').forEach(el => el.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab).classList.add('active');
+        };
+    });
+}
