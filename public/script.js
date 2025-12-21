@@ -1,107 +1,91 @@
-// 1. CONFIGURAÇÕES DOS CLIENTES
+// --- CONFIGURAÇÕES DO SUPABASE ---
 const SUPABASE_URL = 'https://vqocdowjdutfzmnvxqvz.supabase.co'; 
-const SUPABASE_KEY = 'sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm';
+const SUPABASE_KEY = 'sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm'; // Chave Anon/Public
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Chave da API-Sports (para outras ligas se necessário, ou deixe vazio se focar no Supabase)
-const API_KEY = '8238d6b41d6cd9deb1a027865989c3e4'; 
+// Mapeamento das chaves das ligas (Devem ser iguais às do script Python)
+const LEAGUES_CONFIG = {
+    "BR": { name: "Brasileirão Série A", season: "2025" },
+    "PL": { name: "Premier League", season: "24/25" },
+    "ES": { name: "La Liga", season: "24/25" },
+    "DE": { name: "Bundesliga", season: "24/25" },
+    "IT": { name: "Serie A (Itália)", season: "24/25" },
+    "PT": { name: "Liga Portugal", season: "24/25" }
+};
 
-// 2. INICIALIZAÇÃO
+let currentLeague = "BR";
+
+// --- INICIALIZAÇÃO ---
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
-    loadLiveGames();      // Carrega jogos ao vivo do Supabase
-    loadLeagueData(71);   // Carrega Brasileirão por padrão
+    loadLiveGames();      // Carrega jogos ao vivo do Supabase (seu Crawler antigo)
+    loadLeagueTable("BR"); // Carrega a tabela do Brasileirão ao abrir
+    
+    // Atualiza jogos ao vivo a cada 60 segundos
+    setInterval(loadLiveGames, 60000);
 });
 
-// 3. NAVEGAÇÃO ENTRE ABAS
-function initNavigation() {
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-        tab.onclick = () => {
-            // Remove ativo de todos
-            document.querySelectorAll('.nav-tab, .tab-content').forEach(el => el.classList.remove('active'));
-            // Adiciona ativo no clicado
-            tab.classList.add('active');
-            const target = tab.getAttribute('data-tab');
-            document.getElementById(target).classList.add('active');
-        };
-    });
-}
-
-// 4. CARREGAR JOGOS AO VIVO (DO SUPABASE)
-async function loadLiveGames() {
-    const container = document.getElementById('liveGames');
-    
-    const { data, error } = await _supabase
-        .from('partidas_ao_vivo')
-        .select('*');
-
-    if (error || !data || data.length === 0) {
-        container.innerHTML = '<p class="no-data">Nenhum jogo ao vivo encontrado no momento.</p>';
-        return;
-    }
-
-    container.innerHTML = data.map(jogo => `
-        <div class="live-card ${jogo.status.includes("'") ? 'live-border' : ''}">
-            <div class="match">
-                <span class="team">${jogo.home_team || jogo.time_casa}</span>
-                <span class="score">${jogo.home_score ?? 0} - ${jogo.away_score ?? 0}</span>
-                <span class="team">${jogo.away_team || jogo.time_fora}</span>
-            </div>
-            <div class="status">${jogo.status}</div>
-        </div>
-    `).join('');
-}
-
-// 5. CARREGAR TABELA (DO SUPABASE)
-async function loadLeagueData(id) {
+// --- FUNÇÃO PARA CARREGAR TABELAS (DO SUPABASE) ---
+async function loadLeagueTable(ligaKey) {
     const tbody = document.getElementById('standingsBody');
     const title = document.getElementById('leagueTitle');
     
-    tbody.innerHTML = '<tr><td colspan="5">Carregando dados reais de 2025...</td></tr>';
+    // Feedback visual de carregamento
+    tbody.innerHTML = '<tr><td colspan="5" class="loading">Buscando dados no banco...</td></tr>';
+    title.textContent = `${LEAGUES_CONFIG[ligaKey].name} - ${LEAGUES_CONFIG[ligaKey].season}`;
 
-    // Como você está fazendo scraping do Brasileirão (71) para o Supabase:
-    if (id === 71) {
-        title.textContent = "Brasileirão Série A 2025";
-        
+    try {
+        // Busca os dados na tabela que o seu robô Python preenche
         const { data, error } = await _supabase
-            .from('tabela_brasileirao')
+            .from('tabelas_ligas')
             .select('*')
+            .eq('liga', ligaKey)
             .order('posicao', { ascending: true });
 
-        if (error || !data) {
-            tbody.innerHTML = '<tr><td colspan="5">Erro ao carregar tabela do banco de dados.</td></tr>';
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5">Nenhum dado encontrado. Execute o robô Python.</td></tr>';
             return;
         }
 
-        renderTabela(data, tbody);
-    } else {
-        title.textContent = "Liga selecionada (Dados da API)";
-        tbody.innerHTML = '<tr><td colspan="5">Configure o scraping para esta liga ou use a API histórica.</td></tr>';
+        // Renderiza as linhas da tabela
+        tbody.innerHTML = data.map(time => `
+            <tr>
+                <td>${time.posicao}º</td>
+                <td class="t-name-cell">
+                    <strong>${time.time}</strong>
+                </td>
+                <td><span class="pts-badge">${time.pontos}</span></td>
+                <td>${time.jogos}</td>
+                <td>${time.sg}</td>
+            </tr>
+        `).join('');
+
+    } catch (err) {
+        console.error("Erro ao carregar tabela:", err);
+        tbody.innerHTML = '<tr><td colspan="5">Erro de conexão com o banco de dados.</td></tr>';
     }
 }
 
-// 6. RENDERIZAR TABELA NO HTML
-function renderTabela(times, container) {
-    if (times.length === 0) {
-        container.innerHTML = '<tr><td colspan="5">Tabela vazia. Aguardando processamento do Python...</td></tr>';
-        return;
-    }
+// --- FUNÇÃO PARA JOGOS AO VIVO (SEU CRAWLER ANTERIOR) ---
+async function loadLiveGames() {
+    const container = document.getElementById('liveGames');
+    
+    try {
+        const { data, error } = await _supabase
+            .from('partidas_ao_vivo')
+            .select('*');
 
-    container.innerHTML = times.map(t => `
-        <tr>
-            <td>${t.posicao}º</td>
-            <td class="t-name-cell"><strong>${t.time}</strong></td>
-            <td>${t.pontos}</td>
-            <td>${t.jogos}</td>
-            <td>${t.sg >= 0 ? '+' + t.sg : t.sg}</td>
-        </tr>
-    `).join('');
-}
+        if (error) throw error;
 
-// 7. FUNÇÃO GLOBAL PARA OS BOTÕES DE LIGA
-window.mudarLiga = (id) => {
-    document.querySelectorAll('.league-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('onclick').includes(id));
-    });
-    loadLeagueData(id);
-};
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p class="no-games">Nenhum jogo ao vivo agora.</p>';
+            return;
+        }
+
+        container.innerHTML = data.map(jogo => {
+            const isLive = (jogo.status || "").includes("'");
+            return `
+                <div class="live-card ${isLive ? 'live-border' : ''}">
+                    <div class="match
