@@ -1,24 +1,25 @@
 import os
 import time
 import random
-import asyncio
 from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 from supabase import create_client
 from fake_useragent import UserAgent
 
 # --- CONFIGURAÇÕES DE AMBIENTE ---
-SUPABASE_URL = os.environ.get("https://vqocdowjdutfzmnvxqvz.supabase.co")
-SUPABASE_KEY =("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxb2Nkb3dqZHV0ZnptbnZ4cXZ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIzNjQzNCwiZXhwIjoyMDgxODEyNDM0fQ.GlJ_-kh2u7qsLMRgB5jVpvduhIG0yyY9AZ9rU_mEqcE")
+# O GitHub Actions injeta estas variáveis via Secrets
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    print("❌ Erro: SUPABASE_URL ou SUPABASE_KEY não configurados nos Secrets.")
+    print("❌ Erro: SUPABASE_URL ou SUPABASE_KEY não configurados nos Secrets do GitHub.")
     exit(1)
 
+# Inicializa o cliente com a Service Role Key (Permissão de escrita)
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-UA = UserAgent()
+ua = UserAgent()
 
-# URLs FBREF - Temporada 2024-2025
+# URLs FBREF - Temporada 2025 (ou atual disponível)
 FBREF_URLS = {
     "BR": "https://fbref.com/en/comps/24/Serie-A-Stats",
     "PL": "https://fbref.com/en/comps/9/Premier-League-Stats",
@@ -29,96 +30,85 @@ FBREF_URLS = {
 }
 
 def get_tabela(liga_key, url):
-    # Criamos a sessão e forçamos o download do Chromium se necessário
     session = HTMLSession()
-    headers = {
-        'User-Agent': UA.random,
-        'Accept-Language': 'en-US,en;q=0.9'
-    }
+    headers = {'User-Agent': ua.random}
     
     try:
-        print(f"📡 Acessando {liga_key}...")
-        r = session.get(url, headers=headers, timeout=20)
+        print(f"📡 Capturando dados de: {liga_key}...")
+        r = session.get(url, headers=headers, timeout=25)
         
-        # O modo headless é essencial para rodar no GitHub Actions
-        # sleep=5 garante que o JavaScript do Fbref carregue a tabela
+        # render() baixa o Chromium no primeiro uso e executa o JavaScript da página
+        # sleep=5 garante tempo para o Fbref montar a tabela HTML
         r.html.render(sleep=5, timeout=30) 
         
         soup = BeautifulSoup(r.html.html, 'html.parser')
-        
-        # No Fbref, a tabela principal de classificação geralmente tem a classe 'stats_table'
         tabela = soup.find('table', class_='stats_table')
         
         if not tabela:
-            print(f"⚠️ Tabela não encontrada para {liga_key}. Verificando seletores...")
+            print(f"⚠️ Tabela não encontrada para {liga_key}.")
             return []
 
-        dados_liga = []
-        corpo_tabela = tabela.find('tbody')
-        linhas = corpo_tabela.find_all('tr')
-
-        for row in linhas:
-            # Pula linhas de separação ou cabeçalhos intermediários
+        dados_lista = []
+        # Localiza o corpo da tabela e as linhas
+        corpo = tabela.find('tbody')
+        for row in corpo.find_all('tr'):
+            # Ignora linhas de "rebaixamento" ou vazias que o Fbref coloca
             if 'spacer' in row.get('class', []) or 'thead' in row.get('class', []):
                 continue
                 
             cols = row.find_all(['th', 'td'])
             
-            # Estrutura padrão Fbref: 0:Rank, 1:Squad, 2:MP, 3:W... 9:Pts, 10:GD
+            # Mapeamento colunas Fbref: 0:Pos, 1:Squad, 2:MP (Jogos), 9:Pts, 10:GD (SG)
             if len(cols) >= 10:
                 try:
                     pos = cols[0].text.strip()
-                    nome_time = cols[1].text.strip()
+                    time_nome = cols[1].text.strip()
                     jogos = cols[2].text.strip()
-                    sg = cols[11].text.strip() if len(cols) > 11 else cols[10].text.strip()
-                    pts = cols[10].text.strip() if len(cols) > 11 else cols[9].text.strip()
+                    # Saldo de Gols costuma estar na coluna 10 ou 11 dependendo da liga
+                    sg = cols[10].text.strip() if 'Matches' not in cols[10].text else cols[9].text.strip()
+                    pts = cols[9].text.strip() if 'Matches' not in cols[9].text else cols[8].text.strip()
 
-                    dados_liga.append({
+                    dados_lista.append({
                         "liga": liga_key,
                         "posicao": int(pos) if pos.isdigit() else 0,
-                        "time": nome_time,
+                        "time": time_nome,
                         "pontos": int(pts) if pts.isdigit() else 0,
                         "jogos": int(jogos) if jogos.isdigit() else 0,
-                        "sg": int(sg.replace('+', '')) if sg.replace('+', '', 1).replace('-', '', 1).isdigit() else 0,
+                        "sg": int(sg.replace('+', '')) if sg.replace('+', '').replace('-', '').isdigit() else 0
                     })
-                except Exception as e:
+                except:
                     continue
-
-        return dados_liga
+        return dados_lista
 
     except Exception as e:
-        print(f"❌ Erro crítico ao processar {liga_key}: {e}")
+        print(f"❌ Erro ao processar {liga_key}: {str(e)}")
         return []
     finally:
         session.close()
 
 def main():
-    print("🏟️ Iniciando Scraper FutStats PRO 2025")
-    todas_as_tabelas = []
+    todas_as_ligas = []
     
     for key, url in FBREF_URLS.items():
-        dados = get_tabela(key, url)
-        if dados:
-            todas_as_tabelas.extend(dados)
-            print(f"✅ {key}: {len(dados)} times capturados.")
+        resultado = get_tabela(key, url)
+        if resultado:
+            todas_as_ligas.extend(resultado)
+            print(f"✅ {key} processado com sucesso.")
         
-        # Delay entre ligas para evitar detecção de IP pelo Fbref
-        wait = random.uniform(15, 25)
-        print(f"⏳ Aguardando {wait:.1f}s para a próxima liga...")
-        time.sleep(wait)
+        # Delay anti-bloqueio (Imitante comportamento humano)
+        delay = random.uniform(10, 20)
+        print(f"⏳ Aguardando {delay:.1f}s...")
+        time.sleep(delay)
 
-    if todas_as_tabelas:
+    if todas_as_ligas:
         try:
-            # 1. Limpa a tabela atual no Supabase
-            supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-            
-            # 2. Insere os novos dados
-            supabase.table("tabelas_ligas").insert(todas_as_tabelas).execute()
-            print(f"🚀 SUCESSO! {len(todas_as_tabelas)} registros enviados ao Supabase.")
+            # 1. Limpa a tabela para a nova carga
+            supabase.table("tabelas_ligas").delete().neq("liga", "VACANT").execute()
+            # 2. Insere todos os dados de uma vez
+            supabase.table("tabelas_ligas").insert(todas_as_ligas).execute()
+            print(f"🚀 Banco atualizado! Total de registros: {len(todas_as_ligas)}")
         except Exception as e:
-            print(f"❌ Erro ao salvar no Supabase: {e}")
-    else:
-        print("⚠️ Nenhum dado foi coletado. O banco de dados não foi alterado.")
+            print(f"❌ Erro Supabase: {e}")
 
 if __name__ == "__main__":
     main()
