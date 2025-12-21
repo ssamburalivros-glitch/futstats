@@ -1,114 +1,66 @@
-import os
-import requests
+import cloudscraper
 from bs4 import BeautifulSoup
-import re
 from supabase import create_client
-from datetime import datetime
+from fake_useragent import UserAgent
+import time
+import random
 
-# --- CONFIGURAÇÃO ---
-# Se estiver usando variáveis de ambiente, o script priorizará elas.
+# Configurações do Supabase
 SUPABASE_URL = "https://vqocdowjdutfzmnvxqvz.supabase.co"
-SUPABASE_KEY = "sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm"
+# ATENÇÃO: Use a 'service_role' key para poder deletar/inserir dados
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxb2Nkb3dqZHV0ZnptbnZ4cXZ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIzNjQzNCwiZXhwIjoyMDgxODEyNDM0fQ.GlJ_-kh2u7qsLMRgB5jVpvduhIG0yyY9AZ9rU_mEqcE" 
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def get_live_games():
-    """Faz scraping dos jogos ao vivo do placardefutebol.com.br"""
-    try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+def get_tabela_brasileirao():
+    ua = UserAgent()
+    # Cria o scraper que simula comportamento humano
+    scraper = cloudscraper.create_scraper(
+        browser={
+            'browser': 'chrome',
+            'platform': 'windows',
+            'desktop': True
         }
-        
-        response = requests.get('https://www.placardefutebol.com.br/', headers=headers, timeout=15)
-        response.raise_for_status()
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        games = []
-        
-        # BUSCA TODAS AS LINHAS DE JOGO DIRETAMENTE (Evita pular jogos em containers diferentes)
-        matches = soup.find_all('div', class_='row align-items-center content')
-        
-        print(f"🔍 Analisando {len(matches)} partidas encontradas na página...")
+    )
 
-        for match in matches:
-            status_elem = match.find('span', class_='status-name')
-            if not status_elem: 
-                continue
-            
-            status = status_elem.text.strip().upper()
-            
-            # FILTRO EXPANDIDO: Captura Ao Vivo, Minutos, Intervalo, Fim e Encerrado
-            # Isso garante que o 4º jogo apareça mesmo que o status dele seja diferente
-            if not re.search(r'AO VIVO|INTERVALO|\d+\'|FIM|ENCERRADO|PENAL', status):
-                continue
-            
-            teams = match.find_all('div', class_='team-name')
-            if len(teams) < 2: 
-                continue
-            
-            home_team = teams[0].text.strip()
-            away_team = teams[1].text.strip()
-            
-            # Captura o placar com segurança
-            scores = match.find_all('span', class_='badge badge-default')
-            try:
-                h_score = int(scores[0].text.strip()) if len(scores) >= 2 else 0
-                a_score = int(scores[1].text.strip()) if len(scores) >= 2 else 0
-            except (ValueError, IndexError):
-                h_score, a_score = 0, 0
-            
-            # Tenta identificar a liga subindo no HTML até o título do bloco
-            league = "Outros"
-            parent_container = match.find_parent('div', class_='container content')
-            if parent_container:
-                title_elem = parent_container.find_previous('h3', class_='match-list_league-name')
-                if title_elem:
-                    league = title_elem.text.strip()
-            
-            print(f"✅ Jogo encontrado: {home_team} {h_score} x {a_score} {away_team} ({status})")
+    # Fonte confiável (exemplo: WorldFootball ou similar que tenha estrutura estável)
+    url = "https://www.worldfootball.net/schedule/bra_serie_a_2025_spieltag/1/"
 
-            games.append({
-                'status': status,
-                'league': league,
-                'home_team': home_team,
-                'away_team': away_team,
-                'home_score': h_score,
-                'away_score': a_score,
-                'updated_at': datetime.now().isoformat()
-            })
-        
-        return games
-        
-    except Exception as e:
-        print(f"❌ Erro crítico no scraping: {e}")
-        return []
-
-def sync_to_supabase(games_list):
-    """Limpa o banco e insere os novos dados"""
-    url = os.environ.get("SUPABASE_URL") or SUPABASE_URL
-    key = os.environ.get("SUPABASE_KEY") or SUPABASE_KEY
+    headers = {'User-Agent': ua.random}
     
-    if not url or url == "SUA_URL_AQUI":
-        print("❌ Erro: URL ou KEY do Supabase não configurada.")
-        return
-
-    supabase = create_client(url, key)
-
     try:
-        # 1. Deletar jogos antigos (limpa a tabela para não duplicar)
-        # Usamos o filtro 'home_team' neq 'VAZIO' para burlar restrições de delete sem filtro
-        supabase.table("partidas_ao_vivo").delete().neq("home_team", "VAZIO").execute()
+        print("🔍 Iniciando captura da tabela...")
+        response = scraper.get(url, headers=headers)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Localiza a tabela padrão do site
+        tabela = soup.find('table', class_='standard_tabelle')
+        linhas = tabela.find_all('tr')[1:] # Pula o cabeçalho
 
-        if games_list:
-            # 2. Inserir a nova lista de jogos
-            supabase.table("partidas_ao_vivo").insert(games_list).execute()
-            print(f"🚀 Sucesso! {len(games_list)} jogos sincronizados no Supabase.")
-        else:
-            print("ℹ️ Nenhuma partida ao vivo no radar no momento.")
+        dados_para_inserir = []
+
+        for linha in linhas:
+            cols = linha.find_all('td')
+            if len(cols) >= 10:
+                dados_para_inserir.append({
+                    "posicao": int(cols[0].text.strip().replace('.', '')),
+                    "time": cols[2].text.strip(),
+                    "jogos": int(cols[3].text.strip()),
+                    "vitorias": int(cols[4].text.strip()),
+                    "sg": int(cols[8].text.strip()),
+                    "pontos": int(cols[9].text.strip())
+                })
+
+        if dados_para_inserir:
+            # 1. Limpa os dados antigos (evita duplicados)
+            supabase.table("tabela_brasileirao").delete().neq("posicao", 0).execute()
             
+            # 2. Insere a nova tabela atualizada
+            supabase.table("tabela_brasileirao").insert(dados_para_inserir).execute()
+            print(f"✅ Sucesso! {len(dados_para_inserir)} times atualizados no Supabase.")
+        
     except Exception as e:
-        print(f"❌ Erro ao salvar no Supabase: {e}")
+        print(f"❌ Erro durante o scraping: {e}")
 
+# Executa o script
 if __name__ == "__main__":
-    print("--- INICIANDO ATUALIZAÇÃO ---")
-    dados = get_live_games()
-    sync_to_supabase(dados)
-    print("--- PROCESSO CONCLUÍDO ---")
+    get_tabela_brasileirao()
