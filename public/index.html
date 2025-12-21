@@ -3,61 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats PRO - 2025</title>
+    <title>FutStats PRO | 2025</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <header class="header">
         <div class="container">
-            <h1>FutStats <span class="beta">PRO</span></h1>
+            <div class="logo">
+                <i class="fas fa-futbol"></i> 
+                <h1>FutStats <span class="beta">PRO</span></h1>
+            </div>
         </div>
     </header>
 
     <nav class="nav-tabs">
         <div class="container">
-            <button class="nav-tab active" data-tab="ao-vivo">AO VIVO</button>
-            <button class="nav-tab" data-tab="classificacao">TABELAS</button>
-            <button class="nav-tab" data-tab="estatisticas">ARTILHARIA</button>
+            <button class="nav-tab active" data-tab="ao-vivo">
+                <i class="fas fa-broadcast-tower"></i> AO VIVO
+            </button>
+            <button class="nav-tab" data-tab="classificacao">
+                <i class="fas fa-table"></i> TABELAS
+            </button>
+            <button class="nav-tab" data-tab="estatisticas">
+                <i class="fas fa-chart-line"></i> ARTILHARIA
+            </button>
         </div>
     </nav>
 
     <main class="main-content">
         <div class="container">
+            
             <section id="ao-vivo" class="tab-content active">
+                <div class="section-title">
+                    <h2>Partidas em Tempo Real</h2>
+                    <span class="live-indicator">● LIVE</span>
+                </div>
                 <div id="liveGames" class="live-container">
-                    <p class="loading">Buscando jogos no Supabase...</p>
-                </div>
-            </section>
-
-            <section id="classificacao" class="tab-content">
-                <div class="league-selector">
-                    <button class="league-btn active" onclick="mudarLiga(71)">🇧🇷 BR</button>
-                    <button class="league-btn" onclick="mudarLiga(39)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PL</button>
-                    <button class="league-btn" onclick="mudarLiga(140)">🇪🇸 ES</button>
-                    <button class="league-btn" onclick="mudarLiga(78)">🇩🇪 DE</button>
-                    <button class="league-btn" onclick="mudarLiga(135)">🇮🇹 IT</button>
-                    <button class="league-btn" onclick="mudarLiga(94)">🇵🇹 PT</button>
-                </div>
-                <div class="table-container">
-                    <h3 id="leagueTitle">Brasileirão Série A</h3>
-                    <table>
-                        <thead><tr><th>#</th><th>Time</th><th>P</th><th>J</th><th>SG</th></tr></thead>
-                        <tbody id="standingsBody"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="estatisticas" class="tab-content">
-                <div class="stats-card">
-                    <h3>Top Marcadores</h3>
-                    <div id="scorersList"></div>
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script> </body>
-</html>
