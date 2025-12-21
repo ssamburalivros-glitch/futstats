@@ -1,6 +1,5 @@
+requests-html
 beautifulsoup4
-requests
-lxml
 supabase
-cloudscraper
 fake-useragent
+lxml
