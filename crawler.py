@@ -8,8 +8,8 @@ from fake_useragent import UserAgent
 
 # --- CONFIGURAÇÕES DE AMBIENTE ---
 # O GitHub Actions injeta estas variáveis via Secrets
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+SUPABASE_URL = os.environ.get("https://vqocdowjdutfzmnvxqvz.supabase.co")
+SUPABASE_KEY = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxb2Nkb3dqZHV0ZnptbnZ4cXZ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIzNjQzNCwiZXhwIjoyMDgxODEyNDM0fQ.GlJ_-kh2u7qsLMRgB5jVpvduhIG0yyY9AZ9rU_mEqcE")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     print("❌ Erro: SUPABASE_URL ou SUPABASE_KEY não configurados nos Secrets do GitHub.")
