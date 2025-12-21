@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats - PRO Hybrid</title>
+    <title>FutStats PRO - 2025</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -20,15 +20,9 @@
 
     <nav class="nav-tabs">
         <div class="container">
-            <button class="nav-tab active" data-tab="ao-vivo">
-                <i class="fas fa-satellite-dish"></i> AO VIVO
-            </button>
-            <button class="nav-tab" data-tab="classificacao">
-                <i class="fas fa-trophy"></i> TABELAS
-            </button>
-            <button class="nav-tab" data-tab="estatisticas">
-                <i class="fas fa-chart-bar"></i> ESTATS
-            </button>
+            <button class="nav-tab active" data-tab="ao-vivo">AO VIVO</button>
+            <button class="nav-tab" data-tab="classificacao">TABELAS</button>
+            <button class="nav-tab" data-tab="estatisticas">ARTILHARIA</button>
         </div>
     </nav>
 
@@ -36,67 +30,47 @@
         <div class="container">
             
             <section id="ao-vivo" class="tab-content active">
-                <div class="section-header">
-                    <h2><i class="fas fa-circle live-dot"></i> Jogos em Tempo Real</h2>
-                </div>
-                <div id="liveGames" class="live-games-container">
-                    <p class="loading">Conectando ao Supabase...</p>
+                <div id="liveGames" class="live-container">
+                    <p class="loading">Buscando jogos no Supabase...</p>
                 </div>
             </section>
 
             <section id="classificacao" class="tab-content">
-                
                 <div class="league-selector">
                     <button class="league-btn active" onclick="mudarLiga(71)">🇧🇷 BR</button>
                     <button class="league-btn" onclick="mudarLiga(39)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PL</button>
                     <button class="league-btn" onclick="mudarLiga(140)">🇪🇸 ES</button>
                     <button class="league-btn" onclick="mudarLiga(78)">🇩🇪 DE</button>
+                    <button class="league-btn" onclick="mudarLiga(135)">🇮🇹 IT</button>
+                    <button class="league-btn" onclick="mudarLiga(94)">🇵🇹 PT</button>
                 </div>
 
                 <div class="table-container">
-                    <h3 id="leagueTitle" style="padding: 10px; color: #00ff00;">Brasileirão Série A</h3>
-                    <table class="standings-table">
+                    <h3 id="leagueTitle">Brasileirão Série A</h3>
+                    <table>
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Clube</th>
+                                <th>Time</th>
                                 <th>P</th>
                                 <th>J</th>
-                                <th>V</th>
                                 <th>SG</th>
                             </tr>
                         </thead>
-                        <tbody id="standingsBody">
-                            <tr><td colspan="6" class="loading">Carregando dados...</td></tr>
-                        </tbody>
+                        <tbody id="standingsBody"></tbody>
                     </table>
                 </div>
             </section>
 
             <section id="estatisticas" class="tab-content">
-                <div class="stats-grid">
-                    <div class="stats-card">
-                        <h3><i class="fas fa-boot"></i> ARTILHEIROS</h3>
-                        <div id="scorersList" class="stats-list">
-                            <p class="loading">Carregando...</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stats-card">
-                        <h3><i class="fas fa-hands-helping"></i> ASSISTÊNCIAS</h3>
-                        <div id="assistsList" class="stats-list">
-                            <p class="loading">Carregando...</p>
-                        </div>
-                    </div>
+                <div class="stats-card">
+                    <h3><i class="fas fa-crown"></i> Melhores Marcadores</h3>
+                    <div id="scorersList"></div>
                 </div>
             </section>
 
         </div>
     </main>
-
-    <footer class="footer">
-        <p>© 2025 FutStats - Powered by Supabase & API-Football</p>
-    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
