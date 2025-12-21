@@ -1,10 +1,10 @@
-name: Atualizar Tabelas Fbref
+name: FutStats Crawler FBRef
 
 on:
   schedule:
-    
+    # Roda a cada 2 horas
     - cron: '0 */1 * * *'
-  workflow_dispatch: 
+  workflow_dispatch: # Permite rodar manualmente clicando em um botão no GitHub
 
 jobs:
   build:
@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Checkout do código
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Configurar Python
       uses: actions/setup-python@v4
@@ -24,9 +24,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Rodar Scraper
+    - name: Rodar Crawler
+      # ESTA PARTE É A MAIS IMPORTANTE:
       env:
-  
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-      run: python crawler.py
+      run: |
+        # O comando para rodar o robô
+        python crawler.py
