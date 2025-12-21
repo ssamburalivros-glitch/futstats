@@ -3,18 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats PRO - 2025</title>
+    <title>FutStats PRO</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
     <header class="header">
         <div class="container">
-            <div class="logo">
-                <i class="fas fa-futbol"></i>
-                <h1>FutStats <span class="beta">PRO</span></h1>
-            </div>
+            <div class="logo"><h1>FutStats <span class="beta">PRO</span></h1></div>
         </div>
     </header>
 
@@ -28,11 +24,8 @@
 
     <main class="main-content">
         <div class="container">
-            
             <section id="ao-vivo" class="tab-content active">
-                <div id="liveGames" class="live-container">
-                    <p class="loading">Buscando jogos no Supabase...</p>
-                </div>
+                <div id="liveGames" class="live-container"></div>
             </section>
 
             <section id="classificacao" class="tab-content">
@@ -44,19 +37,10 @@
                     <button class="league-btn" onclick="mudarLiga(135)">🇮🇹 IT</button>
                     <button class="league-btn" onclick="mudarLiga(94)">🇵🇹 PT</button>
                 </div>
-
                 <div class="table-container">
                     <h3 id="leagueTitle">Brasileirão Série A</h3>
                     <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Time</th>
-                                <th>P</th>
-                                <th>J</th>
-                                <th>SG</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>#</th><th>Time</th><th>P</th><th>J</th><th>SG</th></tr></thead>
                         <tbody id="standingsBody"></tbody>
                     </table>
                 </div>
@@ -64,11 +48,10 @@
 
             <section id="estatisticas" class="tab-content">
                 <div class="stats-card">
-                    <h3><i class="fas fa-crown"></i> Melhores Marcadores</h3>
+                    <h3>Top Marcadores</h3>
                     <div id="scorersList"></div>
                 </div>
             </section>
-
         </div>
     </main>
 
