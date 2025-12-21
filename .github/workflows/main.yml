@@ -2,7 +2,7 @@ name: Update Supabase Data
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # Diminuído para 5 min para ser mais "ao vivo"
+    - cron: '*/5 * * * *' 
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,9 @@ jobs:
         
     - name: Install dependencies
       run: |
-        pip install beautifulsoup4 requests lxml supabase
+        python -m pip install --upgrade pip
+        # Adicionei cloudscraper e fake-useragent aqui embaixo:
+        pip install beautifulsoup4 requests lxml supabase cloudscraper fake-useragent
         
     - name: Run crawler
       env:
