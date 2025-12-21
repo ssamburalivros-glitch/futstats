@@ -6,20 +6,29 @@ from bs4 import BeautifulSoup
 from supabase import create_client
 from fake_useragent import UserAgent
 
-# --- CONFIGURAÇÕES DE AMBIENTE ---
-# O GitHub Actions injeta estas variáveis via Secrets
-SUPABASE_URL = os.environ.get("https://vqocdowjdutfzmnvxqvz.supabase.co")
-SUPABASE_KEY = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxb2Nkb3dqZHV0ZnptbnZ4cXZ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIzNjQzNCwiZXhwIjoyMDgxODEyNDM0fQ.GlJ_-kh2u7qsLMRgB5jVpvduhIG0yyY9AZ9rU_mEqcE")
+# --- BLOCO DE DIAGNÓSTICO (Para encontrar o erro) ---
+URL_ENV = os.environ.get("https://vqocdowjdutfzmnvxqvz.supabase.co")
+KEY_ENV = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxb2Nkb3dqZHV0ZnptbnZ4cXZ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIzNjQzNCwiZXhwIjoyMDgxODEyNDM0fQ.GlJ_-kh2u7qsLMRgB5jVpvduhIG0yyY9AZ9rU_mEqcE")
 
-if not SUPABASE_URL or not SUPABASE_KEY:
-    print("❌ Erro: SUPABASE_URL ou SUPABASE_KEY não configurados nos Secrets do GitHub.")
+print("--- DIAGNÓSTICO DE AMBIENTE ---")
+if URL_ENV:
+    print(f"✅ SUPABASE_URL: Detectada (Inicia com: {URL_ENV[:10]}...)")
+else:
+    print("❌ SUPABASE_URL: NÃO ENCONTRADA")
+
+if KEY_ENV:
+    print(f"✅ SUPABASE_KEY: Detectada (Tamanho: {len(KEY_ENV)} caracteres)")
+else:
+    print("❌ SUPABASE_KEY: NÃO ENCONTRADA")
+print("-------------------------------")
+
+if not URL_ENV or not KEY_ENV:
     exit(1)
 
-# Inicializa o cliente com a Service Role Key (Permissão de escrita)
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Inicialização do Cliente
+supabase = create_client(URL_ENV, KEY_ENV)
 ua = UserAgent()
 
-# URLs FBREF - Temporada 2025 (ou atual disponível)
 FBREF_URLS = {
     "BR": "https://fbref.com/en/comps/24/Serie-A-Stats",
     "PL": "https://fbref.com/en/comps/9/Premier-League-Stats",
@@ -32,83 +41,58 @@ FBREF_URLS = {
 def get_tabela(liga_key, url):
     session = HTMLSession()
     headers = {'User-Agent': ua.random}
-    
     try:
-        print(f"📡 Capturando dados de: {liga_key}...")
+        print(f"📡 Acessando: {liga_key}...")
         r = session.get(url, headers=headers, timeout=25)
-        
-        # render() baixa o Chromium no primeiro uso e executa o JavaScript da página
-        # sleep=5 garante tempo para o Fbref montar a tabela HTML
         r.html.render(sleep=5, timeout=30) 
         
         soup = BeautifulSoup(r.html.html, 'html.parser')
         tabela = soup.find('table', class_='stats_table')
         
-        if not tabela:
-            print(f"⚠️ Tabela não encontrada para {liga_key}.")
-            return []
+        if not tabela: return []
 
         dados_lista = []
-        # Localiza o corpo da tabela e as linhas
         corpo = tabela.find('tbody')
         for row in corpo.find_all('tr'):
-            # Ignora linhas de "rebaixamento" ou vazias que o Fbref coloca
-            if 'spacer' in row.get('class', []) or 'thead' in row.get('class', []):
-                continue
-                
+            if 'spacer' in row.get('class', []) or 'thead' in row.get('class', []): continue
             cols = row.find_all(['th', 'td'])
             
-            # Mapeamento colunas Fbref: 0:Pos, 1:Squad, 2:MP (Jogos), 9:Pts, 10:GD (SG)
             if len(cols) >= 10:
                 try:
-                    pos = cols[0].text.strip()
-                    time_nome = cols[1].text.strip()
-                    jogos = cols[2].text.strip()
-                    # Saldo de Gols costuma estar na coluna 10 ou 11 dependendo da liga
-                    sg = cols[10].text.strip() if 'Matches' not in cols[10].text else cols[9].text.strip()
-                    pts = cols[9].text.strip() if 'Matches' not in cols[9].text else cols[8].text.strip()
-
+                    # Mapeamento dinâmico básico
                     dados_lista.append({
                         "liga": liga_key,
-                        "posicao": int(pos) if pos.isdigit() else 0,
-                        "time": time_nome,
-                        "pontos": int(pts) if pts.isdigit() else 0,
-                        "jogos": int(jogos) if jogos.isdigit() else 0,
-                        "sg": int(sg.replace('+', '')) if sg.replace('+', '').replace('-', '').isdigit() else 0
+                        "posicao": int(cols[0].text.strip().replace('.', '')),
+                        "time": cols[1].text.strip(),
+                        "pontos": int(cols[9].text.strip()) if cols[9].text.strip().isdigit() else 0,
+                        "jogos": int(cols[2].text.strip()) if cols[2].text.strip().isdigit() else 0,
+                        "sg": int(cols[8].text.strip().replace('+', '')) if len(cols) > 8 else 0
                     })
-                except:
-                    continue
+                except: continue
         return dados_lista
-
     except Exception as e:
-        print(f"❌ Erro ao processar {liga_key}: {str(e)}")
+        print(f"❌ Erro em {liga_key}: {e}")
         return []
     finally:
         session.close()
 
 def main():
     todas_as_ligas = []
-    
     for key, url in FBREF_URLS.items():
-        resultado = get_tabela(key, url)
-        if resultado:
-            todas_as_ligas.extend(resultado)
-            print(f"✅ {key} processado com sucesso.")
-        
-        # Delay anti-bloqueio (Imitante comportamento humano)
-        delay = random.uniform(10, 20)
-        print(f"⏳ Aguardando {delay:.1f}s...")
-        time.sleep(delay)
+        res = get_tabela(key, url)
+        if res:
+            todas_as_ligas.extend(res)
+            print(f"✅ {key} coletado.")
+        time.sleep(random.uniform(10, 20))
 
     if todas_as_ligas:
         try:
-            # 1. Limpa a tabela para a nova carga
-            supabase.table("tabelas_ligas").delete().neq("liga", "VACANT").execute()
-            # 2. Insere todos os dados de uma vez
+            # Inject: Limpa e Insere
+            supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
             supabase.table("tabelas_ligas").insert(todas_as_ligas).execute()
-            print(f"🚀 Banco atualizado! Total de registros: {len(todas_as_ligas)}")
+            print(f"🚀 Sucesso! {len(todas_as_ligas)} linhas injetadas.")
         except Exception as e:
-            print(f"❌ Erro Supabase: {e}")
+            print(f"❌ Erro no Supabase: {e}")
 
 if __name__ == "__main__":
     main()
