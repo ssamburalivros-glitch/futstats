@@ -2,9 +2,8 @@ name: FutStats Crawler FBRef
 
 on:
   schedule:
-    # Roda a cada 2 horas
-    - cron: '0 */1 * * *'
-  workflow_dispatch: # Permite rodar manualmente clicando em um botão no GitHub
+    - cron: '0 */2 * * *' # Roda a cada 2 horas
+  workflow_dispatch:      # Permite rodar manualmente
 
 jobs:
   build:
@@ -25,10 +24,8 @@ jobs:
         pip install -r requirements.txt
 
     - name: Rodar Crawler
-      # ESTA PARTE É A MAIS IMPORTANTE:
       env:
+        # Vincula os Secrets do GitHub às variáveis de ambiente do Python
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-      run: |
-        # O comando para rodar o robô
-        python crawler.py
+      run: python crawler.py
