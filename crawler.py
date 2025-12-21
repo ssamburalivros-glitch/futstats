@@ -1,22 +1,26 @@
+import os
+import time
+import random
+import asyncio
 from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 from supabase import create_client
 from fake_useragent import UserAgent
-import time
-import random
 
-# --- Configurações Supabase ---
-SUPABASE_URL = "https://vqocdowjdutfzmnvxqvz.supabase.co"
-# Use a service_role key para ter permissão de escrita e exclusão
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxb2Nkb3dqZHV0ZnptbnZ4cXZ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIzNjQzNCwiZXhwIjoyMDgxODEyNDM0fQ.GlJ_-kh2u7qsLMRgB5jVpvduhIG0yyY9AZ9rU_mEqcE" 
+# --- CONFIGURAÇÕES DE AMBIENTE ---
+SUPABASE_URL = os.environ.get("https://vqocdowjdutfzmnvxqvz.supabase.co")
+SUPABASE_KEY = os.environ.get("sb_publishable_I_1iAkLogMz0qxxMZJhP3w_U5Fl3Crm")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    print("❌ Erro: SUPABASE_URL ou SUPABASE_KEY não configurados nos Secrets.")
+    exit(1)
+
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-# --- Configurações Scraper ---
 UA = UserAgent()
-# URLs das tabelas no Fbref (ajuste o ano da temporada)
-# Você pode precisar mudar o "2023-2024" para "2024-2025" quando a temporada começar lá
+
+# URLs FBREF - Temporada 2024-2025
 FBREF_URLS = {
-    "BR": "https://fbref.com/en/comps/24/Mineiro-Stats", # Exemplo para o Campeonato Mineiro 2024, ajuste para Brasileirão 2025
+    "BR": "https://fbref.com/en/comps/24/Serie-A-Stats",
     "PL": "https://fbref.com/en/comps/9/Premier-League-Stats",
     "ES": "https://fbref.com/en/comps/12/La-Liga-Stats",
     "DE": "https://fbref.com/en/comps/20/Bundesliga-Stats",
@@ -24,95 +28,97 @@ FBREF_URLS = {
     "PT": "https://fbref.com/en/comps/37/Primeira-Liga-Stats"
 }
 
-def get_tabela_fbref(liga_key, url_liga):
+def get_tabela(liga_key, url):
+    # Criamos a sessão e forçamos o download do Chromium se necessário
     session = HTMLSession()
     headers = {
-        'User-Agent': UA.random, # Rotaciona User-Agent
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1'
+        'User-Agent': UA.random,
+        'Accept-Language': 'en-US,en;q=0.9'
     }
-
+    
     try:
-        print(f"🔍 Iniciando scraping para {liga_key} em {url_liga}...")
+        print(f"📡 Acessando {liga_key}...")
+        r = session.get(url, headers=headers, timeout=20)
         
-        # Faz a requisição e renderiza o JavaScript da página
-        r = session.get(url_liga, headers=headers, timeout=10)
-        r.html.render(sleep=random.uniform(3, 5), scrolldown=1) # Espera e rola um pouco
-
+        # O modo headless é essencial para rodar no GitHub Actions
+        # sleep=5 garante que o JavaScript do Fbref carregue a tabela
+        r.html.render(sleep=5, timeout=30) 
+        
         soup = BeautifulSoup(r.html.html, 'html.parser')
         
-        # O Fbref usa IDs de tabelas específicas. Geralmente é "results", "league_table", etc.
-        # Você PRECISA inspecionar o HTML da página do Fbref para encontrar o ID correto.
-        # Exemplo para a tabela principal:
-        tabela = soup.find('table', id='results2023-202424_overall') # <-- Mude este ID para o da temporada 2025 quando disponível
+        # No Fbref, a tabela principal de classificação geralmente tem a classe 'stats_table'
+        tabela = soup.find('table', class_='stats_table')
+        
         if not tabela:
-            # Tenta um ID comum para a tabela de classificação geral
-            tabela = soup.find('table', class_='stats_table') 
-            
-        if not tabela:
-            print(f"❌ Tabela não encontrada para {liga_key}. Verifique o ID no Fbref.")
+            print(f"⚠️ Tabela não encontrada para {liga_key}. Verificando seletores...")
             return []
 
-        dados_tabela = []
-        # Percorre as linhas da tabela, ignorando o cabeçalho
-        for row in tabela.find_all('tr')[1:]: 
+        dados_liga = []
+        corpo_tabela = tabela.find('tbody')
+        linhas = corpo_tabela.find_all('tr')
+
+        for row in linhas:
+            # Pula linhas de separação ou cabeçalhos intermediários
+            if 'spacer' in row.get('class', []) or 'thead' in row.get('class', []):
+                continue
+                
             cols = row.find_all(['th', 'td'])
-            if len(cols) > 1: # Garante que é uma linha de dados
-                posicao = cols[0].text.strip().replace('.', '')
-                time_nome = cols[1].text.strip()
-                # O Fbref tem muitas colunas. Pegue as que você precisa.
-                # Exemplo: P = Pontos, J = Jogos, V = Vitórias, E = Empates, D = Derrotas, SG = Saldo de Gols
+            
+            # Estrutura padrão Fbref: 0:Rank, 1:Squad, 2:MP, 3:W... 9:Pts, 10:GD
+            if len(cols) >= 10:
                 try:
-                    pontos = int(cols[2].text.strip())
-                    jogos = int(cols[3].text.strip())
-                    vitorias = int(cols[4].text.strip())
-                    empates = int(cols[5].text.strip())
-                    derrotas = int(cols[6].text.strip())
-                    sg = int(cols[10].text.strip()) # O índice pode variar
-                except (ValueError, IndexError):
-                    print(f"⚠️ Erro ao converter dados para {time_nome}. Pulando linha.")
+                    pos = cols[0].text.strip()
+                    nome_time = cols[1].text.strip()
+                    jogos = cols[2].text.strip()
+                    sg = cols[11].text.strip() if len(cols) > 11 else cols[10].text.strip()
+                    pts = cols[10].text.strip() if len(cols) > 11 else cols[9].text.strip()
+
+                    dados_liga.append({
+                        "liga": liga_key,
+                        "posicao": int(pos) if pos.isdigit() else 0,
+                        "time": nome_time,
+                        "pontos": int(pts) if pts.isdigit() else 0,
+                        "jogos": int(jogos) if jogos.isdigit() else 0,
+                        "sg": int(sg.replace('+', '')) if sg.replace('+', '', 1).replace('-', '', 1).isdigit() else 0,
+                    })
+                except Exception as e:
                     continue
 
-                dados_tabela.append({
-                    "liga": liga_key, # Identifica a liga no BD
-                    "posicao": int(posicao),
-                    "time": time_nome,
-                    "pontos": pontos,
-                    "jogos": jogos,
-                    "vitorias": vitorias,
-                    "empates": empates,
-                    "derrotas": derrotas,
-                    "sg": sg,
-                    "last_updated": time.time() # Timestamp de atualização
-                })
-        
-        return dados_tabela
+        return dados_liga
 
     except Exception as e:
-        print(f"❌ Erro crítico no scraping para {liga_key}: {e}")
+        print(f"❌ Erro crítico ao processar {liga_key}: {e}")
         return []
+    finally:
+        session.close()
 
-def atualizar_supabse_tabelas():
-    # Limpa a tabela antiga no Supabase
-    supabase.table("tabelas_ligas").delete().neq("liga", "N/A").execute()
-    print("🗑️ Tabela 'tabelas_ligas' limpa no Supabase.")
-
-    todos_dados = []
+def main():
+    print("🏟️ Iniciando Scraper FutStats PRO 2025")
+    todas_as_tabelas = []
+    
     for key, url in FBREF_URLS.items():
-        dados_liga = get_tabela_fbref(key, url)
-        if dados_liga:
-            todos_dados.extend(dados_liga)
-        time.sleep(random.uniform(10, 20)) # Delay entre as ligas para evitar bloqueio
+        dados = get_tabela(key, url)
+        if dados:
+            todas_as_tabelas.extend(dados)
+            print(f"✅ {key}: {len(dados)} times capturados.")
+        
+        # Delay entre ligas para evitar detecção de IP pelo Fbref
+        wait = random.uniform(15, 25)
+        print(f"⏳ Aguardando {wait:.1f}s para a próxima liga...")
+        time.sleep(wait)
 
-    if todos_dados:
-        supabase.table("tabelas_ligas").insert(todos_dados).execute()
-        print(f"✅ Todas as tabelas ({len(todos_dados)} registros) atualizadas no Supabase.")
+    if todas_as_tabelas:
+        try:
+            # 1. Limpa a tabela atual no Supabase
+            supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
+            
+            # 2. Insere os novos dados
+            supabase.table("tabelas_ligas").insert(todas_as_tabelas).execute()
+            print(f"🚀 SUCESSO! {len(todas_as_tabelas)} registros enviados ao Supabase.")
+        except Exception as e:
+            print(f"❌ Erro ao salvar no Supabase: {e}")
     else:
-        print("⚠️ Nenhum dado capturado para atualizar no Supabase.")
+        print("⚠️ Nenhum dado foi coletado. O banco de dados não foi alterado.")
 
-# --- Execução ---
 if __name__ == "__main__":
-    atualizar_supabse_tabelas()
+    main()
