@@ -6,30 +6,25 @@ from bs4 import BeautifulSoup
 from supabase import create_client
 from fake_useragent import UserAgent
 
-# --- BLOCO DE DIAGNÓSTICO (Para encontrar o erro) ---
-URL_ENV = os.environ.get("https://vqocdowjdutfzmnvxqvz.supabase.co")
-KEY_ENV = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxb2Nkb3dqZHV0ZnptbnZ4cXZ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIzNjQzNCwiZXhwIjoyMDgxODEyNDM0fQ.GlJ_-kh2u7qsLMRgB5jVpvduhIG0yyY9AZ9rU_mEqcE")
+# --- CONFIGURAÇÃO DE AMBIENTE ---
+# O GitHub Actions injeta estas variáveis via Secrets (mapeadas no main.yml)
+SUPABASE_URL = os.environ.get("https://vqocdowjdutfzmnvxqvz.supabase.co")
+SUPABASE_KEY = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxb2Nkb3dqZHV0ZnptbnZ4cXZ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIzNjQzNCwiZXhwIjoyMDgxODEyNDM0fQ.GlJ_-kh2u7qsLMRgB5jVpvduhIG0yyY9AZ9rU_mEqcE")
 
-print("--- DIAGNÓSTICO DE AMBIENTE ---")
-if URL_ENV:
-    print(f"✅ SUPABASE_URL: Detectada (Inicia com: {URL_ENV[:10]}...)")
+# Log de Diagnóstico (Aparece no console do GitHub Actions)
+print("--- INICIALIZANDO CRAWLER FUTSTATS ---")
+if SUPABASE_URL and SUPABASE_KEY:
+    print(f"✅ Conexão configurada. URL: {SUPABASE_URL[:15]}...")
 else:
-    print("❌ SUPABASE_URL: NÃO ENCONTRADA")
-
-if KEY_ENV:
-    print(f"✅ SUPABASE_KEY: Detectada (Tamanho: {len(KEY_ENV)} caracteres)")
-else:
-    print("❌ SUPABASE_KEY: NÃO ENCONTRADA")
-print("-------------------------------")
-
-if not URL_ENV or not KEY_ENV:
+    print("❌ ERRO FATAL: Chaves do Supabase não encontradas!")
     exit(1)
 
-# Inicialização do Cliente
-supabase = create_client(URL_ENV, KEY_ENV)
+# Inicializa o banco de dados
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 ua = UserAgent()
 
-FBREF_URLS = {
+# Definição das Ligas e URLs (Fbref Temporada Atual)
+LIGAS = {
     "BR": "https://fbref.com/en/comps/24/Serie-A-Stats",
     "PL": "https://fbref.com/en/comps/9/Premier-League-Stats",
     "ES": "https://fbref.com/en/comps/12/La-Liga-Stats",
@@ -38,61 +33,38 @@ FBREF_URLS = {
     "PT": "https://fbref.com/en/comps/37/Primeira-Liga-Stats"
 }
 
-def get_tabela(liga_key, url):
+def capturar_dados(liga_id, url):
     session = HTMLSession()
     headers = {'User-Agent': ua.random}
+    
     try:
-        print(f"📡 Acessando: {liga_key}...")
-        r = session.get(url, headers=headers, timeout=25)
+        print(f"📡 Raspando: {liga_id}...")
+        r = session.get(url, headers=headers, timeout=20)
+        
+        # O modo headless é essencial para rodar no servidor do GitHub
         r.html.render(sleep=5, timeout=30) 
         
         soup = BeautifulSoup(r.html.html, 'html.parser')
+        # Localiza a tabela de classificação (stats_table)
         tabela = soup.find('table', class_='stats_table')
         
-        if not tabela: return []
+        if not tabela:
+            print(f"⚠️ Tabela não encontrada para {liga_id}")
+            return []
 
-        dados_lista = []
+        lista_times = []
         corpo = tabela.find('tbody')
         for row in corpo.find_all('tr'):
-            if 'spacer' in row.get('class', []) or 'thead' in row.get('class', []): continue
+            # Ignora linhas que não são de dados (cabeçalhos extras ou spacers)
+            if 'spacer' in row.get('class', []) or 'thead' in row.get('class', []):
+                continue
+                
             cols = row.find_all(['th', 'td'])
             
+            # Mapeamento de colunas (Padrão Fbref 2025)
+            # 0: Rank, 1: Squad, 2: MP, 3: W... 9: Pts, 10: GD
             if len(cols) >= 10:
                 try:
-                    # Mapeamento dinâmico básico
-                    dados_lista.append({
-                        "liga": liga_key,
+                    lista_times.append({
+                        "liga": liga_id,
                         "posicao": int(cols[0].text.strip().replace('.', '')),
-                        "time": cols[1].text.strip(),
-                        "pontos": int(cols[9].text.strip()) if cols[9].text.strip().isdigit() else 0,
-                        "jogos": int(cols[2].text.strip()) if cols[2].text.strip().isdigit() else 0,
-                        "sg": int(cols[8].text.strip().replace('+', '')) if len(cols) > 8 else 0
-                    })
-                except: continue
-        return dados_lista
-    except Exception as e:
-        print(f"❌ Erro em {liga_key}: {e}")
-        return []
-    finally:
-        session.close()
-
-def main():
-    todas_as_ligas = []
-    for key, url in FBREF_URLS.items():
-        res = get_tabela(key, url)
-        if res:
-            todas_as_ligas.extend(res)
-            print(f"✅ {key} coletado.")
-        time.sleep(random.uniform(10, 20))
-
-    if todas_as_ligas:
-        try:
-            # Inject: Limpa e Insere
-            supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-            supabase.table("tabelas_ligas").insert(todas_as_ligas).execute()
-            print(f"🚀 Sucesso! {len(todas_as_ligas)} linhas injetadas.")
-        except Exception as e:
-            print(f"❌ Erro no Supabase: {e}")
-
-if __name__ == "__main__":
-    main()
