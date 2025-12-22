@@ -1,242 +1,187 @@
+/* --- CONFIGURAÇÕES GERAIS --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 :root {
-    --bg: #0d1117;
-    --card: #161b22;
-    --border: #30363d;
-    --text-muted: #8b949e;
+    --bg-body: #090c10;      /* Fundo muito escuro */
+    --bg-card: #161b22;      /* Fundo dos cards */
+    --border: #30363d;       /* Bordas sutis */
+    --text-main: #c9d1d9;    /* Texto principal */
+    --text-muted: #8b949e;   /* Texto secundário */
+    --accent: #238636;       /* Verde acento */
     --white: #ffffff;
-    --accent-green: #3fb950;
-    --accent-red: #f85149;
+    --red-live: #f85149;
+    --glass: rgba(255, 255, 255, 0.04);
 }
 
-/* Reset básico */
-* { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    background-color: var(--bg);
-    color: var(--white);
+    background-color: var(--bg-body);
+    color: var(--text-main);
     font-family: 'Inter', sans-serif;
     padding: 20px;
+    -webkit-font-smoothing: antialiased;
+}
+
+.container { max-width: 900px; margin: 0 auto; }
+
+/* --- HEADER & LOGO --- */
+.site-header {
     display: flex;
-    justify-content: center;
+    align-items: center;
+    justify-content: center; /* Centraliza logo e nome */
+    gap: 12px;
+    margin-bottom: 30px;
+    padding-top: 10px;
 }
 
-.container { 
-    width: 100%; 
-    max-width: 900px; 
+.app-logo {
+    height: 40px; /* Tamanho do logo */
+    width: auto;
+    filter: drop-shadow(0 0 8px rgba(255,255,255,0.1));
 }
 
-/* --- SEÇÃO JOGOS DE HOJE --- */
-.ao-vivo-container { 
-    margin-bottom: 30px; 
+.app-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -1px;
 }
 
-.ao-vivo-header { 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    margin-bottom: 15px; 
+.highlight { color: var(--accent); }
+
+/* --- AO VIVO (CARDS) --- */
+.ao-vivo-header { margin-bottom: 15px; display: flex; align-items: center; }
+
+.live-indicator {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(248, 81, 73, 0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(248, 81, 73, 0.2);
 }
 
-.pulse-icon { 
-    width: 8px; 
-    height: 8px; 
-    background: var(--accent-red); 
-    border-radius: 50%; 
-    box-shadow: 0 0 0 rgba(248, 81, 73, 0.4);
+.pulse-dot {
+    width: 8px; height: 8px; background: var(--red-live);
+    border-radius: 50%;
     animation: pulse 2s infinite;
 }
 
+.live-text { font-size: 0.75rem; font-weight: 700; color: var(--red-live); letter-spacing: 0.5px; }
+
 @keyframes pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); }
+    0% { transform: scale(0.95); opacity: 1; }
+    70% { transform: scale(1.5); opacity: 0; }
+    100% { transform: scale(0.95); opacity: 0; }
 }
 
-/* GRID DE ROLAGEM LATERAL */
-.ao-vivo-grid { 
-    display: flex; 
-    gap: 12px; 
-    overflow-x: auto; 
-    padding-bottom: 15px; /* Espaço para a barra de rolagem */
-    -webkit-overflow-scrolling: touch;
+/* Grid Horizontal */
+.ao-vivo-grid {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 20px;
     scroll-behavior: smooth;
 }
 
-/* ESTILIZAÇÃO DA BARRA DE ROLAGEM (Scrollbar) */
-.ao-vivo-grid::-webkit-scrollbar {
-    height: 6px;
+/* Scrollbar Personalizada */
+.ao-vivo-grid::-webkit-scrollbar { height: 6px; }
+.ao-vivo-grid::-webkit-scrollbar-track { background: var(--bg-body); }
+.ao-vivo-grid::-webkit-scrollbar-thumb { 
+    background: var(--border); 
+    border-radius: 10px; 
 }
 
-.ao-vivo-grid::-webkit-scrollbar-track {
-    background: var(--bg);
-    border-radius: 10px;
-}
-
-.ao-vivo-grid::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 10px;
-    transition: background 0.3s;
-}
-
-.ao-vivo-grid::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
-}
-
-/* CARD DE JOGO (DESIGN PREMIUM E ESTÁVEL) */
+/* Card Design */
 .card-jogo {
     min-width: 260px;
-    height: 155px; /* Altura fixa para evitar tremores */
-    background: var(--card);
+    height: 150px;
+    background: linear-gradient(145deg, var(--bg-card), #0d1117);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 15px;
+    border-radius: 16px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     transition: transform 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-.card-jogo:hover {
-    border-color: var(--text-muted);
-}
+.card-jogo:hover { transform: translateY(-3px); border-color: var(--text-muted); }
 
 .campeonato-nome { 
-    font-size: 0.65rem; 
-    color: var(--text-muted); 
-    text-transform: uppercase; 
-    text-align: center;
-    letter-spacing: 0.5px;
+    font-size: 0.65rem; color: var(--text-muted); 
+    text-transform: uppercase; text-align: center; letter-spacing: 1px;
 }
 
-.confronto { 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-around; 
-}
-
-.time-box { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    width: 85px; 
-}
-
-.logo-ao-vivo { 
-    width: 35px !important; 
-    height: 35px !important; 
-    object-fit: contain; 
-    margin-bottom: 8px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 50%;
-}
+.confronto { display: flex; align-items: center; justify-content: space-between; padding: 0 10px; }
+.time-box { display: flex; flex-direction: column; align-items: center; width: 70px; }
+.logo-ao-vivo { width: 32px; height: 32px; object-fit: contain; margin-bottom: 6px; }
 
 .nome-time-ao-vivo { 
-    font-size: 0.75rem; 
-    font-weight: 600; 
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
+    font-size: 0.7rem; font-weight: 600; text-align: center; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
 }
 
 .placar-ao-vivo { 
-    font-size: 1.6rem; 
-    font-weight: 800; 
-    letter-spacing: 2px; 
+    font-size: 1.6rem; font-weight: 800; color: var(--white); 
+    font-variant-numeric: tabular-nums;
 }
 
 .status-tempo { 
-    font-size: 0.7rem; 
-    color: var(--accent-green); 
-    text-align: center; 
-    font-weight: bold;
+    font-size: 0.7rem; color: var(--accent); 
+    text-align: center; font-weight: 700; 
+    background: rgba(35, 134, 54, 0.1);
+    padding: 4px; border-radius: 4px;
+    align-self: center;
 }
 
-/* --- BOTÕES PÍLULA (ESTILO IMAGEM DE REFERÊNCIA) --- */
-.menu-ligas { 
-    display: flex; 
-    gap: 8px; 
-    justify-content: center; 
-    margin: 25px 0; 
-    flex-wrap: wrap; 
-}
+/* --- BOTÕES PÍLULA --- */
+.menu-ligas { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 30px 0; }
 
 .btn-liga {
-    background: transparent;
+    background: var(--glass);
     border: 1px solid var(--border);
-    color: var(--white);
-    padding: 8px 18px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-main);
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; transition: 0.3s;
+    backdrop-filter: blur(5px);
 }
 
-.btn-liga.active { 
-    background: var(--white); 
-    color: #000; 
-    border-color: var(--white);
-    font-weight: 600;
+.btn-liga:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+
+.btn-liga.active {
+    background: var(--white); color: #000; border-color: var(--white);
+    font-weight: 700; box-shadow: 0 0 15px rgba(255,255,255,0.15);
 }
 
-.btn-liga:hover:not(.active) {
-    border-color: var(--text-muted);
-    background: rgba(255, 255, 255, 0.05);
+/* --- TABELA --- */
+.tabela-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
 }
 
-/* --- TABELA DE CLASSIFICAÇÃO --- */
-.tabela-wrapper { 
-    background: var(--card); 
-    border: 1px solid var(--border); 
-    border-radius: 12px; 
-    overflow: hidden; 
+table { width: 100%; border-collapse: collapse; }
+
+th {
+    background: rgba(255,255,255,0.02);
+    padding: 14px; font-size: 0.7rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
 }
 
-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-}
-
-th { 
-    padding: 12px; 
-    font-size: 0.7rem; 
-    color: var(--text-muted); 
-    border-bottom: 1px solid var(--border); 
-    text-transform: uppercase;
-}
-
-td { 
-    padding: 14px; 
-    border-bottom: 1px solid var(--border); 
-    text-align: center; 
-    font-size: 0.9rem; 
+td {
+    padding: 16px 14px; border-bottom: 1px solid var(--border);
+    text-align: center; font-size: 0.9rem;
 }
 
 .text-left { text-align: left; }
+.col-pos { width: 50px; color: var(--text-muted); font-weight: 600; }
+.td-time { display: flex; align-items: center; gap: 12px; }
+.escudo { width: 24px; height: 24px; object-fit: contain; }
 
-.td-time { 
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
-}
-
-.escudo { 
-    width: 22px; 
-    height: 22px; 
-    object-fit: contain; 
-}
-
-.sg-positive { color: var(--accent-green); }
-.sg-negative { color: var(--accent-red); }
-
-/* Ajuste para mobile */
-@media (max-width: 600px) {
-    .container { padding: 10px; }
-    .card-jogo { min-width: 230px; }
-    .placar-ao-vivo { font-size: 1.3rem; }
-}
+.sg-positive { color: var(--accent); font-weight: 600; }
+.sg-negative { color: var(--red-live); }
