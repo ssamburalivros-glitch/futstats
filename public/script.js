@@ -1,7 +1,7 @@
 // 1. CONFIGURAÇÕES DO SUPABASE
 // Importante: No JS (Site) usamos a ANON KEY, não a service_role!
 const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjQwODkzOCwiZXhwIjoyMDgxOTg0OTM4fQ.qeZliDad795-HMs26rheYtKfIgtWZ7aIHQmQsVwZIic";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
 
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
