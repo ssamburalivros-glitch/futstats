@@ -1,275 +1,127 @@
-/* --- VARIÁVEIS E RESET --- */
-:root {
-    --neon-green: #00ff88;
-    --dark-bg: #0d0d0d;
-    --card-bg: #1a1a1a;
-    --header-bg: #111111;
-    --text-main: #ffffff;
-    --text-dim: #888888;
-    --danger: #ff4444;
-}
-
+/* Configurações Gerais */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background-color: var(--dark-bg);
-    color: var(--text-main);
-    line-height: 1.6;
-}
-
-.container {
-    max-width: 650px;
-    margin: 0 auto;
-    padding: 0 15px;
-}
-
-/* --- CABEÇALHO --- */
-.header {
-    background-color: var(--header-bg);
-    padding: 20px 0;
-    text-align: center;
-    border-bottom: 2px solid var(--neon-green);
-    box-shadow: 0 4px 10px rgba(0, 255, 136, 0.1);
-}
-
-.logo h1 {
-    font-size: 1.5rem;
-    letter-spacing: 1px;
-}
-
-.beta {
-    background: var(--neon-green);
-    color: #000;
-    font-size: 0.7rem;
-    padding: 2px 6px;
-    border-radius: 4px;
-    vertical-align: middle;
-}
-
-/* --- NAVEGAÇÃO (TABS) --- */
-.nav-tabs {
-    background: #161616;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    border-bottom: 1px solid #333;
-}
-
-.nav-tabs .container {
+    background-color: #0d1117; /* Fundo escuro estilo GitHub/Supabase */
+    color: #ffffff;
     display: flex;
-    justify-content: space-around;
-}
-
-.nav-tab {
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    padding: 15px 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 0.85rem;
-    transition: 0.3s;
-    border-bottom: 3px solid transparent;
-}
-
-.nav-tab.active {
-    color: var(--neon-green);
-    border-bottom-color: var(--neon-green);
-}
-
-/* --- CONTEÚDO --- */
-.main-content {
-    padding: 20px 0;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-    animation: fadeIn 0.4s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* --- SELETOR DE LIGAS --- */
-.league-selector {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-    scrollbar-width: none; /* Firefox */
-}
-
-.league-selector::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-
-.league-btn {
-    background: #222;
-    border: 1px solid #444;
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-    white-space: nowrap;
-    font-size: 0.8rem;
-    transition: 0.3s;
-}
-
-.league-btn.active {
-    background: var(--neon-green);
-    color: #000;
-    border-color: var(--neon-green);
-    font-weight: bold;
-}
-
-/* --- CARDS AO VIVO --- */
-.live-container h4 {
-    margin: 20px 0 10px;
-    font-size: 0.9rem;
-    color: var(--neon-green);
-    text-transform: uppercase;
-}
-
-.live-card {
-    background: var(--card-bg);
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 12px;
-    border-left: 4px solid #333;
-    transition: 0.2s;
-}
-
-.live-border {
-    border-left-color: var(--neon-green);
-}
-
-.match {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-}
-
-.match span { width: 35%; }
-.match span:last-child { text-align: right; }
-
-.score {
-    width: 30% !important;
-    text-align: center;
-    color: var(--neon-green);
-    font-size: 1.3rem;
-    font-family: 'Courier New', monospace;
-}
-
-.status {
-    text-align: center;
-    font-size: 0.75rem;
-    margin-top: 8px;
-    color: var(--text-dim);
-}
-
-.blink {
-    color: var(--danger);
-    font-weight: bold;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.4; }
-    100% { opacity: 1; }
-}
-
-/* --- TABELAS DE CLASSIFICAÇÃO --- */
-.table-container {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 10px;
-    overflow-x: auto;
-}
-
-#leagueTitle {
-    margin-bottom: 15px;
-    padding-left: 5px;
-    font-size: 1.1rem;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th {
-    text-align: left;
-    font-size: 0.75rem;
-    color: var(--text-dim);
-    padding: 10px 5px;
-    border-bottom: 1px solid #333;
-}
-
-td {
-    padding: 12px 5px;
-    font-size: 0.9rem;
-    border-bottom: 1px solid #252525;
-}
-
-.t-name-cell {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.t-name-cell img {
-    object-fit: contain;
-}
-
-/* --- ARTILHARIA --- */
-.stats-card {
-    background: var(--card-bg);
-    border-radius: 12px;
+    justify-content: center;
     padding: 20px;
 }
 
-.stat-row {
+.container {
+    width: 100%;
+    max-width: 800px;
+    background-color: #161b22;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid #30363d;
+}
+
+/* Cabeçalho e Botões */
+h1 {
+    text-align: center;
+    padding: 20px;
+    background-color: #21262d;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #30363d;
+}
+
+.menu-ligas {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 15px;
+    background-color: #0d1117;
+}
+
+.btn-liga {
+    background-color: #21262d;
+    color: #8b949e;
+    border: 1px solid #30363d;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: bold;
+}
+
+.btn-liga:hover {
+    background-color: #30363d;
+    color: #ffffff;
+}
+
+.btn-liga.active {
+    background-color: #238636; /* Verde sucesso */
+    color: #ffffff;
+    border-color: #2ea043;
+}
+
+/* Tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+thead {
+    background-color: #21262d;
+    color: #8b949e;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #30363d;
+}
+
+/* Coluna do Time e Escudo (Onde estava o erro) */
+.td-time {
+    display: flex;
     align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #333;
+    text-align: left;
 }
 
-.stat-row:last-child { border: none; }
-
-.stat-row span {
-    font-size: 0.9rem;
+.escudo {
+    width: 24px;         /* Tamanho fixo e pequeno */
+    height: 24px;        /* Tamanho fixo e pequeno */
+    margin-right: 12px;
+    object-fit: contain; /* Não distorce a imagem */
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
 }
 
-.stat-row strong {
-    color: var(--neon-green);
-    font-size: 1.1rem;
+.pos {
+    font-weight: bold;
+    color: #8b949e;
+    width: 40px;
 }
 
-/* --- FEEDBACKS --- */
-.loading {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-dim);
-    font-style: italic;
+.pts {
+    font-weight: bold;
+    color: #ffffff;
 }
 
-.footer {
-    text-align: center;
-    padding: 30px;
-    font-size: 0.8rem;
-    color: var(--text-dim);
+/* Cores de Saldo de Gols */
+.sg-positive { color: #3fb950; }
+.sg-negative { color: #f85149; }
+
+/* Linhas alternadas para leitura */
+tbody tr:hover {
+    background-color: #1f242c;
+}
+
+/* Responsividade para Celular */
+@media (max-width: 600px) {
+    th:nth-child(3), td:nth-child(3) { display: none; } /* Esconde 'Jogos' no celular */
+    .container { border-radius: 0; }
+    .btn-liga { padding: 6px 12px; font-size: 0.8rem; }
 }
