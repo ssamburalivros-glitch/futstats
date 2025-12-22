@@ -10,16 +10,42 @@ async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
 
     try {
-        const { data, error } = await _supabase
-            .from('jogos_ao_vivo')
-            .select('*');
+        const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
 
         if (error) throw error;
-
         if (!data || data.length === 0) {
-            container.innerHTML = '<p style="color:#8b949e; padding: 20px; width: 100%; text-align: center;">Aguardando próximos jogos...</p>';
+            container.innerHTML = '<p style="color:#8b949e; padding: 20px; width:100%; text-align:center;">Aguardando próximos jogos...</p>';
             return;
         }
+
+        container.innerHTML = data.map(jogo => {
+            // Se não houver logo, usamos um escudo genérico estável para não quebrar o layout
+            const imgCasa = jogo.logo_casa && jogo.logo_casa !== "" ? jogo.logo_casa : 'https://www.espn.com.br/static/cp/img/soccer/shield-generic.png';
+            const imgFora = jogo.logo_fora && jogo.logo_fora !== "" ? jogo.logo_fora : 'https://www.espn.com.br/static/cp/img/soccer/shield-generic.png';
+
+            return `
+                <div class="card-jogo">
+                    <span class="campeonato-nome">${jogo.campeonato || 'Futebol'}</span>
+                    <div class="confronto">
+                        <div class="time-box">
+                            <img src="${imgCasa}" class="logo-ao-vivo" loading="lazy">
+                            <span class="nome-time-ao-vivo">${jogo.time_casa}</span>
+                        </div>
+                        <div class="placar-ao-vivo">${jogo.placar}</div>
+                        <div class="time-box">
+                            <img src="${imgFora}" class="logo-ao-vivo" loading="lazy">
+                            <span class="nome-time-ao-vivo">${jogo.time_fora}</span>
+                        </div>
+                    </div>
+                    <div class="status-tempo">${jogo.status}</div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (err) {
+        console.error("Erro ao carregar ao vivo:", err);
+    }
+}
 
         // Renderização dos cards com Logos e Placar centralizado
         container.innerHTML = data.map(jogo => `
