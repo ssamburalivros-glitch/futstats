@@ -9,7 +9,7 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def capturar_ao_vivo_espn():
     print("📡 Acessando API Global de Placares da ESPN...")
-    # Endpoint alternativo que costuma ser mais completo para futebol mundial
+    # Endpoint global para pegar todos os jogos de futebol do dia
     url = "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard"
     
     try:
@@ -21,14 +21,21 @@ def capturar_ao_vivo_espn():
 
         for evento in eventos:
             try:
-                # Extrai o status (Ex: 15', HT, Final, ou Horário)
-                status = evento['status']['type']['shortDetail']
+                # Extrai o nome do campeonato (ex: English Premier League)
+                campeonato = evento.get('shortName', 'Futebol')
                 
+                # Trata o status: Se for agendado, mostra o horário. Se estiver rolando, mostra o tempo.
+                status_raw = evento['status']['type']['shortDetail']
+                if "Scheduled" in status_raw or "TM" in status_raw:
+                    status = evento['status']['type']['detail'] # Ex: "17:00"
+                else:
+                    status = status_raw # Ex: "45'", "HT", "Final"
+
                 comp = evento['competitions'][0]
-                casa = comp['competitors'][0] # Time da casa
-                fora = comp['competitors'][1] # Time de fora
+                casa = comp['competitors'][0]
+                fora = comp['competitors'][1]
                 
-                # Inverte se a posição home/away estiver trocada na API
+                # Garante ordem correta Home/Away
                 if casa['homeAway'] != 'home':
                     casa, fora = fora, casa
 
@@ -41,11 +48,12 @@ def capturar_ao_vivo_espn():
 
                 jogos.append({
                     "status": status,
+                    "campeonato": campeonato,
                     "time_casa": nome_casa,
                     "time_fora": nome_fora,
                     "placar": placar
                 })
-            except Exception as e:
+            except:
                 continue
         
         return jogos
@@ -58,12 +66,12 @@ def main():
     
     if dados:
         print(f"✅ {len(dados)} jogos encontrados. Atualizando Supabase...")
-        # Limpa e insere
+        # Limpa e insere na tabela jogos_ao_vivo
         supabase.table("jogos_ao_vivo").delete().neq("time_casa", "OFF").execute()
         supabase.table("jogos_ao_vivo").insert(dados).execute()
-        print("🚀 Placares atualizados!")
+        print("🚀 Placares e Campeonatos atualizados!")
     else:
-        print("⚠️ A API não retornou jogos agora. Tente novamente em instantes.")
+        print("⚠️ Ninguém jogando agora.")
 
 if __name__ == "__main__":
     main()
