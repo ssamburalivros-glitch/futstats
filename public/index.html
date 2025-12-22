@@ -3,56 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats Premium | Live Center</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>FutStats | Premium Live</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        
-        <header class="site-header">
-            <img src="logo.png" alt="Logo do Site" class="app-logo">
-            <h1 class="app-title">FutStats<span class="highlight">Pro</span></h1>
+        <header class="main-header">
+            <div class="logo-container">
+                <img src="logo.png" alt="FutStats" class="main-logo" onerror="this.style.display='none'">
+                <h1>FUT<span class="green">STATS</span></h1>
+            </div>
+            <p class="subtitle">Acompanhe os resultados em tempo real</p>
         </header>
 
-        <section class="ao-vivo-container">
-            <div class="ao-vivo-header">
-                <div class="live-indicator">
-                    <span class="pulse-dot"></span>
-                    <span class="live-text">AO VIVO</span>
-                </div>
+        <section class="live-section">
+            <div class="section-title">
+                <span class="dot"></span>
+                <h2>JOGOS EM DESTAQUE</h2>
             </div>
             
-            <div id="lista-ao-vivo" class="ao-vivo-grid">
+            <div id="lista-ao-vivo" class="hero-grid">
                 </div>
         </section>
 
-        <nav class="menu-ligas">
-            <button class="btn-liga active" data-liga="BR">Brasileirão</button>
-            <button class="btn-liga" data-liga="PL">Premier League</button>
-            <button class="btn-liga" data-liga="ES">La Liga</button>
-            <button class="btn-liga" data-liga="DE">Bundesliga</button>
-            <button class="btn-liga" data-liga="IT">Serie A</button>
-            <button class="btn-liga" data-liga="PT">Liga Portugal</button>
+        <nav class="nav-pills">
+            <button class="pill active" data-liga="BR">Brasileirão</button>
+            <button class="pill" data-liga="PL">Premier League</button>
+            <button class="pill" data-liga="ES">La Liga</button>
+            <button class="pill" data-liga="DE">Bundesliga</button>
+            <button class="pill" data-liga="IT">Serie A</button>
         </nav>
 
-        <main class="tabela-wrapper">
+        <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th class="col-pos">#</th>
-                        <th class="text-left">CLUBE</th>
-                        <th>J</th>
-                        <th>SG</th>
-                        <th>PTS</th>
+                        <th class="txt-center">POS</th>
+                        <th>CLUBE</th>
+                        <th class="txt-center">J</th>
+                        <th class="txt-center">SG</th>
+                        <th class="txt-center">PTS</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-corpo">
                     </tbody>
             </table>
-        </main>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
