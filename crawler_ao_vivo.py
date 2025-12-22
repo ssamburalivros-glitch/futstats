@@ -8,9 +8,9 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def capturar_ao_vivo_espn():
-    print("📡 Acessando API de Placares da ESPN...")
-    # URL da API de eventos (jogos) da ESPN
-    url = "https://site.api.espn.com/apis/site/v2/sports/soccer/scoreboard"
+    print("📡 Acessando API Global de Placares da ESPN...")
+    # Endpoint alternativo que costuma ser mais completo para futebol mundial
+    url = "https://site.api.espn.com/apis/site/v2/sports/soccer/all/scoreboard"
     
     try:
         response = requests.get(url, timeout=20)
@@ -21,27 +21,31 @@ def capturar_ao_vivo_espn():
 
         for evento in eventos:
             try:
-                # Status do jogo (ex: "70'", "Final", "14:00")
+                # Extrai o status (Ex: 15', HT, Final, ou Horário)
                 status = evento['status']['type']['shortDetail']
                 
-                # Times e Placar
-                competidores = evento['competitions'][0]['competitors']
-                casa = next(team for team in competidores if team['homeAway'] == 'home')
-                fora = next(team for team in competidores if team['homeAway'] == 'away')
+                comp = evento['competitions'][0]
+                casa = comp['competitors'][0] # Time da casa
+                fora = comp['competitors'][1] # Time de fora
                 
-                time_casa = casa['team']['displayName']
-                time_fora = fora['team']['displayName']
+                # Inverte se a posição home/away estiver trocada na API
+                if casa['homeAway'] != 'home':
+                    casa, fora = fora, casa
+
+                nome_casa = casa['team']['displayName']
+                nome_fora = fora['team']['displayName']
+                score_casa = casa.get('score', '0')
+                score_fora = fora.get('score', '0')
                 
-                # Formata placar: "1 - 0"
-                placar = f"{casa['score']} - {fora['score']}"
+                placar = f"{score_casa} - {score_fora}"
 
                 jogos.append({
                     "status": status,
-                    "time_casa": time_casa,
-                    "time_fora": time_fora,
+                    "time_casa": nome_casa,
+                    "time_fora": nome_fora,
                     "placar": placar
                 })
-            except:
+            except Exception as e:
                 continue
         
         return jogos
@@ -53,14 +57,13 @@ def main():
     dados = capturar_ao_vivo_espn()
     
     if dados:
-        print(f"✅ {len(dados)} jogos encontrados na ESPN. Atualizando Supabase...")
-        # Limpa a tabela (utilizando o filtro para burlar restrição de delete total se necessário)
+        print(f"✅ {len(dados)} jogos encontrados. Atualizando Supabase...")
+        # Limpa e insere
         supabase.table("jogos_ao_vivo").delete().neq("time_casa", "OFF").execute()
-        # Insere novos dados
         supabase.table("jogos_ao_vivo").insert(dados).execute()
-        print("🚀 Placares atualizados com sucesso via API!")
+        print("🚀 Placares atualizados!")
     else:
-        print("⚠️ Nenhum jogo encontrado pela API no momento.")
+        print("⚠️ A API não retornou jogos agora. Tente novamente em instantes.")
 
 if __name__ == "__main__":
     main()
