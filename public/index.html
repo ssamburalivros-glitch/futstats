@@ -3,129 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats PRO - Tabelas em Tempo Real</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --primary: #00ff88;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h1 { font-weight: 800; margin-bottom: 30px; color: var(--primary); }
-
-        /* Menu de Ligas */
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .btn-liga {
-            background: var(--card);
-            border: 2px solid transparent;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .btn-liga:hover { border-color: var(--primary); }
-
-        .btn-liga.active {
-            background: var(--primary);
-            color: var(--bg);
-        }
-
-        /* Tabela Estilizada */
-        .table-container {
-            background: var(--card);
-            border-radius: 12px;
-            overflow: hidden;
-            width: 100%;
-            max-width: 800px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #94a3b8;
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        tr:last-child td { border: none; }
-
-        .pos { width: 50px; font-weight: 800; color: var(--primary); }
-        .time { font-weight: 600; }
-        .pts { font-weight: 800; background: rgba(0,255,136,0.1); text-align: center; border-radius: 4px; }
-        
-        .loading { padding: 40px; text-align: center; color: var(--primary); }
-    </style>
+    <title>FutStats - Classificação em Tempo Real</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <h1>🏟️ FutStats PRO</h1>
+    <div class="container">
+        <header>
+            <h1>FutStats</h1>
+            <div class="menu-ligas">
+                <button class="btn-liga active" data-liga="BR">Brasileirão</button>
+                <button class="btn-liga" data-liga="PL">Premier League</button>
+                <button class="btn-liga" data-liga="ES">La Liga</button>
+                <button class="btn-liga" data-liga="DE">Bundesliga</button>
+                <button class="btn-liga" data-liga="IT">Serie A</button>
+                <button class="btn-liga" data-liga="PT">Liga Portugal</button>
+            </div>
+        </header>
 
-    <div class="tabs">
-        <button class="btn-liga active" data-liga="BR">Brasileirão</button>
-        <button class="btn-liga" data-liga="PL">Premier League</button>
-        <button class="btn-liga" data-liga="ES">La Liga</button>
-        <button class="btn-liga" data-liga="DE">Bundesliga</button>
-        <button class="btn-liga" data-liga="IT">Série A (IT)</button>
-        <button class="btn-liga" data-liga="PT">Liga Portugal</button>
-    </div>
-
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Pos</th>
-                    <th>Clube</th>
-                    <th>J</th>
-                    <th>SG</th>
-                    <th style="text-align: center;">Pts</th>
-                </tr>
-            </thead>
-            <tbody id="tabela-corpo">
-                </tbody>
-        </table>
+        <main>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th class="text-left">Time</th>
+                        <th>J</th>
+                        <th>SG</th>
+                        <th>Pts</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-corpo">
+                    </tbody>
+            </table>
+        </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script src="script.js"></script>
-
 </body>
 </html>
