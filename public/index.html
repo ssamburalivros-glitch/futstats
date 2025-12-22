@@ -3,22 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats - Classificação em Tempo Real</title>
+    <title>FutStats - Ao Vivo e Classificação</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
     <div class="container">
         <header>
             <h1>FutStats</h1>
+            
+            <div class="ao-vivo-container">
+                <h3>🔴 Jogos de Hoje</h3>
+                <div id="lista-ao-vivo" class="ao-vivo-grid">
+                    <p>Carregando placares...</p>
+                </div>
+            </div>
+
             <div class="menu-ligas">
                 <button class="btn-liga active" data-liga="BR">Brasileirão</button>
                 <button class="btn-liga" data-liga="PL">Premier League</button>
                 <button class="btn-liga" data-liga="ES">La Liga</button>
-                <button class="btn-liga" data-liga="DE">Bundesliga</button>
-                <button class="btn-liga" data-liga="IT">Serie A</button>
-                <button class="btn-liga" data-liga="PT">Liga Portugal</button>
             </div>
         </header>
 
@@ -33,8 +36,7 @@
                         <th>Pts</th>
                     </tr>
                 </thead>
-                <tbody id="tabela-corpo">
-                    </tbody>
+                <tbody id="tabela-corpo"></tbody>
             </table>
         </main>
     </div>
