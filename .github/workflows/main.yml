@@ -30,4 +30,5 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SCRAPING_KEY: ${{ secrets.SCRAPING_KEY }}
         run: python crawler.py
