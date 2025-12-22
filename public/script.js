@@ -4,7 +4,7 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ESCUDO_FALLBACK = 'https://cdn-icons-png.flaticon.com/512/53/53283.png';
 
-// --- 1. CARREGAR JOGOS AO VIVO ---
+// --- 1. CARREGAR JOGOS AO VIVO (CARDS GIGANTES) ---
 async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
     try {
@@ -29,12 +29,12 @@ async function carregarAoVivo() {
                 </div>
             `).join('');
         } else {
-            container.innerHTML = '<p style="color: #666; padding: 20px;">Buscando destaques...</p>';
+            container.innerHTML = '<p style="color: #666; padding: 20px;">Sem jogos em destaque agora.</p>';
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Erro ao carregar ao vivo:", e); }
 }
 
-// --- 2. EXIBIR MODAL COM LÓGICA DE LETRAS (V, E, D) ---
+// --- 2. MOSTRAR MODAL (LÓGICA BLINDADA CONTRA NÚMEROS E LETRAS ESTRANHAS) ---
 function mostrarStatsTime(nome, escudo, pts, jogos, sg, formaString) {
     const modal = document.getElementById('modal-time');
     const detalhes = document.getElementById('detalhes-time');
@@ -42,40 +42,56 @@ function mostrarStatsTime(nome, escudo, pts, jogos, sg, formaString) {
     // Calcula aproveitamento real
     const aproveitamentoCalc = jogos > 0 ? (pts / (jogos * 3)) * 100 : 0;
     
+    // LIMPEZA: Remove tudo o que NÃO for V, E ou D (Ignora números e letras como S, A, _)
+    let formaLimpa = (formaString || '')
+        .toUpperCase()
+        .replace(/[^VED]/g, ''); 
+
     let formaArray;
-    
-    // Se a forma vier como letras reais (ex: VVDVE)
-    if (formaString && formaString !== "S_DADOS" && !/\d/.test(formaString)) {
-        formaArray = formaString.split('').slice(0, 5);
-    } else {
-        // LÓGICA DE FALLBACK: Se a API falhar, o JS gera a forma baseada nos pontos reais
-        if (aproveitamentoCalc >= 65) {
+
+    // Se não houver dados válidos (V, E, D), gera baseado no aproveitamento
+    if (formaLimpa.length < 2) {
+        if (aproveitamentoCalc >= 60) {
             formaArray = ['V', 'V', 'E', 'V', 'V'];
-        } else if (aproveitamentoCalc >= 45) {
-            formaArray = ['V', 'E', 'D', 'V', 'E'];
+        } else if (aproveitamentoCalc >= 40) {
+            formaArray = ['V', 'E', 'D', 'E', 'V'];
         } else {
-            formaArray = ['D', 'D', 'E', 'D', 'V'];
+            formaArray = ['D', 'D', 'E', 'D', 'D'];
         }
+    } else {
+        // Se houver letras válidas, pega as 5 mais recentes
+        formaArray = formaLimpa.split('').slice(-5);
     }
 
-    // Transforma letras em círculos coloridos (V=Verde, D=Vermelho, E=Cinza)
+    // Gera o HTML dos círculos
     const formaHtml = formaArray.map(res => {
-        let r = res.toUpperCase();
-        let classe = r === 'V' ? 'v' : (r === 'D' ? 'd' : 'e');
-        return `<span class="ball ${classe}">${r}</span>`;
+        let classe = res === 'V' ? 'v' : (res === 'D' ? 'd' : 'e');
+        return `<span class="ball ${classe}">${res}</span>`;
     }).join('');
 
     detalhes.innerHTML = `
         <div style="text-align:center; margin-bottom: 20px;">
             <img src="${escudo || ESCUDO_FALLBACK}" style="width:80px; height:80px; object-fit:contain; margin-bottom:10px;">
-            <h2 style="font-size: 1.8rem; font-weight: 900;">${nome}</h2>
+            <h2 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -1px;">${nome}</h2>
             <div class="form-streak">${formaHtml}</div>
         </div>
         <div class="stats-grid">
-            <div class="stat-card"><span class="stat-value">${pts}</span>Pts</div>
-            <div class="stat-card"><span class="stat-value">${jogos}</span>Jogos</div>
-            <div class="stat-card"><span class="stat-value">${sg > 0 ? '+' + sg : sg}</span>SG</div>
-            <div class="stat-card"><span class="stat-value">${aproveitamentoCalc.toFixed(1)}%</span>Aproveit.</div>
+            <div class="stat-card">
+                <span class="stat-value">${pts}</span>
+                <span class="stat-label">Pts</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">${jogos}</span>
+                <span class="stat-label">Jogos</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">${sg > 0 ? '+' + sg : sg}</span>
+                <span class="stat-label">SG</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">${aproveitamentoCalc.toFixed(1)}%</span>
+                <span class="stat-label">Aproveit.</span>
+            </div>
         </div>
     `;
     modal.style.display = "block";
@@ -84,7 +100,7 @@ function mostrarStatsTime(nome, escudo, pts, jogos, sg, formaString) {
 // --- 3. CARREGAR TABELA ---
 async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
-    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#444;">Sincronizando...</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#444;">Atualizando classificação...</td></tr>';
 
     try {
         const { data, error } = await _supabase
@@ -111,18 +127,21 @@ async function carregarTabela(liga) {
                 </tr>
             `).join('');
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Erro ao carregar tabela:", e); }
 }
 
-// --- 4. INICIALIZAÇÃO ---
+// --- 4. INICIALIZAÇÃO E EVENTOS ---
 document.addEventListener('DOMContentLoaded', () => {
     carregarAoVivo();
     carregarTabela('BR');
 
+    // Modal
     const modal = document.getElementById('modal-time');
-    document.querySelector('.close-modal').onclick = () => modal.style.display = "none";
+    const closeBtn = document.querySelector('.close-modal');
+    if(closeBtn) closeBtn.onclick = () => modal.style.display = "none";
     window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
 
+    // Filtros de Ligas
     document.querySelectorAll('.pill').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelector('.pill.active').classList.remove('active');
