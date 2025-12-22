@@ -1,68 +1,79 @@
+// CONFIGURAÇÕES DO SUPABASE
 const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A"; // Use a sua key
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A"; // Certifique-se de usar sua chave anon pública
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/**
+ * BUSCA E RENDERIZA OS JOGOS AO VIVO (CARDS SUPERIORES)
+ */
 async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
-    const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
 
-    if (error || !data || data.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-secondary)">Aguardando próximos jogos...</p>';
-        return;
-    }
+    try {
+        const { data, error } = await _supabase
+            .from('jogos_ao_vivo')
+            .select('*');
 
-    container.innerHTML = data.map(jogo => `
-        <div class="card-jogo">
-            <span class="campeonato-tag">${jogo.campeonato || 'Futebol'}</span>
-            <span class="status-badge">${jogo.status}</span>
-            <div class="times-container">
-                <div class="time-row">${jogo.time_casa}</div>
-                <div class="placar-central">${jogo.placar}</div>
-                <div class="time-row">${jogo.time_fora}</div>
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p style="color:#8b949e; padding: 20px;">Nenhum jogo para exibir no momento.</p>';
+            return;
+        }
+
+        // Mapeia os dados para o layout da imagem (Logo - Placar - Logo)
+        container.innerHTML = data.map(jogo => `
+            <div class="card-jogo">
+                <span class="campeonato-nome">${jogo.campeonato || 'Futebol'}</span>
+                
+                <div class="confronto">
+                    <div class="time-box">
+                        <img src="${jogo.logo_casa}" class="logo-ao-vivo" onerror="this.src='https://via.placeholder.com/35?text=?'">
+                        <span class="nome-time-ao-vivo">${jogo.time_casa}</span>
+                    </div>
+
+                    <div class="placar-ao-vivo">${jogo.placar}</div>
+
+                    <div class="time-box">
+                        <img src="${jogo.logo_fora}" class="logo-ao-vivo" onerror="this.src='https://via.placeholder.com/35?text=?'">
+                        <span class="nome-time-ao-vivo">${jogo.time_fora}</span>
+                    </div>
+                </div>
+
+                <div class="status-tempo">${jogo.status}</div>
             </div>
-        </div>
-    `).join('');
+        `).join('');
+
+    } catch (err) {
+        console.error("Erro ao carregar ao vivo:", err);
+    }
 }
+
+/**
+ * BUSCA E RENDERIZA A TABELA DE CLASSIFICAÇÃO
+ */
 async function carregarTabela(ligaId) {
     const container = document.getElementById('tabela-corpo');
-    container.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
+    container.innerHTML = '<tr><td colspan="5" style="padding:40px;">Carregando dados...</td></tr>';
 
-    const { data, error } = await _supabase
-        .from('tabelas_ligas')
-        .select('*')
-        .eq('liga', ligaId)
-        .order('posicao', { ascending: true });
+    try {
+        const { data, error } = await _supabase
+            .from('tabelas_ligas')
+            .select('*')
+            .eq('liga', ligaId)
+            .order('posicao', { ascending: true });
 
-    if (data) {
-        container.innerHTML = data.map(item => `
-            <tr>
-                <td>${item.posicao}º</td>
-                <td>
-                    <div class="td-time">
-                        <img src="${item.escudo}" class="escudo">
-                        <span>${item.time}</span>
-                    </div>
-                </td>
-                <td>${item.jogos}</td>
-                <td class="${item.sg > 0 ? 'sg-positive' : 'sg-negative'}">${item.sg}</td>
-                <td class="pts">${item.pontos}</td>
-            </tr>
-        `).join('');
-    }
-}
+        if (error) throw error;
 
-document.addEventListener('DOMContentLoaded', () => {
-    carregarAoVivo(); // Carrega os placares
-    carregarTabela('BR'); // Carrega a tabela inicial
-    
-    // Intervalo para atualizar placares a cada 1 minuto sem recarregar a página
-    setInterval(carregarAoVivo, 60000);
-
-    document.querySelectorAll('.btn-liga').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.btn-liga').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            carregarTabela(e.target.dataset.liga);
-        });
-    });
-});
+        if (data) {
+            container.innerHTML = data.map(item => `
+                <tr>
+                    <td class="pos">${item.posicao}º</td>
+                    <td>
+                        <div class="td-time">
+                            <img src="${item.escudo}" class="escudo" onerror="this.src='https://via.placeholder.com/24?text=?'">
+                            <span>${item.time}</span>
+                        </div>
+                    </td>
+                    <td>${item.jogos}</td>
+                    <td class="${item.sg > 0 ? 'sg-positive' : (item.sg < 0 ? 'sg-negative'
