@@ -1,7 +1,8 @@
 import os
 import time
 import requests
-from bs4 import BeautifulSoup
+import re
+from bs4 import BeautifulSoup, Comment
 from supabase import create_client
 from urllib.parse import quote
 
@@ -21,83 +22,94 @@ LIGAS = {
     "PT": "https://fbref.com/en/comps/37/Primeira-Liga-Stats"
 }
 
-def capturar_dados(liga_id, url_alvo):
-    print(f"📡 Solicitando {liga_id} via ScrapingBee...")
+def extrair_tabela(soup):
+    """Procura a tabela no HTML ou dentro de comentários"""
+    # 1. Tenta encontrar a tabela visível
+    tabela = soup.select_one('table[id*="overall"]') or soup.find('table', class_='stats_table')
     
-    # Adicionamos 'wait_for' para garantir que a tabela carregue
-    api_url = f"https://app.scrapingbee.com/api/v1/?api_key={SCRAPING_KEY}&url={quote(url_alvo)}&render_js=false"
+    if not tabela:
+        # 2. Se não achou, procura dentro de comentários (Truque do FBRef)
+        comentarios = soup.find_all(string=lambda text: isinstance(text, Comment))
+        for com in comentarios:
+            if 'table' in com and 'id="results' in com:
+                sub_soup = BeautifulSoup(com, 'html.parser')
+                tabela = sub_soup.find('table')
+                if tabela: break
+    return tabela
+
+def capturar_dados(liga_id, url_alvo):
+    print(f"📡 Solicitando {liga_id} via ScrapingBee (Premium Mode)...")
+    
+    # Adicionamos premium_proxy=true para garantir que não caia em captchas
+    api_url = f"https://app.scrapingbee.com/api/v1/?api_key={SCRAPING_KEY}&url={quote(url_alvo)}&premium_proxy=true&country_code=br"
     
     try:
         response = requests.get(api_url, timeout=60)
-        
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Tenta encontrar a tabela de várias formas possíveis
-            tabela = (soup.select_one('table[id*="overall"]') or 
-                      soup.find('table', class_='stats_table') or
-                      soup.find('table'))
-
-            if not tabela:
-                print(f"⚠️ HTML recebido, mas tabela não encontrada para {liga_id}")
-                return []
-
-            times = []
-            corpo = tabela.find('tbody')
-            if not corpo: return []
-
-            for row in corpo.find_all('tr'):
-                if 'spacer' in row.get('class', []) or 'thead' in row.get('class', []):
-                    continue
-                
-                cols = row.find_all(['th', 'td'])
-                if len(cols) >= 10:
-                    try:
-                        times.append({
-                            "liga": liga_id,
-                            "posicao": int(cols[0].text.strip().replace('.', '')),
-                            "time": cols[1].text.strip(),
-                            "escudo": cols[1].find('img')['src'] if cols[1].find('img') else "",
-                            "jogos": int(cols[2].text.strip()),
-                            "pontos": int(cols[9].text.strip()),
-                            "sg": int(cols[10].text.strip().replace('+', ''))
-                        })
-                    except: continue
-            
-            if times:
-                print(f"✅ {liga_id}: {len(times)} times encontrados.")
-            return times
-        else:
-            print(f"❌ Erro na API ScrapingBee: {response.status_code}")
+        if response.status_code != 200:
+            print(f"❌ Erro ScrapingBee: {response.status_code}")
             return []
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+        tabela = extrair_tabela(soup)
+
+        if not tabela:
+            print(f"⚠️ HTML recebido, mas tabela ainda oculta para {liga_id}")
+            return []
+
+        times = []
+        corpo = tabela.find('tbody')
+        if not corpo: return []
+
+        for row in corpo.find_all('tr'):
+            if 'spacer' in row.get('class', []) or 'thead' in row.get('class', []):
+                continue
+            
+            cols = row.find_all(['th', 'td'])
+            if len(cols) >= 10:
+                try:
+                    # Alguns campos podem vir com links, pegamos apenas o texto
+                    pos = cols[0].text.strip().replace('.', '')
+                    nome_time = cols[1].text.strip()
+                    img = cols[1].find('img')
+                    escudo = img['src'] if img else ""
+                    
+                    times.append({
+                        "liga": liga_id,
+                        "posicao": int(pos) if pos.isdigit() else 0,
+                        "time": nome_time,
+                        "escudo": escudo,
+                        "jogos": int(cols[2].text.strip() or 0),
+                        "pontos": int(cols[9].text.strip() or 0),
+                        "sg": int(cols[10].text.strip().replace('+', '') or 0)
+                    })
+                except: continue
+        
+        if times:
+            print(f"✅ {liga_id}: {len(times)} times encontrados.")
+        return times
     except Exception as e:
         print(f"❌ Erro na requisição: {e}")
         return []
 
 def main():
     if not SCRAPING_KEY:
-        print("❌ Chaves de API não configuradas!")
+        print("❌ Chave SCRAPING_KEY não configurada!")
         return
 
-    todas_ligas = []
+    dados_totais = []
     for liga_id, url in LIGAS.items():
         res = capturar_dados(liga_id, url)
         if res:
-            todas_ligas.extend(res)
-        
-        # ESSENCIAL: Esperar um pouco entre as ligas para a API não engasgar
-        time.sleep(5)
+            dados_totais.extend(res)
+        time.sleep(2) # Pequeno delay entre chamadas de API
 
-    if todas_ligas:
-        print(f"📤 Enviando {len(todas_ligas)} registros para o Supabase...")
-        try:
-            supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-            supabase.table("tabelas_ligas").insert(todas_ligas).execute()
-            print("🚀 SUCESSO ABSOLUTO!")
-        except Exception as e:
-            print(f"❌ Erro ao salvar no Supabase: {e}")
+    if dados_totais:
+        print(f"📤 Enviando {len(dados_totais)} registros para o Supabase...")
+        supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
+        supabase.table("tabelas_ligas").insert(dados_totais).execute()
+        print("🚀 SUCESSO ABSOLUTO!")
     else:
-        print("💀 Falha total na coleta. Verifique os logs acima.")
+        print("💀 O site está bloqueando até a API. Tentando plano B em seguida...")
 
 if __name__ == "__main__":
     main()
