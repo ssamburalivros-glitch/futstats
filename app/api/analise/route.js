@@ -2,57 +2,60 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-// 1. Configurar Supabase (use suas chaves de ambiente)
+// Configuração do Supabase com as chaves de ambiente
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,("https://sihunefyfkecumbiyxva.supabase.co")
-  process.env.SUPABASE_SERVICE_ROLE_KEY ("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjQwODkzOCwiZXhwIjoyMDgxOTg0OTM4fQ.qeZliDad795-HMs26rheYtKfIgtWZ7aIHQmQsVwZIic")
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// 2. Configurar Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export async function POST(req) {
   try {
-    const { message, time_id } = await req.json(); // Recebe a pergunta e o ID do time (opcional)
+    const { message, time_nome } = await req.json();
 
-    // PASSO A: Buscar dados relevantes no Supabase
-    // Exemplo: Pegar os últimos 5 jogos do banco de dados raspado
+    // 1. Busca os dados reais do time na sua tabela de classificação
     const { data: stats, error } = await supabase
-      .from('partidas') // Sua tabela de dados raspados
-      .select('*')
-      .eq('time_mandante', time_id) // Exemplo de filtro
-      .limit(5);
+      .from('tabelas_ligas') 
+      .select('posicao, time, pontos, jogos, vitorias, empates, derrotas, sg, forma')
+      .eq('time', time_nome)
+      .single(); // Pega apenas o time específico
 
-    if (error) throw error;
+    if (error) {
+        console.error("Erro Supabase:", error);
+    }
 
-    // Transformar dados em texto para a IA ler
-    const dadosContexto = JSON.stringify(stats);
+    // 2. Configura o modelo (Gemini 1.5 Flash é grátis e rápido)
+    const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
+        generationConfig: { temperature: 0.3 } // Baixa temperatura = menos invenção
+    });
 
-    // PASSO B: Montar o Prompt para a IA
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
+    // 3. O Prompt que ensina a IA a ler seus dados
     const prompt = `
-      Você é um especialista em análise de futebol e estatísticas (sabermetrics).
+      Você é um analista de futebol profissional do site FutStats.
       
-      Aqui estão os dados recentes do time (em formato JSON):
-      ${dadosContexto}
+      DADOS REAIS DO TIME NO CAMPEONATO:
+      ${stats ? JSON.stringify(stats) : "Dados não encontrados no momento."}
 
-      Pergunta do usuário: "${message}"
+      PERGUNTA DO USUÁRIO:
+      "${message}"
 
-      Com base APENAS nos dados acima, responda a pergunta. 
-      Seja técnico mas acessível. Cite números específicos (posse de bola, chutes, etc).
-      Se os dados não tiverem a resposta, diga que não sabe.
+      INSTRUÇÕES:
+      1. Use os dados acima para responder. Se os dados mostram que o time tem poucos pontos, seja realista sobre o risco de rebaixamento ou falta de títulos.
+      2. Se a "forma" tiver muitos 'V', o time está em boa fase. Se tiver 'D', está em má fase.
+      3. Responda de forma curta e direta (máximo 3 parágrafos).
+      4. Use negrito em estatísticas importantes.
+      5. Se não souber a resposta com base nos dados, diga que está analisando a tendência mas ainda não tem números confirmados.
     `;
 
-    // PASSO C: Gerar a resposta
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
-
-    return NextResponse.json({ answer: text });
+    
+    return NextResponse.json({ answer: response.text() });
 
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Erro ao processar análise.' }, { status: 500 });
+    console.error("Erro na Rota AI:", error);
+    return NextResponse.json({ answer: "O analista está ocupado estudando os esquemas táticos. Tente novamente em instantes!" }, { status: 500 });
   }
 }
