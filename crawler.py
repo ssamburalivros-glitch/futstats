@@ -20,14 +20,12 @@ LIGAS = {
 
 def capturar_api_espn(liga_id, espn_id):
     print(f"📡 Acessando API ESPN para {liga_id}...")
-    # URL da API de estatísticas da ESPN
     url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/standings"
     
     try:
         response = requests.get(url, timeout=20)
         data = response.json()
         
-        # A API da ESPN retorna uma lista de 'entries' (times)
         entries = data['children'][0]['standings']['entries']
         
         times = []
@@ -35,12 +33,22 @@ def capturar_api_espn(liga_id, espn_id):
             stats = entry['stats']
             team = entry['team']
             
-            # Mapeando os campos da API para o nosso banco
-            # pontos (idx varia, buscamos pelo nome)
+            # Mapeando estatísticas básicas
             pontos = next(s['value'] for s in stats if s['name'] == 'points')
             jogos = next(s['value'] for s in stats if s['name'] == 'gamesPlayed')
             sg = next(s['value'] for s in stats if s['name'] == 'pointDifferential')
             posicao = next(s['value'] for s in stats if s['name'] == 'rank')
+
+            # --- NOVA LÓGICA: CAPTURAR A FORMA (SUMMARY) ---
+            # A API da ESPN retorna algo como "V, V, E, D, V" ou "W, W, D, L, W"
+            try:
+                forma_bruta = next(s['summary'] for s in stats if s['name'] == 'summary')
+                # Padroniza para o nosso site: Remove vírgulas, espaços e converte W->V e L->D
+                forma_limpa = forma_bruta.replace(",", "").replace(" ", "")
+                forma_limpa = forma_limpa.replace("W", "V").replace("L", "D").replace("T", "E")
+                forma_final = forma_limpa[:5] # Pega apenas os últimos 5
+            except:
+                forma_final = "EEEEE" # Caso a API não retorne a forma
 
             times.append({
                 "liga": liga_id,
@@ -49,7 +57,8 @@ def capturar_api_espn(liga_id, espn_id):
                 "escudo": team['logos'][0]['href'] if 'logos' in team else "",
                 "jogos": int(jogos),
                 "pontos": int(pontos),
-                "sg": int(sg)
+                "sg": int(sg),
+                "forma": forma_final  # <--- ADICIONADO AO DICIONÁRIO
             })
             
         print(f"✅ {liga_id}: {len(times)} times encontrados.")
@@ -68,11 +77,11 @@ def main():
 
     if dados_finais:
         print(f"📤 Enviando {len(dados_finais)} registros para o Supabase...")
-        # Limpa o banco antes de inserir
+        # Limpa o banco antes de inserir para manter a classificação fresca
         supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
         # Insere os novos dados
         supabase.table("tabelas_ligas").insert(dados_finais).execute()
-        print("🚀 SUCESSO! Banco de dados atualizado via API.")
+        print("🚀 SUCESSO! Banco de dados atualizado com a coluna FORMA.")
     else:
         print("💀 Falha crítica: Nenhuma liga capturada.")
 
