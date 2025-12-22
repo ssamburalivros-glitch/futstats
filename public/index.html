@@ -3,18 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Premium Standings</title>
+    <title>FutStats Premium | Live Center</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="container">
+        
+        <header class="site-header">
+            <img src="logo.png" alt="Logo do Site" class="app-logo">
+            <h1 class="app-title">FutStats<span class="highlight">Pro</span></h1>
+        </header>
+
         <section class="ao-vivo-container">
             <div class="ao-vivo-header">
-                <span class="pulse-icon"></span>
-                <h3>Jogos de Hoje</h3>
+                <div class="live-indicator">
+                    <span class="pulse-dot"></span>
+                    <span class="live-text">AO VIVO</span>
+                </div>
             </div>
+            
             <div id="lista-ao-vivo" class="ao-vivo-grid">
                 </div>
         </section>
@@ -32,8 +42,8 @@
             <table>
                 <thead>
                     <tr>
-                        <th>POS</th>
-                        <th class="text-left">TIME</th>
+                        <th class="col-pos">#</th>
+                        <th class="text-left">CLUBE</th>
                         <th>J</th>
                         <th>SG</th>
                         <th>PTS</th>
