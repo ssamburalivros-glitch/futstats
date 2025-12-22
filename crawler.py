@@ -4,6 +4,7 @@ import requests
 from supabase import create_client
 
 # --- CONFIGURAÇÃO ---
+# Certifique-se de que estas variáveis de ambiente estão configuradas ou substitua pelas strings
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -20,12 +21,14 @@ LIGAS = {
 
 def capturar_api_espn(liga_id, espn_id):
     print(f"📡 Acessando API ESPN para {liga_id}...")
+    # URL da API de classificação
     url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/standings"
     
     try:
         response = requests.get(url, timeout=20)
         data = response.json()
         
+        # Caminho para os dados dos times
         entries = data['children'][0]['standings']['entries']
         
         times = []
@@ -33,22 +36,30 @@ def capturar_api_espn(liga_id, espn_id):
             stats = entry['stats']
             team = entry['team']
             
-            # Mapeando estatísticas básicas
-            pontos = next(s['value'] for s in stats if s['name'] == 'points')
-            jogos = next(s['value'] for s in stats if s['name'] == 'gamesPlayed')
-            sg = next(s['value'] for s in stats if s['name'] == 'pointDifferential')
-            posicao = next(s['value'] for s in stats if s['name'] == 'rank')
+            # Extração de estatísticas básicas com segurança
+            def get_stat(name):
+                return next((s['value'] for s in stats if s['name'] == name), 0)
 
-            # --- NOVA LÓGICA: CAPTURAR A FORMA (SUMMARY) ---
-            # A API da ESPN retorna algo como "V, V, E, D, V" ou "W, W, D, L, W"
+            pontos = get_stat('points')
+            jogos = get_stat('gamesPlayed')
+            sg = get_stat('pointDifferential')
+            posicao = get_stat('rank')
+
+            # --- LÓGICA REVISADA DA COLUNA 'FORMA' ---
+            forma_final = "EEEEE" # Valor inicial neutro
             try:
-                forma_bruta = next(s['summary'] for s in stats if s['name'] == 'summary')
-                # Padroniza para o nosso site: Remove vírgulas, espaços e converte W->V e L->D
-                forma_limpa = forma_bruta.replace(",", "").replace(" ", "")
-                forma_limpa = forma_limpa.replace("W", "V").replace("L", "D").replace("T", "E")
-                forma_final = forma_limpa[:5] # Pega apenas os últimos 5
-            except:
-                forma_final = "EEEEE" # Caso a API não retorne a forma
+                # Na API ESPN, a forma (V-E-D) costuma vir no campo 'summary'
+                forma_bruta = next((s['summary'] for s in stats if s['name'] == 'summary'), "")
+                
+                if forma_bruta:
+                    # 1. Remove espaços e vírgulas
+                    limpo = forma_bruta.replace(",", "").replace(" ", "").upper()
+                    # 2. Traduz Inglês (W, L, T) para Português (V, D, E)
+                    traduzido = limpo.replace("W", "V").replace("L", "D").replace("T", "E")
+                    # 3. Garante que pegamos apenas os últimos 5 e preenche se faltar
+                    forma_final = traduzido[:5].ljust(5, 'E')
+            except Exception:
+                pass # Mantém o 'EEEEE' se falhar
 
             times.append({
                 "liga": liga_id,
@@ -58,32 +69,37 @@ def capturar_api_espn(liga_id, espn_id):
                 "jogos": int(jogos),
                 "pontos": int(pontos),
                 "sg": int(sg),
-                "forma": forma_final  # <--- ADICIONADO AO DICIONÁRIO
+                "forma": forma_final  # Enviando para a coluna que criamos
             })
             
-        print(f"✅ {liga_id}: {len(times)} times encontrados.")
+        print(f"✅ {liga_id}: {len(times)} times processados.")
         return times
     except Exception as e:
-        print(f"❌ Erro na API para {liga_id}: {e}")
+        print(f"❌ Erro ao processar {liga_id}: {e}")
         return []
 
 def main():
-    dados_finais = []
+    dados_totais = []
+    
     for liga_id, espn_id in LIGAS.items():
-        res = capturar_api_espn(liga_id, espn_id)
-        if res:
-            dados_finais.extend(res)
-        time.sleep(1)
+        lista_times = capturar_api_espn(liga_id, espn_id)
+        if lista_times:
+            dados_totais.extend(lista_times)
+        time.sleep(1) # Evita bloqueios por excesso de requisições
 
-    if dados_finais:
-        print(f"📤 Enviando {len(dados_finais)} registros para o Supabase...")
-        # Limpa o banco antes de inserir para manter a classificação fresca
-        supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-        # Insere os novos dados
-        supabase.table("tabelas_ligas").insert(dados_finais).execute()
-        print("🚀 SUCESSO! Banco de dados atualizado com a coluna FORMA.")
+    if dados_totais:
+        print(f"📤 Atualizando {len(dados_totais)} registros no Supabase...")
+        try:
+            # 1. Limpa a tabela para evitar dados duplicados ou antigos
+            supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
+            
+            # 2. Insere os novos dados com a coluna 'forma' preenchida
+            supabase.table("tabelas_ligas").insert(dados_totais).execute()
+            print("🚀 SUCESSO! Site e Banco de dados sincronizados.")
+        except Exception as e:
+            print(f"❌ Erro ao salvar no banco: {e}")
     else:
-        print("💀 Falha crítica: Nenhuma liga capturada.")
+        print("💀 Erro: Nenhum dado capturado para enviar.")
 
 if __name__ == "__main__":
     main()
