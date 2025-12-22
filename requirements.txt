@@ -2,5 +2,5 @@ requests-html
 beautifulsoup4
 supabase
 fake-useragent
-lxml
 lxml_html_clean
+playwright
