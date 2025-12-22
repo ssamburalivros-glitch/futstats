@@ -1,6 +1,5 @@
 import os
 import requests
-from bs4 import BeautifulSoup
 from supabase import create_client
 
 # --- CONFIGURAÇÃO ---
@@ -8,65 +7,60 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def capturar_ao_vivo():
-    print("📡 Acessando Placar de Futebol...")
-    url = "https://www.placardefutebol.com.br/jogos-de-hoje"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-    }
+def capturar_ao_vivo_espn():
+    print("📡 Acessando API de Placares da ESPN...")
+    # URL da API de eventos (jogos) da ESPN
+    url = "https://site.api.espn.com/apis/site/v2/sports/soccer/scoreboard"
     
     try:
-        response = requests.get(url, headers=headers, timeout=30)
-        soup = BeautifulSoup(response.content, 'html.parser')
+        response = requests.get(url, timeout=20)
+        data = response.json()
         
         jogos = []
-        # Tenta encontrar os blocos de partidas
-        containers = soup.find_all('div', class_='container-content') or soup.find_all('a', class_='match-link')
+        eventos = data.get('events', [])
 
-        for item in containers:
+        for evento in eventos:
             try:
-                # Busca status (Tempo de jogo ou 'Encerrado')
-                status_el = item.select_one('.status-name, .match-status')
-                status = status_el.text.strip() if status_el else "Hoje"
+                # Status do jogo (ex: "70'", "Final", "14:00")
+                status = evento['status']['type']['shortDetail']
                 
-                # Busca times
-                casa_el = item.select_one('.team-home h3, .name-home')
-                fora_el = item.select_one('.team-away h3, .name-away')
+                # Times e Placar
+                competidores = evento['competitions'][0]['competitors']
+                casa = next(team for team in competidores if team['homeAway'] == 'home')
+                fora = next(team for team in competidores if team['homeAway'] == 'away')
                 
-                # Busca placar
-                placar_el = item.select_one('.match-score, .score')
+                time_casa = casa['team']['displayName']
+                time_fora = fora['team']['displayName']
                 
-                if casa_el and fora_el:
-                    time_casa = casa_el.text.strip()
-                    time_fora = fora_el.text.strip()
-                    placar = placar_el.text.strip().replace('\n', ' ') if placar_el else "vs"
+                # Formata placar: "1 - 0"
+                placar = f"{casa['score']} - {fora['score']}"
 
-                    jogos.append({
-                        "status": status,
-                        "time_casa": time_casa,
-                        "time_fora": time_fora,
-                        "placar": placar
-                    })
+                jogos.append({
+                    "status": status,
+                    "time_casa": time_casa,
+                    "time_fora": time_fora,
+                    "placar": placar
+                })
             except:
                 continue
         
         return jogos
     except Exception as e:
-        print(f"❌ Erro ao acessar site: {e}")
+        print(f"❌ Erro na API ESPN: {e}")
         return []
 
 def main():
-    dados = capturar_ao_vivo()
+    dados = capturar_ao_vivo_espn()
     
     if dados:
-        print(f"✅ {len(dados)} jogos encontrados. Limpando e salvando no Supabase...")
-        # Deleta dados antigos
+        print(f"✅ {len(dados)} jogos encontrados na ESPN. Atualizando Supabase...")
+        # Limpa a tabela (utilizando o filtro para burlar restrição de delete total se necessário)
         supabase.table("jogos_ao_vivo").delete().neq("time_casa", "OFF").execute()
-        # Insere novos
+        # Insere novos dados
         supabase.table("jogos_ao_vivo").insert(dados).execute()
-        print("🚀 Sucesso! Tabela atualizada.")
+        print("🚀 Placares atualizados com sucesso via API!")
     else:
-        print("⚠️ Nenhum jogo encontrado. Verifique se o site mudou a estrutura.")
+        print("⚠️ Nenhum jogo encontrado pela API no momento.")
 
 if __name__ == "__main__":
     main()
