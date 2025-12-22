@@ -4,6 +4,7 @@
     --border: #30363d;
     --text-muted: #8b949e;
     --white: #ffffff;
+    --accent-green: #3fb950;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -19,51 +20,111 @@ body {
 
 .container { width: 100%; max-width: 900px; }
 
-/* AO VIVO E CARDS */
+/* SEÇÃO AO VIVO */
 .ao-vivo-container { margin-bottom: 30px; }
 .ao-vivo-header { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
 .pulse-icon { width: 8px; height: 8px; background: #f85149; border-radius: 50%; }
 
-.ao-vivo-grid { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; }
+.ao-vivo-grid { 
+    display: flex; 
+    gap: 12px; 
+    overflow-x: auto; 
+    padding-bottom: 10px;
+    scrollbar-width: none; 
+}
 
+/* CARD DE JOGO (ESTABILIZADO) */
 .card-jogo {
-    min-width: 250px;
+    min-width: 260px;
+    height: 150px; /* Altura fixa para evitar pulos */
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.campeonato-nome { 
+    font-size: 0.65rem; 
+    color: var(--text-muted); 
+    text-transform: uppercase; 
     text-align: center;
 }
 
-.campeonato-nome { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; display: block; }
-
 .confronto { display: flex; align-items: center; justify-content: space-around; }
-.time-box { display: flex; flex-direction: column; align-items: center; width: 75px; }
-.logo-ao-vivo { width: 35px; height: 35px; margin-bottom: 5px; object-fit: contain; }
-.nome-time-ao-vivo { font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 
-.placar-ao-vivo { font-size: 1.4rem; font-weight: 800; }
+.time-box { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    width: 85px; 
+}
 
-.status-tempo { font-size: 0.7rem; color: #3fb950; margin-top: 10px; }
+.logo-ao-vivo { 
+    width: 35px !important; 
+    height: 35px !important; 
+    object-fit: contain; 
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 50%;
+}
+
+.nome-time-ao-vivo { 
+    font-size: 0.75rem; 
+    font-weight: 600; 
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.placar-ao-vivo { font-size: 1.6rem; font-weight: 800; letter-spacing: 2px; }
+
+.status-tempo { 
+    font-size: 0.7rem; 
+    color: var(--accent-green); 
+    text-align: center; 
+    font-weight: bold;
+}
 
 /* BOTÕES PÍLULA */
-.menu-ligas { display: flex; gap: 8px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
+.menu-ligas { 
+    display: flex; 
+    gap: 8px; 
+    justify-content: center; 
+    margin-bottom: 25px; 
+    flex-wrap: wrap; 
+}
 
 .btn-liga {
     background: transparent;
     border: 1px solid var(--border);
     color: var(--white);
-    padding: 6px 14px;
-    border-radius: 20px;
+    padding: 8px 18px;
+    border-radius: 25px;
     cursor: pointer;
-    font-size: 0.8rem;
-    transition: 0.2s;
+    font-size: 0.85rem;
+    transition: 0.3s ease;
 }
 
-.btn-liga.active { background: var(--white); color: #000; border-color: var(--white); }
+.btn-liga.active { 
+    background: var(--white); 
+    color: #000; 
+    border-color: var(--white);
+    font-weight: 600;
+}
 
-/* TABELA */
-.tabela-wrapper { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+/* TABELA DE CLASSIFICAÇÃO */
+.tabela-wrapper { 
+    background: var(--card); 
+    border: 1px solid var(--border); 
+    border-radius: 12px; 
+    overflow: hidden; 
+}
+
 table { width: 100%; border-collapse: collapse; }
 th { padding: 12px; font-size: 0.7rem; color: var(--text-muted); border-bottom: 1px solid var(--border); }
 td { padding: 14px; border-bottom: 1px solid var(--border); text-align: center; font-size: 0.9rem; }
@@ -72,37 +133,5 @@ td { padding: 14px; border-bottom: 1px solid var(--border); text-align: center; 
 .td-time { display: flex; align-items: center; gap: 10px; }
 .escudo { width: 22px; height: 22px; object-fit: contain; }
 
-/* CORES SG */
 .sg-positive { color: #3fb950; }
 .sg-negative { color: #f85149; }
-
-/* Estabiliza o tamanho das logos para evitar tremor */
-.logo-ao-vivo {
-    width: 35px !important;
-    height: 35px !important;
-    min-width: 35px;
-    min-height: 35px;
-    object-fit: contain;
-    background-color: rgba(255, 255, 255, 0.05); /* Espaço reservado visual */
-    border-radius: 50%;
-    display: block;
-    margin-bottom: 5px;
-}
-
-/* Garante que o container de times não colapse */
-.time-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 85px; /* Tamanho fixo */
-    min-height: 60px;
-    justify-content: flex-start;
-}
-
-.card-jogo {
-    min-width: 260px;
-    height: 140px; /* Altura fixa impede o card de "pular" */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
