@@ -1,4 +1,4 @@
-/* --- CONFIGURAÇÕES DE ELITE --- */
+/* --- CONFIGURAÇÕES GERAIS --- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
 :root {
@@ -10,94 +10,256 @@
     --text-dim: #888;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    -webkit-font-smoothing: antialiased;
+}
 
 body {
     background-color: var(--bg);
     color: var(--text);
     font-family: 'Inter', sans-serif;
     padding: 20px;
-    overflow-x: hidden;
 }
 
-.container { max-width: 1100px; margin: 0 auto; }
+.container { 
+    max-width: 1100px; 
+    margin: 0 auto; 
+}
 
-/* HEADER COM LOGO GRANDE */
-.main-header { text-align: center; padding: 50px 0; }
-.logo-container { display: flex; align-items: center; justify-content: center; gap: 15px; }
-.main-logo { height: 70px; width: auto; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
-.main-header h1 { font-size: 3.5rem; font-weight: 900; letter-spacing: -3px; }
+/* --- HEADER E LOGO --- */
+.main-header { 
+    text-align: center; 
+    padding: 40px 0; 
+}
+
+.logo-container { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 15px; 
+}
+
+.main-logo { 
+    height: 70px; 
+    width: auto; 
+}
+
+.main-header h1 { 
+    font-size: 3rem; 
+    font-weight: 900; 
+    letter-spacing: -2px; 
+}
+
 .green { color: var(--green); }
-.subtitle { color: var(--text-dim); font-size: 1.1rem; margin-top: 10px; font-weight: 500; }
 
-/* SEÇÃO DE DESTAQUES (CARDS GIGANTES) */
-.section-title { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; }
-.dot { width: 10px; height: 10px; background: #ff3b30; border-radius: 50%; box-shadow: 0 0 10px #ff3b30; }
-.section-title h2 { font-size: 0.9rem; font-weight: 800; color: var(--text-dim); letter-spacing: 1px; }
+.subtitle { 
+    color: var(--text-dim); 
+    font-size: 1rem; 
+    margin-top: 5px; 
+}
 
-/* GRID DE ROLAGEM COM SNAP */
+/* --- SEÇÃO DE JOGOS (CARDS COM ROLAGEM) --- */
+.section-title { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    margin-bottom: 20px; 
+}
+
+.dot { 
+    width: 10px; 
+    height: 10px; 
+    background: #ff3b30; 
+    border-radius: 50%; 
+    box-shadow: 0 0 10px #ff3b30; 
+}
+
+.section-title h2 { 
+    font-size: 0.9rem; 
+    font-weight: 700; 
+    color: var(--text-dim); 
+}
+
+/* GRID DE ROLAGEM */
 .hero-grid { 
     display: flex; 
     gap: 20px; 
     overflow-x: auto; 
     padding: 10px 5px 25px 5px; 
     -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory; /* Efeito magnético */
+    scroll-snap-type: x mandatory;
     cursor: grab;
 }
 
 .hero-grid:active { cursor: grabbing; }
 
-/* ESTILIZAÇÃO DA BARRA DE ROLAGEM */
-.hero-grid::-webkit-scrollbar { height: 8px; }
-.hero-grid::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-.hero-grid::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; border: 2px solid var(--bg); }
-.hero-grid::-webkit-scrollbar-thumb:hover { background: #444; }
+/* ESTILO DA BARRA DE ROLAGEM */
+.hero-grid::-webkit-scrollbar {
+    height: 8px;
+}
 
-/* CARD GIGANTE (ESTILO APPLE TV) */
+.hero-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.hero-grid::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
+    border: 2px solid var(--bg);
+}
+
+.hero-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--green);
+}
+
+/* CARD GIGANTE COM FUNDO DE CAMPO */
 .card-hero {
-    min-width: 350px;
-    height: 220px;
+    min-width: 320px;
+    height: 200px;
     scroll-snap-align: start;
-    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.9) 100%), 
-                url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1000'); /* Fundo padrão estádio */
+    /* Imagem do campo com degradê para legibilidade */
+    background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.85)), 
+                url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1000');
     background-size: cover;
     background-position: center;
-    border-radius: 28px;
-    padding: 30px;
+    border-radius: 24px;
+    padding: 25px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     border: 1px solid var(--border);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.3s ease, border-color 0.3s;
 }
 
-.card-hero:hover { transform: scale(1.02); border-color: var(--green); }
+.card-hero:hover { 
+    transform: scale(1.02); 
+    border-color: var(--green); 
+}
 
-.hero-teams { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-.hero-team-box { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 90px; }
-.hero-logo { width: 50px; height: 50px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
-.hero-name { font-size: 0.85rem; font-weight: 700; text-align: center; color: #fff; }
-.hero-score { font-size: 2.5rem; font-weight: 900; letter-spacing: -1px; }
+.hero-teams { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin-bottom: 10px; 
+}
+
+.hero-team-box { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 5px; 
+    width: 90px;
+}
+
+.hero-logo { 
+    width: 45px; 
+    height: 45px; 
+    object-fit: contain; 
+}
+
+.hero-name { 
+    font-size: 0.8rem; 
+    font-weight: 700; 
+    text-align: center;
+}
+
+.hero-score { 
+    font-size: 2.2rem; 
+    font-weight: 900; 
+}
+
 .hero-status { 
-    font-size: 0.75rem; color: var(--green); font-weight: 800; 
-    background: rgba(0,255,102,0.15); padding: 6px 15px; border-radius: 50px; 
-    align-self: center; border: 1px solid rgba(0,255,102,0.2);
+    font-size: 0.75rem; 
+    color: var(--green); 
+    font-weight: 800; 
+    background: rgba(0,0,0,0.6); 
+    padding: 5px 15px; 
+    border-radius: 50px; 
+    align-self: center; 
 }
 
-/* NAV PILLS */
-.nav-pills { display: flex; gap: 12px; justify-content: center; margin: 50px 0; flex-wrap: wrap; }
+/* --- BOTÕES DE NAVEGAÇÃO (PILLS) --- */
+.nav-pills { 
+    display: flex; 
+    gap: 10px; 
+    justify-content: center; 
+    margin: 40px 0; 
+    flex-wrap: wrap;
+}
+
 .pill { 
-    background: var(--card-bg); border: 1px solid var(--border); color: var(--text);
-    padding: 14px 30px; border-radius: 100px; font-weight: 700; cursor: pointer; transition: 0.3s;
+    background: var(--card-bg); 
+    border: 1px solid var(--border); 
+    color: var(--text);
+    padding: 12px 25px; 
+    border-radius: 100px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    transition: 0.3s;
 }
-.pill.active { background: var(--text); color: #000; border-color: var(--text); transform: scale(1.05); }
 
-/* TABELA */
-.table-container { background: var(--card-bg); border-radius: 30px; padding: 20px; border: 1px solid var(--border); }
-table { width: 100%; border-collapse: collapse; }
-th { color: var(--text-dim); font-size: 0.75rem; padding: 20px; text-transform: uppercase; letter-spacing: 1px; }
-td { padding: 22px 20px; border-bottom: 1px solid #1a1a1a; font-weight: 600; font-size: 1rem; }
-.team-row { display: flex; align-items: center; gap: 15px; }
-.escudo-tab { width: 30px; height: 30px; object-fit: contain; }
+.pill:hover {
+    border-color: var(--text-dim);
+}
+
+.pill.active { 
+    background: var(--text); 
+    color: #000; 
+    border-color: var(--text); 
+}
+
+/* --- TABELA DE CLASSIFICAÇÃO --- */
+.table-container { 
+    background: var(--card-bg); 
+    border-radius: 24px; 
+    padding: 15px; 
+    border: 1px solid var(--border); 
+    overflow-x: auto;
+}
+
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+}
+
+th { 
+    color: var(--text-dim); 
+    font-size: 0.7rem; 
+    padding: 15px; 
+    border-bottom: 1px solid var(--border); 
+    text-transform: uppercase;
+    text-align: center;
+}
+
+td { 
+    padding: 18px 15px; 
+    border-bottom: 1px solid #1a1a1a; 
+    font-weight: 600; 
+}
+
+.txt-center { text-align: center; }
+
+.team-row { 
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+}
+
+.escudo-tab { 
+    width: 28px; 
+    height: 28px; 
+    object-fit: contain;
+}
+
 .sg-pos { color: var(--green); }
+
+/* Responsividade Mobile */
+@media (max-width: 600px) {
+    .main-header h1 { font-size: 2.2rem; }
+    .card-hero { min-width: 280px; height: 180px; }
+    .hero-score { font-size: 1.8rem; }
+}
