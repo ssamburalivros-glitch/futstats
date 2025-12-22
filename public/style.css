@@ -138,3 +138,59 @@ tbody tr:hover {
     th:nth-child(3), td:nth-child(3) { display: none; } /* Oculta 'Jogos' no mobile */
     .container { border-radius: 0; }
 }
+.ao-vivo-container {
+    padding: 15px;
+    background: #1c2128;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.ao-vivo-container h3 {
+    font-size: 0.9rem;
+    color: #f85149;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.ao-vivo-grid {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto; /* Scroll horizontal se tiver muitos jogos */
+    padding-bottom: 10px;
+}
+
+.card-jogo {
+    min-width: 180px;
+    background: #21262d;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #30363d;
+    text-align: center;
+}
+
+.card-jogo .status {
+    font-size: 0.7rem;
+    color: #8b949e;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.card-jogo .times {
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.card-jogo .placar {
+    display: block;
+    color: #3fb950;
+    font-size: 1.1rem;
+    margin: 5px 0;
+}
+
+/* Garante que os escudos continuem pequenos na tabela principal */
+.escudo {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    object-fit: contain !important;
+}
