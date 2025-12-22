@@ -2,7 +2,7 @@ name: Atualizar Dados FutStats
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # Roda a cada 10 minutos para o Ao Vivo ser rápido
+    - cron: '*/2 * * * *' # Roda a cada 10 minutos para o Ao Vivo ser rápido
   workflow_dispatch:
 
 jobs:
