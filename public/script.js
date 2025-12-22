@@ -6,20 +6,23 @@ async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
     const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
 
-    if (error || !data.length) {
-        container.innerHTML = '<p>Nenhum jogo ao vivo no momento.</p>';
+    if (error || !data || data.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-secondary)">Aguardando próximos jogos...</p>';
         return;
     }
 
     container.innerHTML = data.map(jogo => `
         <div class="card-jogo">
-            <span class="status">${jogo.status}</span>
-            <div class="times">${jogo.time_casa} vs ${jogo.time_fora}</div>
-            <span class="placar">${jogo.placar}</span>
+            <span class="campeonato-tag">${jogo.campeonato || 'Futebol'}</span>
+            <span class="status-badge">${jogo.status}</span>
+            <div class="times-container">
+                <div class="time-row">${jogo.time_casa}</div>
+                <div class="placar-central">${jogo.placar}</div>
+                <div class="time-row">${jogo.time_fora}</div>
+            </div>
         </div>
     `).join('');
 }
-
 async function carregarTabela(ligaId) {
     const container = document.getElementById('tabela-corpo');
     container.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
