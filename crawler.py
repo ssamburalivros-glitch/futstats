@@ -44,19 +44,26 @@ def capturar_liga(liga_id, espn_id):
             s = entry['stats']
             team = entry['team']
             
-            # Força a busca da forma real time por time
+            # Função para converter qualquer valor para INT puro (remove o .0 se houver)
+            def to_int(name):
+                try:
+                    val = next(i['value'] for i in s if i['name'] == name)
+                    return int(float(val)) # Converte texto/float para float e depois para int
+                except: return 0
+
             forma_real = pegar_forma_real(espn_id, team['id'])
             
             lista.append({
                 "liga": liga_id,
-                "posicao": next(i['value'] for i in s if i['name'] == 'rank'),
+                "posicao": to_int('rank'),
                 "time": team['displayName'],
                 "escudo": team['logos'][0]['href'] if 'logos' in team else "",
-                "jogos": next(i['value'] for i in s if i['name'] == 'gamesPlayed'),
-                "pontos": next(i['value'] for i in s if i['name'] == 'points'),
-                "sg": next(i['value'] for i in s if i['name'] == 'pointDifferential'),
+                "jogos": to_int('gamesPlayed'),
+                "pontos": to_int('points'),
+                "sg": to_int('pointDifferential'),
                 "forma": forma_real
             })
+        print(f"✅ {liga_id}: {len(lista)} times.")
         return lista
     except Exception as e:
         print(f"❌ Erro {liga_id}: {e}")
@@ -67,12 +74,16 @@ def main():
     for lid, eid in LIGAS.items():
         res = capturar_liga(lid, eid)
         if res: dados.extend(res)
-        time.sleep(2) # Pausa para evitar bloqueio
+        time.sleep(1) 
 
     if dados:
-        supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-        supabase.table("tabelas_ligas").insert(dados).execute()
-        print("🚀 TABELAS ATUALIZADAS!")
+        print(f"📤 Enviando {len(dados)} registros para o Supabase...")
+        try:
+            supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
+            supabase.table("tabelas_ligas").insert(dados).execute()
+            print("🚀 SUCESSO!")
+        except Exception as e:
+            print(f"❌ Erro no Supabase: {e}")
 
 if __name__ == "__main__":
     main()
