@@ -1,26 +1,27 @@
+// --- CONFIGURAÇÃO ---
 const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A"; 
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A"; // <--- COLE SUA KEY AQUI
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const ESCUDO_PADRAO = 'https://www.espn.com.br/static/cp/img/soccer/shield-generic.png';
+const IMG_DEFAULT = 'https://www.espn.com.br/static/cp/img/soccer/shield-generic.png';
 
+// --- 1. CARREGAR JOGOS AO VIVO ---
 async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
 
     try {
         const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
-
         if (error) throw error;
 
         if (!data || data.length === 0) {
-            container.innerHTML = '<p style="color:#8b949e; width:100%; text-align:center;">Sem jogos ao vivo agora.</p>';
+            container.innerHTML = '<div style="width:100%; text-align:center; padding:30px; color:#8b949e;">Nenhum jogo ao vivo agora.</div>';
             return;
         }
 
         container.innerHTML = data.map(jogo => {
-            // Validação de logos para evitar quebra/pisca
-            const logoCasa = (jogo.logo_casa && jogo.logo_casa.startsWith('http')) ? jogo.logo_casa : ESCUDO_PADRAO;
-            const logoFora = (jogo.logo_fora && jogo.logo_fora.startsWith('http')) ? jogo.logo_fora : ESCUDO_PADRAO;
+            // Verifica se a URL da imagem é válida, senão usa padrão
+            const logoC = (jogo.logo_casa && jogo.logo_casa.startsWith('http')) ? jogo.logo_casa : IMG_DEFAULT;
+            const logoF = (jogo.logo_fora && jogo.logo_fora.startsWith('http')) ? jogo.logo_fora : IMG_DEFAULT;
 
             return `
                 <div class="card-jogo">
@@ -28,14 +29,14 @@ async function carregarAoVivo() {
                     
                     <div class="confronto">
                         <div class="time-box">
-                            <img src="${logoCasa}" class="logo-ao-vivo" loading="lazy">
+                            <img src="${logoC}" class="logo-ao-vivo" loading="lazy">
                             <span class="nome-time-ao-vivo">${jogo.time_casa}</span>
                         </div>
 
                         <div class="placar-ao-vivo">${jogo.placar}</div>
 
                         <div class="time-box">
-                            <img src="${logoFora}" class="logo-ao-vivo" loading="lazy">
+                            <img src="${logoF}" class="logo-ao-vivo" loading="lazy">
                             <span class="nome-time-ao-vivo">${jogo.time_fora}</span>
                         </div>
                     </div>
@@ -46,13 +47,14 @@ async function carregarAoVivo() {
         }).join('');
 
     } catch (err) {
-        console.error("Erro ao carregar ao vivo:", err);
+        console.error("Erro live:", err);
     }
 }
 
+// --- 2. CARREGAR TABELA ---
 async function carregarTabela(ligaId) {
-    const container = document.getElementById('tabela-corpo');
-    container.innerHTML = '<tr><td colspan="5" style="padding:40px;">Atualizando...</td></tr>';
+    const tbody = document.getElementById('tabela-corpo');
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:40px; color:#8b949e;">Atualizando classificação...</td></tr>';
 
     try {
         const { data, error } = await _supabase
@@ -64,42 +66,50 @@ async function carregarTabela(ligaId) {
         if (error) throw error;
 
         if (data) {
-            container.innerHTML = data.map(item => `
+            tbody.innerHTML = data.map(row => `
                 <tr>
-                    <td>${item.posicao}º</td>
+                    <td class="col-pos">${row.posicao}</td>
                     <td>
                         <div class="td-time">
-                            <img src="${item.escudo || ESCUDO_PADRAO}" class="escudo">
-                            <span>${item.time}</span>
+                            <img src="${row.escudo || IMG_DEFAULT}" class="escudo" loading="lazy">
+                            <span>${row.time}</span>
                         </div>
                     </td>
-                    <td>${item.jogos}</td>
-                    <td class="${item.sg > 0 ? 'sg-positive' : (item.sg < 0 ? 'sg-negative' : '')}">
-                        ${item.sg > 0 ? '+' + item.sg : item.sg}
+                    <td>${row.jogos}</td>
+                    <td class="${row.sg >= 0 ? 'sg-positive' : 'sg-negative'}">
+                        ${row.sg > 0 ? '+' + row.sg : row.sg}
                     </td>
-                    <td style="font-weight:bold;">${item.pontos}</td>
+                    <td style="font-weight:700; color:#fff;">${row.pontos}</td>
                 </tr>
             `).join('');
         }
     } catch (err) {
-        console.error("Erro na tabela:", err);
+        console.error("Erro tabela:", err);
+        tbody.innerHTML = '<tr><td colspan="5">Erro ao buscar dados.</td></tr>';
     }
 }
 
+// --- 3. INICIALIZAÇÃO ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Carrega dados iniciais
     carregarAoVivo();
-    carregarTabela('BR');
+    carregarTabela('BR'); // Inicia com Brasileirão
 
-    // Refresh automático de 60s
+    // Atualiza Live a cada 60s
     setInterval(carregarAoVivo, 60000);
 
-    // Eventos dos botões pílula
+    // Configura botões
     const botoes = document.querySelectorAll('.btn-liga');
     botoes.forEach(btn => {
         btn.addEventListener('click', () => {
+            // Remove active de todos
             botoes.forEach(b => b.classList.remove('active'));
+            // Adiciona no clicado
             btn.classList.add('active');
-            carregarTabela(btn.getAttribute('data-liga'));
+            
+            // Carrega nova tabela
+            const liga = btn.getAttribute('data-liga');
+            carregarTabela(liga);
         });
     });
 });
