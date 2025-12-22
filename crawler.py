@@ -33,32 +33,48 @@ def capturar_dados(liga_id, url):
         response = requests.get(url, headers=headers, timeout=15)
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # Procura a tabela de classificação (padrão do FBRef)
+        # Tenta encontrar a tabela principal de classificação (Regular Season ou Overall)
+        # O FBRef costupa usar IDs como 'results20242025121_overall'
         tabela = soup.find('table', {'class': 'stats_table'})
-        if not tabela: return []
+        
+        if not tabela:
+            print(f"⚠️ Nenhuma tabela encontrada para {liga_id}")
+            return []
 
         times = []
-        for row in tabela.find('tbody').find_all('tr'):
-            if 'spacer' in row.get('class', []) or 'thead' in row.get('class', []): continue
+        corpo_tabela = tabela.find('tbody')
+        if not corpo_tabela: return []
+
+        for row in corpo_tabela.find_all('tr'):
+            # Ignora linhas de separação ou cabeçalhos repetidos
+            if 'spacer' in row.get('class', []) or 'thead' in row.get('class', []):
+                continue
             
             cols = row.find_all(['th', 'td'])
+            
+            # Verificação mínima de colunas para garantir que é uma linha de dados
             if len(cols) >= 10:
-                # Extração segura dos dados
                 try:
+                    # posicao costuma estar no <th> ou na primeira <td>
+                    pos_text = cols[0].text.strip().replace('.', '')
                     nome_time = cols[1].text.strip()
+                    
+                    # Busca o escudo
                     img_tag = cols[1].find('img')
                     escudo = img_tag['src'] if img_tag else ""
 
+                    # No FBRef Overall: 2=MP(jogos), 9=Pts, 10=GD(saldo)
                     times.append({
                         "liga": liga_id,
-                        "posicao": int(cols[0].text.strip().replace('.', '')),
+                        "posicao": int(pos_text) if pos_text.isdigit() else 0,
                         "time": nome_time,
                         "escudo": escudo,
-                        "jogos": int(cols[2].text.strip()),
-                        "pontos": int(cols[9].text.strip()),
-                        "sg": int(cols[10].text.strip().replace('+', ''))
+                        "jogos": int(cols[2].text.strip()) if cols[2].text.strip().isdigit() else 0,
+                        "pontos": int(cols[9].text.strip()) if cols[9].text.strip().isdigit() else 0,
+                        "sg": int(cols[10].text.strip().replace('+', '')) if cols[10].text.strip().replace('+', '').lstrip('-').isdigit() else 0
                     })
-                except: continue
+                except Exception as e:
+                    continue
         return times
     except Exception as e:
         print(f"❌ Erro {liga_id}: {e}")
@@ -70,14 +86,23 @@ def main():
         res = capturar_dados(liga_id, url)
         if res:
             todas_ligas.extend(res)
-            print(f"✅ {liga_id} capturado.")
-        time.sleep(3) # Delay curto e seguro
+            print(f"✅ {liga_id} capturado: {len(res)} times encontrados.")
+        
+        # Delay para não ser bloqueado (FBRef é sensível)
+        time.sleep(random.uniform(3, 6))
 
     if todas_ligas:
-        print(f"📤 Enviando {len(todas_ligas)} times para o Supabase...")
-        supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-        supabase.table("tabelas_ligas").insert(todas_ligas).execute()
-        print("🚀 SUCESSO!")
+        print(f"📤 Enviando {len(todas_ligas)} registros para o Supabase...")
+        try:
+            # Limpa os dados antigos
+            supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
+            # Insere os novos
+            supabase.table("tabelas_ligas").insert(todas_ligas).execute()
+            print("🚀 SUCESSO! Dados atualizados.")
+        except Exception as e:
+            print(f"❌ Erro ao subir para o banco: {e}")
+    else:
+        print("⚠️ Nenhum dado coletado para enviar.")
 
 if __name__ == "__main__":
     main()
