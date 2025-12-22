@@ -1,187 +1,78 @@
-/* --- CONFIGURAÇÕES GERAIS --- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
 :root {
-    --bg-body: #090c10;      /* Fundo muito escuro */
-    --bg-card: #161b22;      /* Fundo dos cards */
-    --border: #30363d;       /* Bordas sutis */
-    --text-main: #c9d1d9;    /* Texto principal */
-    --text-muted: #8b949e;   /* Texto secundário */
-    --accent: #238636;       /* Verde acento */
-    --white: #ffffff;
-    --red-live: #f85149;
-    --glass: rgba(255, 255, 255, 0.04);
+    --bg: #050505;
+    --card-bg: #121212;
+    --border: #222;
+    --green: #00ff66;
+    --text: #ffffff;
+    --text-dim: #888;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    background-color: var(--bg-body);
-    color: var(--text-main);
+    background-color: var(--bg);
+    color: var(--text);
     font-family: 'Inter', sans-serif;
     padding: 20px;
-    -webkit-font-smoothing: antialiased;
 }
 
-.container { max-width: 900px; margin: 0 auto; }
+.container { max-width: 1100px; margin: 0 auto; }
 
-/* --- HEADER & LOGO --- */
-.site-header {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Centraliza logo e nome */
-    gap: 12px;
-    margin-bottom: 30px;
-    padding-top: 10px;
+/* HEADER */
+.main-header { text-align: center; padding: 40px 0; }
+.main-logo { height: 80px; margin-bottom: 10px; } /* Logo grande */
+.main-header h1 { font-size: 3rem; font-weight: 900; letter-spacing: -2px; }
+.green { color: var(--green); }
+.subtitle { color: var(--text-dim); font-size: 1rem; margin-top: 5px; }
+
+/* CARDS DE DESTAQUE */
+.section-title { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.dot { width: 10px; height: 10px; background: #ff3b30; border-radius: 50%; box-shadow: 0 0 10px #ff3b30; }
+.section-title h2 { font-size: 0.9rem; font-weight: 700; color: var(--text-dim); }
+
+.hero-grid { 
+    display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; 
+    scrollbar-width: none; 
 }
 
-.app-logo {
-    height: 40px; /* Tamanho do logo */
-    width: auto;
-    filter: drop-shadow(0 0 8px rgba(255,255,255,0.1));
-}
-
-.app-title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--white);
-    letter-spacing: -1px;
-}
-
-.highlight { color: var(--accent); }
-
-/* --- AO VIVO (CARDS) --- */
-.ao-vivo-header { margin-bottom: 15px; display: flex; align-items: center; }
-
-.live-indicator {
-    display: flex; align-items: center; gap: 8px;
-    background: rgba(248, 81, 73, 0.1);
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1px solid rgba(248, 81, 73, 0.2);
-}
-
-.pulse-dot {
-    width: 8px; height: 8px; background: var(--red-live);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-}
-
-.live-text { font-size: 0.75rem; font-weight: 700; color: var(--red-live); letter-spacing: 0.5px; }
-
-@keyframes pulse {
-    0% { transform: scale(0.95); opacity: 1; }
-    70% { transform: scale(1.5); opacity: 0; }
-    100% { transform: scale(0.95); opacity: 0; }
-}
-
-/* Grid Horizontal */
-.ao-vivo-grid {
-    display: flex;
-    gap: 15px;
-    overflow-x: auto;
-    padding-bottom: 20px;
-    scroll-behavior: smooth;
-}
-
-/* Scrollbar Personalizada */
-.ao-vivo-grid::-webkit-scrollbar { height: 6px; }
-.ao-vivo-grid::-webkit-scrollbar-track { background: var(--bg-body); }
-.ao-vivo-grid::-webkit-scrollbar-thumb { 
-    background: var(--border); 
-    border-radius: 10px; 
-}
-
-/* Card Design */
-.card-jogo {
-    min-width: 260px;
-    height: 150px;
-    background: linear-gradient(145deg, var(--bg-card), #0d1117);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
+.card-hero {
+    min-width: 320px;
+    height: 200px;
+    background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1000&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    border-radius: 24px;
+    padding: 25px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.2s;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-.card-jogo:hover { transform: translateY(-3px); border-color: var(--text-muted); }
-
-.campeonato-nome { 
-    font-size: 0.65rem; color: var(--text-muted); 
-    text-transform: uppercase; text-align: center; letter-spacing: 1px;
-}
-
-.confronto { display: flex; align-items: center; justify-content: space-between; padding: 0 10px; }
-.time-box { display: flex; flex-direction: column; align-items: center; width: 70px; }
-.logo-ao-vivo { width: 32px; height: 32px; object-fit: contain; margin-bottom: 6px; }
-
-.nome-time-ao-vivo { 
-    font-size: 0.7rem; font-weight: 600; text-align: center; 
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
-}
-
-.placar-ao-vivo { 
-    font-size: 1.6rem; font-weight: 800; color: var(--white); 
-    font-variant-numeric: tabular-nums;
-}
-
-.status-tempo { 
-    font-size: 0.7rem; color: var(--accent); 
-    text-align: center; font-weight: 700; 
-    background: rgba(35, 134, 54, 0.1);
-    padding: 4px; border-radius: 4px;
-    align-self: center;
-}
-
-/* --- BOTÕES PÍLULA --- */
-.menu-ligas { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 30px 0; }
-
-.btn-liga {
-    background: var(--glass);
+    justify-content: flex-end;
     border: 1px solid var(--border);
-    color: var(--text-main);
-    padding: 10px 20px;
-    border-radius: 100px;
-    font-size: 0.85rem; font-weight: 500;
-    cursor: pointer; transition: 0.3s;
-    backdrop-filter: blur(5px);
+    transition: transform 0.3s;
 }
 
-.btn-liga:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+.card-hero:hover { transform: scale(1.03); border-color: var(--green); }
 
-.btn-liga.active {
-    background: var(--white); color: #000; border-color: var(--white);
-    font-weight: 700; box-shadow: 0 0 15px rgba(255,255,255,0.15);
+.hero-teams { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.hero-team-box { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.hero-logo { width: 45px; height: 45px; object-fit: contain; }
+.hero-name { font-size: 0.8rem; font-weight: 700; }
+.hero-score { font-size: 2.2rem; font-weight: 900; }
+.hero-status { font-size: 0.75rem; color: var(--green); font-weight: 800; background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 50px; align-self: center; }
+
+/* NAV PILLS */
+.nav-pills { display: flex; gap: 10px; justify-content: center; margin: 40px 0; }
+.pill { 
+    background: var(--card-bg); border: 1px solid var(--border); color: var(--text);
+    padding: 12px 25px; border-radius: 100px; font-weight: 600; cursor: pointer; transition: 0.3s;
 }
+.pill.active { background: var(--text); color: #000; border-color: var(--text); }
 
-/* --- TABELA --- */
-.tabela-wrapper {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px; overflow: hidden;
-}
-
+/* TABELA */
+.table-container { background: var(--card-bg); border-radius: 24px; padding: 15px; border: 1px solid var(--border); }
 table { width: 100%; border-collapse: collapse; }
-
-th {
-    background: rgba(255,255,255,0.02);
-    padding: 14px; font-size: 0.7rem; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border);
-}
-
-td {
-    padding: 16px 14px; border-bottom: 1px solid var(--border);
-    text-align: center; font-size: 0.9rem;
-}
-
-.text-left { text-align: left; }
-.col-pos { width: 50px; color: var(--text-muted); font-weight: 600; }
-.td-time { display: flex; align-items: center; gap: 12px; }
-.escudo { width: 24px; height: 24px; object-fit: contain; }
-
-.sg-positive { color: var(--accent); font-weight: 600; }
-.sg-negative { color: var(--red-live); }
+th { color: var(--text-dim); font-size: 0.7rem; padding: 15px; border-bottom: 1px solid var(--border); }
+td { padding: 18px 15px; border-bottom: 1px solid var(--border); font-weight: 600; }
+.txt-center { text-align: center; }
+.team-row { display: flex; align-items: center; gap: 15px; }
+.escudo-tab { width: 28px; height: 28px; }
+.sg-pos { color: var(--green); }
