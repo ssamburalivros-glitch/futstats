@@ -2,8 +2,8 @@ name: FutStats Crawler FBRef
 
 on:
   schedule:
-    # Roda a cada 2 horas
-    - cron: '0 */2 * * *'
+    # Roda a cada 6 horas (Horário UTC)
+    - cron: '0 */6 * * *'
   workflow_dispatch: # Permite rodar manualmente pelo botão "Run workflow"
 
 jobs:
@@ -11,21 +11,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do codigo
+      - name: Checkout do código
         uses: actions/checkout@v4
 
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+          cache: 'pip' # Acelera as próximas execuções
 
-      - name: Instalar dependencias
+      - name: Instalar Dependências Python
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install requests-html beautifulsoup4 supabase fake-useragent lxml_html_clean playwright
+
+      - name: Instalar Navegador e Bibliotecas do Sistema
+        # Este passo evita o travamento infinito instalando o Chromium e as deps do Linux
+        run: |
+          python -m playwright install chromium --with-deps
 
       - name: Rodar Crawler
-        # É aqui que a mágica acontece. A indentação deve ser exata.
+        # É aqui que os segredos do seu GitHub entram no código
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
