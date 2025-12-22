@@ -1,87 +1,77 @@
 :root {
-    --bg-body: #0d1117;
-    --bg-card: #161b22;
+    --bg: #0d1117;
+    --card: #161b22;
     --border: #30363d;
-    --accent: #238636;
-    --text: #c9d1d9;
+    --text-muted: #8b949e;
+    --white: #ffffff;
 }
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    background-color: var(--bg-body);
+    background-color: var(--bg);
+    color: var(--white);
     font-family: 'Inter', sans-serif;
-    color: var(--text);
-}
-
-/* BOTÕES ESTILO PÍLULA (Conforme a imagem) */
-.menu-ligas {
+    padding: 20px;
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin: 20px 0;
 }
+
+.container { width: 100%; max-width: 900px; }
+
+/* AO VIVO E CARDS */
+.ao-vivo-container { margin-bottom: 30px; }
+.ao-vivo-header { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
+.pulse-icon { width: 8px; height: 8px; background: #f85149; border-radius: 50%; }
+
+.ao-vivo-grid { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; }
+
+.card-jogo {
+    min-width: 250px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+}
+
+.campeonato-nome { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; display: block; }
+
+.confronto { display: flex; align-items: center; justify-content: space-around; }
+.time-box { display: flex; flex-direction: column; align-items: center; width: 75px; }
+.logo-ao-vivo { width: 35px; height: 35px; margin-bottom: 5px; object-fit: contain; }
+.nome-time-ao-vivo { font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+
+.placar-ao-vivo { font-size: 1.4rem; font-weight: 800; }
+
+.status-tempo { font-size: 0.7rem; color: #3fb950; margin-top: 10px; }
+
+/* BOTÕES PÍLULA */
+.menu-ligas { display: flex; gap: 8px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
 
 .btn-liga {
     background: transparent;
     border: 1px solid var(--border);
-    color: #fff;
-    padding: 6px 16px;
-    border-radius: 20px; /* Efeito arredondado pílula */
+    color: var(--white);
+    padding: 6px 14px;
+    border-radius: 20px;
     cursor: pointer;
-    font-size: 0.85rem;
-    transition: 0.3s;
-}
-
-.btn-liga.active {
-    background: #fff;
-    color: #000;
-    border-color: #fff;
-}
-
-/* CARDS AO VIVO COM LOGOS */
-.card-jogo {
-    min-width: 260px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 15px;
-    margin-right: 15px;
-}
-
-.campeonato-nome {
-    font-size: 0.7rem;
-    color: #8b949e;
-    text-align: center;
-    display: block;
-    margin-bottom: 10px;
-}
-
-.confronto {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.time-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 80px;
-}
-
-.logo-ao-vivo {
-    width: 35px;
-    height: 35px;
-    margin-bottom: 5px;
-}
-
-.nome-time-ao-vivo {
     font-size: 0.8rem;
-    font-weight: bold;
-    text-align: center;
+    transition: 0.2s;
 }
 
-.placar-ao-vivo {
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: 5px;
-}
+.btn-liga.active { background: var(--white); color: #000; border-color: var(--white); }
+
+/* TABELA */
+.tabela-wrapper { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 12px; font-size: 0.7rem; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+td { padding: 14px; border-bottom: 1px solid var(--border); text-align: center; font-size: 0.9rem; }
+.text-left { text-align: left; }
+
+.td-time { display: flex; align-items: center; gap: 10px; }
+.escudo { width: 22px; height: 22px; object-fit: contain; }
+
+/* CORES SG */
+.sg-positive { color: #3fb950; }
+.sg-negative { color: #f85149; }
