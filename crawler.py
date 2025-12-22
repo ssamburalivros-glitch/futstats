@@ -8,7 +8,7 @@ from urllib.parse import quote
 # --- CONFIGURAÇÃO ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-SCRAPINGBEE_KEY = os.environ.get("SCRAPING_KEY") # Chave que adicionou ao GitHub
+SCRAPING_KEY = os.environ.get("SCRAPING_KEY") # Chave que adicionou ao GitHub
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
