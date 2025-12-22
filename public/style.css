@@ -75,3 +75,34 @@ td { padding: 14px; border-bottom: 1px solid var(--border); text-align: center; 
 /* CORES SG */
 .sg-positive { color: #3fb950; }
 .sg-negative { color: #f85149; }
+
+/* Estabiliza o tamanho das logos para evitar tremor */
+.logo-ao-vivo {
+    width: 35px !important;
+    height: 35px !important;
+    min-width: 35px;
+    min-height: 35px;
+    object-fit: contain;
+    background-color: rgba(255, 255, 255, 0.05); /* Espaço reservado visual */
+    border-radius: 50%;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Garante que o container de times não colapse */
+.time-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 85px; /* Tamanho fixo */
+    min-height: 60px;
+    justify-content: flex-start;
+}
+
+.card-jogo {
+    min-width: 260px;
+    height: 140px; /* Altura fixa impede o card de "pular" */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
