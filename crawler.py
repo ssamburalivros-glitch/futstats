@@ -1,13 +1,15 @@
 import os
 import time
-import random
 import requests
 from bs4 import BeautifulSoup
 from supabase import create_client
+from urllib.parse import quote
 
 # --- CONFIGURAÇÃO ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+SCRAPINGBEE_KEY = os.environ.get("SCRAPING_KEY") # Chave que adicionou ao GitHub
+
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 LIGAS = {
@@ -19,28 +21,24 @@ LIGAS = {
     "PT": "https://fbref.com/en/comps/37/Primeira-Liga-Stats"
 }
 
-def capturar_dados(liga_id, url):
-    # Usamos o Google Search/Cache como "ponte" para evitar o 403 direto
-    # ou tentamos uma URL de "versão móvel" que costuma ser menos protegida
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G960U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36'
-    }
+def capturar_dados_com_proxy(liga_id, url_alvo):
+    print(f"📡 Solicitando {liga_id} via ScrapingBee...")
+    
+    # Monta a URL do ScrapingBee para contornar o 403
+    api_url = f"https://app.scrapingbee.com/api/v1/?api_key={SCRAPINGBEE_KEY}&url={quote(url_alvo)}&render_js=false"
     
     try:
-        print(f"📡 Solicitando {liga_id} via Mobile Gateway...")
-        # Adicionamos parâmetros de busca para parecer um tráfego de busca real
-        proxy_url = f"{url}?utm_source=google&utm_medium=search"
+        response = requests.get(api_url, timeout=40)
         
-        response = requests.get(proxy_url, headers=headers, timeout=30)
-        
-        if response.status_code == 403:
-            print(f"❌ FBRef ainda bloqueia o GitHub para {liga_id} (403).")
+        if response.status_code != 200:
+            print(f"❌ Erro na API ({response.status_code}) para {liga_id}")
             return []
 
         soup = BeautifulSoup(response.content, 'html.parser')
         tabela = soup.select_one('table[id*="overall"]') or soup.find('table', class_='stats_table')
 
         if not tabela:
+            print(f"⚠️ Tabela não encontrada no HTML retornado para {liga_id}")
             return []
 
         times = []
@@ -48,7 +46,6 @@ def capturar_dados(liga_id, url):
             cols = row.find_all(['th', 'td'])
             if len(cols) >= 10:
                 try:
-                    # Limpeza de dados para o Supabase
                     times.append({
                         "liga": liga_id,
                         "posicao": int(cols[0].text.strip().replace('.', '')),
@@ -61,29 +58,27 @@ def capturar_dados(liga_id, url):
                 except: continue
         return times
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f"❌ Falha na conexão: {e}")
         return []
 
 def main():
     todas_ligas = []
     for liga_id, url in LIGAS.items():
-        res = capturar_dados(liga_id, url)
+        res = capturar_dados_com_proxy(liga_id, url)
         if res:
             todas_ligas.extend(res)
-            print(f"✅ {liga_id} capturada!")
+            print(f"✅ {liga_id} capturada com sucesso!")
         
-        # Intervalo longo e aleatório é vital aqui
-        espera = random.randint(30, 60)
-        print(f"⏳ Aguardando {espera}s para a próxima liga...")
-        time.sleep(espera)
+        # Como o ScrapingBee já rotaciona o IP, podemos diminuir o intervalo
+        time.sleep(2)
 
     if todas_ligas:
-        print(f"📤 Enviando {len(todas_ligas)} times...")
+        print(f"📤 Enviando {len(todas_ligas)} times para o Supabase...")
         supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
         supabase.table("tabelas_ligas").insert(todas_ligas).execute()
-        print("🚀 SUCESSO!")
+        print("🚀 SUCESSO ABSOLUTO!")
     else:
-        print("💀 O bloqueio persiste. O FBRef proibiu o GitHub Actions.")
+        print("💀 Nem a API conseguiu aceder aos dados.")
 
 if __name__ == "__main__":
     main()
