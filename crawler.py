@@ -7,8 +7,8 @@ from supabase import create_client
 from fake_useragent import UserAgent
 
 # --- CONFIGURAÇÃO DE AMBIENTE ---
-SUPABASE_URL = os.environ.get("https://vqocdowjdutfzmnvxqvz.supabase.co")
-SUPABASE_KEY = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxb2Nkb3dqZHV0ZnptbnZ4cXZ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjIzNjQzNCwiZXhwIjoyMDgxODEyNDM0fQ.GlJ_-kh2u7qsLMRgB5jVpvduhIG0yyY9AZ9rU_mEqcE")
+SUPABASE_URL = os.environ.get("https://sihunefyfkecumbiyxva.supabase.co")
+SUPABASE_KEY = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjQwODkzOCwiZXhwIjoyMDgxOTg0OTM4fQ.qeZliDad795-HMs26rheYtKfIgtWZ7aIHQmQsVwZIic")
 
 print("--- INICIALIZANDO CRAWLER FUTSTATS ---")
 if SUPABASE_URL and SUPABASE_KEY:
