@@ -25,7 +25,7 @@ def capturar_dados_com_proxy(liga_id, url_alvo):
     print(f"📡 Solicitando {liga_id} via ScrapingBee...")
     
     # Monta a URL do ScrapingBee para contornar o 403
-    api_url = f"https://app.scrapingbee.com/api/v1/?api_key={SCRAPINGBEE_KEY}&url={quote(url_alvo)}&render_js=false"
+    api_url = f"https://app.scrapingbee.com/api/v1/?api_key={SCRAPING_KEY}&url={quote(url_alvo)}&render_js=false"
     
     try:
         response = requests.get(api_url, timeout=40)
