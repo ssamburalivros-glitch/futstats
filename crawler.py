@@ -1,7 +1,6 @@
 import os
 import time
 import requests
-import re
 from supabase import create_client
 
 # --- CONFIGURAÇÃO ---
@@ -10,113 +9,70 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 LIGAS = {
-    "BR": "bra.1",
-    "PL": "eng.1",
-    "ES": "esp.1",
-    "DE": "ger.1",
-    "IT": "ita.1",
-    "PT": "por.1"
+    "BR": "bra.1", "PL": "eng.1", "ES": "esp.1",
+    "DE": "ger.1", "IT": "ita.1", "PT": "por.1"
 }
 
-def pegar_forma_fallback(espn_id, team_id):
-    """ Busca os últimos 5 jogos reais no calendário do time se a tabela falhar """
+def pegar_forma_real(espn_id, team_id):
+    """Busca os últimos 5 jogos reais no calendário do time"""
     try:
         url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/teams/{team_id}/schedule"
         res = requests.get(url, timeout=10)
         eventos = res.json().get('events', [])
         resultados = []
         
-        # Inverte para pegar os mais recentes
         for evento in reversed(eventos):
             if len(resultados) >= 5: break
-            
-            # Só pega jogos que já terminaram
             if evento['status']['type']['description'] == "Final":
-                competicao = evento['competitions'][0]
-                equipes = competicao['competitors']
-                
-                meu_time = next(t for t in equipes if t['id'] == team_id)
-                
-                if meu_time.get('winner') is True:
-                    resultados.append('V')
+                comp = evento['competitions'][0]
+                meu_time = next(t for t in comp['competitors'] if t['id'] == team_id)
+                if meu_time.get('winner') is True: resultados.append('V')
                 elif meu_time.get('winner') is False:
-                    # Verifica se o adversário venceu ou se foi empate
-                    adversario = next(t for t in equipes if t['id'] != team_id)
-                    if adversario.get('winner') is False:
-                        resultados.append('E')
-                    else:
-                        resultados.append('D')
-        
+                    adv = next(t for t in comp['competitors'] if t['id'] != team_id)
+                    resultados.append('E' if adv.get('winner') is False else 'D')
         return "".join(reversed(resultados))
-    except Exception as e:
-        return ""
+    except: return "EEEEE"
 
 def capturar_liga(liga_id, espn_id):
     print(f"📡 Processando {liga_id}...")
     url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/standings"
     try:
-        response = requests.get(url, timeout=20)
-        data = response.json()
+        data = requests.get(url, timeout=20).json()
         entries = data['children'][0]['standings']['entries']
-        times_lista = []
-
+        lista = []
         for entry in entries:
-            stats = entry['stats']
+            s = entry['stats']
             team = entry['team']
             
-            # Função auxiliar segura para pegar valores numéricos
-            def get_stat(name):
-                for s in stats:
-                    if s.get('name') == name:
-                        return int(s.get('value', 0))
-                return 0
+            # Força a busca da forma real time por time
+            forma_real = pegar_forma_real(espn_id, team['id'])
             
-            # Tenta pegar a forma da tabela principal
-            forma = ""
-            for s in stats:
-                if s.get('name') in ['summary', 'overall', 'form']:
-                    forma = s.get('summary') or s.get('displayValue', '')
-                    break
-            
-            # Se a forma veio com números (ex: 1-1-0) ou vazia, usa o fallback real
-            if not forma or any(c.isdigit() for c in forma):
-                forma = pegar_forma_fallback(espn_id, team['id'])
-            
-            # Tradução e Limpeza rigorosa (V, E, D apenas)
-            forma = forma.upper().replace('W','V').replace('L','D').replace('T','E')
-            forma = re.sub(r'[^VED]', '', forma)
-
-            times_lista.append({
+            lista.append({
                 "liga": liga_id,
-                "posicao": get_stat('rank'),
+                "posicao": next(i['value'] for i in s if i['name'] == 'rank'),
                 "time": team['displayName'],
                 "escudo": team['logos'][0]['href'] if 'logos' in team else "",
-                "jogos": get_stat('gamesPlayed'),
-                "pontos": get_stat('points'),
-                "sg": get_stat('pointDifferential'),
-                "forma": forma[-5:] if forma else "S_DADOS"
+                "jogos": next(i['value'] for i in s if i['name'] == 'gamesPlayed'),
+                "pontos": next(i['value'] for i in s if i['name'] == 'points'),
+                "sg": next(i['value'] for i in s if i['name'] == 'pointDifferential'),
+                "forma": forma_real
             })
-            
-        print(f"✅ {liga_id}: {len(times_lista)} times processados.")
-        return times_lista
+        return lista
     except Exception as e:
-        print(f"❌ Erro em {liga_id}: {e}")
+        print(f"❌ Erro {liga_id}: {e}")
         return []
 
 def main():
-    final_data = []
+    dados = []
     for lid, eid in LIGAS.items():
         res = capturar_liga(lid, eid)
-        if res:
-            final_data.extend(res)
-        time.sleep(1)
+        if res: dados.extend(res)
+        time.sleep(2) # Pausa para evitar bloqueio
 
-    if final_data:
-        print(f"📤 Atualizando Supabase com {len(final_data)} registros...")
-        # Limpa e insere
+    if dados:
         supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-        supabase.table("tabelas_ligas").insert(final_data).execute()
-        print("🚀 SUCESSO!")
+        supabase.table("tabelas_ligas").insert(dados).execute()
+        print("🚀 TABELAS ATUALIZADAS!")
 
 if __name__ == "__main__":
     main()
