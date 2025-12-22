@@ -1,6 +1,7 @@
 import os
 import time
 import requests
+import re
 from supabase import create_client
 
 # --- CONFIGURAÇÃO ---
@@ -13,37 +14,25 @@ LIGAS = {
     "DE": "ger.1", "IT": "ita.1", "PT": "por.1"
 }
 
-def pegar_forma_real(espn_id, team_id):
-    """Busca os últimos 5 jogos reais no calendário específico do time"""
+def pegar_forma_detalhada(espn_id, team_id):
+    """ Tenta extrair a forma real do calendário de jogos do time """
     try:
-        # Endpoint de calendário/resultados do time
         url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/teams/{team_id}/schedule"
-        res = requests.get(url, timeout=10)
-        eventos = res.json().get('events', [])
+        res = requests.get(url, timeout=10).json()
+        eventos = res.get('events', [])
         resultados = []
         
-        # Pega os jogos encerrados de trás para frente
         for evento in reversed(eventos):
             if len(resultados) >= 5: break
-            
             if evento['status']['type']['description'] == "Final":
                 comp = evento['competitions'][0]
-                equipes = comp['competitors']
-                
-                # Identifica meu time na partida
-                meu_time = next(t for t in equipes if t['id'] == team_id)
-                
-                if meu_time.get('winner') is True:
-                    resultados.append('V')
+                meu_time = next(t for t in comp['competitors'] if t['id'] == team_id)
+                if meu_time.get('winner') is True: resultados.append('V')
                 elif meu_time.get('winner') is False:
-                    # Verifica se o adversário venceu ou se foi empate
-                    adversario = next(t for t in equipes if t['id'] != team_id)
-                    resultados.append('E' if adversario.get('winner') is False else 'D')
-        
-        # Inverte para ficar na ordem cronológica correta (mais antigo para o mais novo)
+                    adv = next(t for t in comp['competitors'] if t['id'] != team_id)
+                    resultados.append('E' if adv.get('winner') is False else 'D')
         return "".join(reversed(resultados))
-    except:
-        return ""
+    except: return ""
 
 def capturar_liga(liga_id, espn_id):
     print(f"📡 Processando {liga_id}...")
@@ -54,19 +43,31 @@ def capturar_liga(liga_id, espn_id):
         lista = []
         
         for entry in entries:
-            s = entry['stats']
+            stats = entry['stats']
             team = entry['team']
             
-            # Converte valores numéricos com segurança (evita o erro 38.0)
+            # 1. Tenta pegar a forma simples da própria tabela
+            forma_bruta = ""
+            for s in stats:
+                if s.get('name') in ['summary', 'overall', 'form']:
+                    forma_bruta = s.get('summary') or s.get('displayValue', '')
+                    break
+            
+            # Limpa a forma bruta (remove números e espaços)
+            forma_limpa = re.sub(r'[^WLTwedv]', '', forma_bruta).upper()
+            forma_limpa = forma_limpa.replace('W','V').replace('L','D').replace('T','E')
+
+            # 2. Se a forma da tabela estiver vazia, vai no calendário detalhado
+            if not forma_limpa or len(forma_limpa) < 2:
+                forma_limpa = pegar_forma_detalhada(espn_id, team['id'])
+
+            # Conversão de números segura
             def to_int(name):
                 try:
-                    val = next(i['value'] for i in s if i['name'] == name)
+                    val = next(i['value'] for i in stats if i['name'] == name)
                     return int(float(val))
                 except: return 0
 
-            # BUSCA OS RESULTADOS REAIS (V-E-D)
-            forma_real = pegar_forma_real(espn_id, team['id'])
-            
             lista.append({
                 "liga": liga_id,
                 "posicao": to_int('rank'),
@@ -75,31 +76,25 @@ def capturar_liga(liga_id, espn_id):
                 "jogos": to_int('gamesPlayed'),
                 "pontos": to_int('points'),
                 "sg": to_int('pointDifferential'),
-                "forma": forma_real if forma_real else "S_DADOS"
+                "forma": forma_limpa if forma_limpa else "S_DADOS"
             })
-            # Pequena pausa para não sobrecarregar a API
-            time.sleep(0.5) 
-            
-        print(f"✅ {liga_id} concluída.")
         return lista
     except Exception as e:
         print(f"❌ Erro {liga_id}: {e}")
         return []
 
 def main():
-    dados_finais = []
+    dados_totais = []
     for lid, eid in LIGAS.items():
         res = capturar_liga(lid, eid)
-        if res: dados_finais.extend(res)
+        if res: dados_totais.extend(res)
+        time.sleep(1)
 
-    if dados_finais:
-        print(f"📤 Enviando {len(dados_finais)} registros para o Supabase...")
-        try:
-            supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-            supabase.table("tabelas_ligas").insert(dados_finais).execute()
-            print("🚀 SUCESSO!")
-        except Exception as e:
-            print(f"❌ Erro Supabase: {e}")
+    if dados_totais:
+        # Limpa e insere no Supabase
+        supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
+        supabase.table("tabelas_ligas").insert(dados_totais).execute()
+        print(f"🚀 {len(dados_totais)} times atualizados com sucesso!")
 
 if __name__ == "__main__":
     main()
