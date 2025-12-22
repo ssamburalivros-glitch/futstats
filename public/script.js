@@ -1,10 +1,10 @@
 // CONFIGURAÇÕES DO SUPABASE
 const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A"; // Certifique-se de usar sua chave anon pública
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A"; // Substitua pela sua chave anon pública
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /**
- * BUSCA E RENDERIZA OS JOGOS AO VIVO (CARDS SUPERIORES)
+ * BUSCA E RENDERIZA OS JOGOS AO VIVO (CARDS SUPERIORES COM LOGOS)
  */
 async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
@@ -17,11 +17,11 @@ async function carregarAoVivo() {
         if (error) throw error;
 
         if (!data || data.length === 0) {
-            container.innerHTML = '<p style="color:#8b949e; padding: 20px;">Nenhum jogo para exibir no momento.</p>';
+            container.innerHTML = '<p style="color:#8b949e; padding: 20px; width: 100%; text-align: center;">Aguardando próximos jogos...</p>';
             return;
         }
 
-        // Mapeia os dados para o layout da imagem (Logo - Placar - Logo)
+        // Renderização dos cards com Logos e Placar centralizado
         container.innerHTML = data.map(jogo => `
             <div class="card-jogo">
                 <span class="campeonato-nome">${jogo.campeonato || 'Futebol'}</span>
@@ -76,4 +76,37 @@ async function carregarTabela(ligaId) {
                         </div>
                     </td>
                     <td>${item.jogos}</td>
-                    <td class="${item.sg > 0 ? 'sg-positive' : (item.sg < 0 ? 'sg-negative'
+                    <td class="${item.sg > 0 ? 'sg-positive' : (item.sg < 0 ? 'sg-negative' : '')}">
+                        ${item.sg > 0 ? '+' + item.sg : item.sg}
+                    </td>
+                    <td class="pts">${item.pontos}</td>
+                </tr>
+            `).join('');
+        }
+    } catch (err) {
+        console.error("Erro ao carregar tabela:", err);
+        container.innerHTML = '<tr><td colspan="5">Erro ao carregar classificação.</td></tr>';
+    }
+}
+
+/**
+ * INICIALIZAÇÃO E EVENTOS DE CLICK (BOTÕES PÍLULA)
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    carregarAoVivo();
+    carregarTabela('BR');
+
+    // Atualização automática a cada 60 segundos
+    setInterval(carregarAoVivo, 60000);
+
+    const botoes = document.querySelectorAll('.btn-liga');
+    botoes.forEach(btn => {
+        btn.addEventListener('click', () => {
+            botoes.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const liga = btn.getAttribute('data-liga');
+            carregarTabela(liga);
+        });
+    });
+});
