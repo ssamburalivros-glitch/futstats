@@ -5,9 +5,15 @@
     --text-muted: #8b949e;
     --white: #ffffff;
     --accent-green: #3fb950;
+    --accent-red: #f85149;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* Reset básico */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
 
 body {
     background-color: var(--bg);
@@ -18,25 +24,72 @@ body {
     justify-content: center;
 }
 
-.container { width: 100%; max-width: 900px; }
+.container { 
+    width: 100%; 
+    max-width: 900px; 
+}
 
-/* SEÇÃO AO VIVO */
-.ao-vivo-container { margin-bottom: 30px; }
-.ao-vivo-header { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
-.pulse-icon { width: 8px; height: 8px; background: #f85149; border-radius: 50%; }
+/* --- SEÇÃO JOGOS DE HOJE --- */
+.ao-vivo-container { 
+    margin-bottom: 30px; 
+}
 
+.ao-vivo-header { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    margin-bottom: 15px; 
+}
+
+.pulse-icon { 
+    width: 8px; 
+    height: 8px; 
+    background: var(--accent-red); 
+    border-radius: 50%; 
+    box-shadow: 0 0 0 rgba(248, 81, 73, 0.4);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); }
+}
+
+/* GRID DE ROLAGEM LATERAL */
 .ao-vivo-grid { 
     display: flex; 
     gap: 12px; 
     overflow-x: auto; 
-    padding-bottom: 10px;
-    scrollbar-width: none; 
+    padding-bottom: 15px; /* Espaço para a barra de rolagem */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
 }
 
-/* CARD DE JOGO (ESTABILIZADO) */
+/* ESTILIZAÇÃO DA BARRA DE ROLAGEM (Scrollbar) */
+.ao-vivo-grid::-webkit-scrollbar {
+    height: 6px;
+}
+
+.ao-vivo-grid::-webkit-scrollbar-track {
+    background: var(--bg);
+    border-radius: 10px;
+}
+
+.ao-vivo-grid::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+    transition: background 0.3s;
+}
+
+.ao-vivo-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* CARD DE JOGO (DESIGN PREMIUM E ESTÁVEL) */
 .card-jogo {
     min-width: 260px;
-    height: 150px; /* Altura fixa para evitar pulos */
+    height: 155px; /* Altura fixa para evitar tremores */
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -44,6 +97,11 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: transform 0.2s;
+}
+
+.card-jogo:hover {
+    border-color: var(--text-muted);
 }
 
 .campeonato-nome { 
@@ -51,9 +109,14 @@ body {
     color: var(--text-muted); 
     text-transform: uppercase; 
     text-align: center;
+    letter-spacing: 0.5px;
 }
 
-.confronto { display: flex; align-items: center; justify-content: space-around; }
+.confronto { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-around; 
+}
 
 .time-box { 
     display: flex; 
@@ -67,7 +130,7 @@ body {
     height: 35px !important; 
     object-fit: contain; 
     margin-bottom: 8px;
-    background: rgba(255,255,255,0.03);
+    background: rgba(255, 255, 255, 0.03);
     border-radius: 50%;
 }
 
@@ -81,7 +144,11 @@ body {
     width: 100%;
 }
 
-.placar-ao-vivo { font-size: 1.6rem; font-weight: 800; letter-spacing: 2px; }
+.placar-ao-vivo { 
+    font-size: 1.6rem; 
+    font-weight: 800; 
+    letter-spacing: 2px; 
+}
 
 .status-tempo { 
     font-size: 0.7rem; 
@@ -90,12 +157,12 @@ body {
     font-weight: bold;
 }
 
-/* BOTÕES PÍLULA */
+/* --- BOTÕES PÍLULA (ESTILO IMAGEM DE REFERÊNCIA) --- */
 .menu-ligas { 
     display: flex; 
     gap: 8px; 
     justify-content: center; 
-    margin-bottom: 25px; 
+    margin: 25px 0; 
     flex-wrap: wrap; 
 }
 
@@ -107,7 +174,7 @@ body {
     border-radius: 25px;
     cursor: pointer;
     font-size: 0.85rem;
-    transition: 0.3s ease;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-liga.active { 
@@ -117,7 +184,12 @@ body {
     font-weight: 600;
 }
 
-/* TABELA DE CLASSIFICAÇÃO */
+.btn-liga:hover:not(.active) {
+    border-color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* --- TABELA DE CLASSIFICAÇÃO --- */
 .tabela-wrapper { 
     background: var(--card); 
     border: 1px solid var(--border); 
@@ -125,13 +197,46 @@ body {
     overflow: hidden; 
 }
 
-table { width: 100%; border-collapse: collapse; }
-th { padding: 12px; font-size: 0.7rem; color: var(--text-muted); border-bottom: 1px solid var(--border); }
-td { padding: 14px; border-bottom: 1px solid var(--border); text-align: center; font-size: 0.9rem; }
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+}
+
+th { 
+    padding: 12px; 
+    font-size: 0.7rem; 
+    color: var(--text-muted); 
+    border-bottom: 1px solid var(--border); 
+    text-transform: uppercase;
+}
+
+td { 
+    padding: 14px; 
+    border-bottom: 1px solid var(--border); 
+    text-align: center; 
+    font-size: 0.9rem; 
+}
+
 .text-left { text-align: left; }
 
-.td-time { display: flex; align-items: center; gap: 10px; }
-.escudo { width: 22px; height: 22px; object-fit: contain; }
+.td-time { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+}
 
-.sg-positive { color: #3fb950; }
-.sg-negative { color: #f85149; }
+.escudo { 
+    width: 22px; 
+    height: 22px; 
+    object-fit: contain; 
+}
+
+.sg-positive { color: var(--accent-green); }
+.sg-negative { color: var(--accent-red); }
+
+/* Ajuste para mobile */
+@media (max-width: 600px) {
+    .container { padding: 10px; }
+    .card-jogo { min-width: 230px; }
+    .placar-ao-vivo { font-size: 1.3rem; }
+}
