@@ -4,7 +4,7 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ESCUDO_FALLBACK = 'https://cdn-icons-png.flaticon.com/512/53/53283.png';
 
-// --- 1. CARREGAR JOGOS AO VIVO (CARDS SUPERIORES) ---
+// --- 1. CARREGAR JOGOS AO VIVO ---
 async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
     if (!container) return;
@@ -31,30 +31,30 @@ async function carregarAoVivo() {
                 </div>
             `).join('');
         } else {
-            container.innerHTML = '<p style="color: #666; padding: 20px;">Nenhum jogo ao vivo no momento.</p>';
+            container.innerHTML = '<p style="color: #666; padding: 20px;">Nenhum jogo ao vivo agora.</p>';
         }
-    } catch (e) {
-        console.error("Erro ao carregar jogos ao vivo:", e);
-    }
+    } catch (e) { console.error("Erro ao vivo:", e); }
 }
 
-// --- 2. MOSTRAR MODAL (ESTATÍSTICAS DO TIME) ---
+// --- 2. MOSTRAR MODAL (LÓGICA DE CÍRCULOS V-E-D) ---
 function mostrarStatsTime(nome, escudo, pts, jogos, sg, formaString) {
     const modal = document.getElementById('modal-time');
     const detalhes = document.getElementById('detalhes-time');
     
+    // Aproveitamento para o fallback caso o crawler falhe
     const aproveitamentoCalc = jogos > 0 ? (pts / (jogos * 3)) * 100 : 0;
     
-    // LIMPEZA: Remove tudo que não for V, E ou D
+    // LIMPEZA: Mantém apenas V, E, D. Remove "S_DADOS", espaços ou números.
     let formaLimpa = (formaString || '').toUpperCase().replace(/[^VED]/g, '');
 
     let formaArray;
-    // Se o banco estiver vazio ou com erro, gera baseado no aproveitamento
+    // Se o banco retornar vazio ou "S_DADOS", gera visual baseado no aproveitamento
     if (formaLimpa.length < 2) {
-        if (aproveitamentoCalc >= 65) formaArray = ['V', 'V', 'E', 'V', 'V'];
+        if (aproveitamentoCalc >= 60) formaArray = ['V', 'V', 'E', 'V', 'V'];
         else if (aproveitamentoCalc >= 40) formaArray = ['V', 'E', 'D', 'E', 'V'];
         else formaArray = ['D', 'D', 'E', 'D', 'D'];
     } else {
+        // Usa os dados reais do banco (últimos 5)
         formaArray = formaLimpa.split('').slice(-5);
     }
 
@@ -66,25 +66,25 @@ function mostrarStatsTime(nome, escudo, pts, jogos, sg, formaString) {
     detalhes.innerHTML = `
         <div style="text-align:center; margin-bottom: 25px;">
             <img src="${escudo || ESCUDO_FALLBACK}" style="width:80px; height:80px; object-fit:contain; margin-bottom:12px;">
-            <h2 style="font-size: 1.8rem; font-weight: 900; color: #fff;">${nome}</h2>
+            <h2 style="font-size: 1.8rem; font-weight: 900; color: #fff; letter-spacing: -1px;">${nome}</h2>
             <div class="form-streak">${formaHtml}</div>
         </div>
         <div class="stats-grid">
             <div class="stat-card"><span class="stat-value">${pts}</span>Pts</div>
             <div class="stat-card"><span class="stat-value">${jogos}</span>Jogos</div>
             <div class="stat-card"><span class="stat-value">${sg > 0 ? '+' + sg : sg}</span>SG</div>
-            <div class="stat-card"><span class="stat-value">${aproveitamentoCalc.toFixed(1)}%</span>Aprov.</div>
+            <div class="stat-card"><span class="stat-value">${aproveitamentoCalc.toFixed(1)}%</span>Aproveit.</div>
         </div>
     `;
     modal.style.display = "block";
 }
 
-// --- 3. CARREGAR TABELA DE CLASSIFICAÇÃO ---
+// --- 3. CARREGAR TABELA ---
 async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
     if (!corpo) return;
     
-    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#888;">Carregando...</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px; color:#888;">Sincronizando classificação...</td></tr>';
 
     try {
         const { data, error } = await _supabase
@@ -98,7 +98,7 @@ async function carregarTabela(liga) {
         if (data) {
             corpo.innerHTML = data.map(t => `
                 <tr onclick="mostrarStatsTime('${t.time}', '${t.escudo}', ${t.pontos}, ${t.jogos}, ${t.sg}, '${t.forma || ''}')" style="cursor:pointer">
-                    <td class="txt-center" style="font-weight:800; color:#aaa;">${t.posicao}</td>
+                    <td class="txt-center" style="font-weight:800; color:#666;">${t.posicao}</td>
                     <td>
                         <div class="team-row">
                             <img src="${t.escudo || ESCUDO_FALLBACK}" class="escudo-tab">
@@ -107,7 +107,7 @@ async function carregarTabela(liga) {
                     </td>
                     <td class="txt-center">${t.jogos}</td>
                     <td class="txt-center ${t.sg > 0 ? 'green' : (t.sg < 0 ? 'red' : '')}">${t.sg}</td>
-                    <td class="txt-center" style="font-weight:900;">${t.pontos}</td>
+                    <td class="txt-center" style="font-weight:900; font-size:1.1rem;">${t.pontos}</td>
                 </tr>
             `).join('');
         }
@@ -116,27 +116,23 @@ async function carregarTabela(liga) {
 
 // --- 4. INICIALIZAÇÃO ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Chama as duas funções ao carregar a página
     carregarAoVivo();
     carregarTabela('BR');
 
-    // Controle da Modal
     const modal = document.getElementById('modal-time');
     const closeBtn = document.querySelector('.close-modal');
-    if (closeBtn) {
-        closeBtn.onclick = () => modal.style.display = "none";
-    }
+    if (closeBtn) closeBtn.onclick = () => modal.style.display = "none";
+    
     window.onclick = (e) => {
         if (e.target == modal) modal.style.display = "none";
     };
 
-    // Filtros de Ligas
     document.querySelectorAll('.pill').forEach(btn => {
         btn.addEventListener('click', () => {
-            const active = document.querySelector('.pill.active');
-            if (active) active.classList.remove('active');
+            document.querySelector('.pill.active').classList.remove('active');
             btn.classList.add('active');
             carregarTabela(btn.dataset.liga);
         });
     });
+});
 });
