@@ -10,7 +10,7 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    print("❌ Chaves não encontradas!")
+    print("❌ Chaves não encontradas nos Secrets do GitHub!")
     exit(1)
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -25,67 +25,60 @@ LIGAS = {
 }
 
 def capturar_dados(liga_id, url):
-    # Headers mais completos para evitar o bloqueio (fingindo ser um navegador real)
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Referer': 'https://www.google.com/'
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'DNT': '1',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1'
     }
     
     try:
         print(f"📡 Lendo {liga_id}...")
-        response = requests.get(url, headers=headers, timeout=20)
+        response = requests.get(url, headers=headers, timeout=30)
         
         if response.status_code != 200:
-            print(f"❌ Erro de acesso ({response.status_code}) para {liga_id}")
+            print(f"❌ Erro HTTP {response.status_code} em {liga_id}")
             return []
 
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # O FBRef coloca a tabela de classificação dentro de uma div com id "all_results..."
-        # Vamos buscar qualquer tabela que tenha a classe 'stats_table'
-        tabela = soup.find('table', {'class': 'stats_table'})
+        # O FBRef usa IDs que contém 'overall' para a tabela principal
+        tabela = soup.select_one('table[id*="overall"]')
         
         if not tabela:
-            # Tentativa secundária: buscar pelo ID comum do FBRef
-            tabela = soup.find('table', id=lambda x: x and 'overall' in x)
+            tabela = soup.find('table', class_='stats_table')
 
         if not tabela:
-            print(f"⚠️ Tabela não localizada em {liga_id}")
+            print(f"⚠️ Tabela não encontrada para {liga_id}")
             return []
 
         times = []
-        # No FBRef, os dados reais estão no tbody
-        linhas = tabela.find('tbody').find_all('tr')
+        corpo = tabela.find('tbody')
+        if not corpo: return []
 
-        for row in linhas:
-            # Ignora linhas que não são de times (como cabeçalhos no meio da tabela)
-            if row.get('class') and ('spacer' in row.get('class') or 'thead' in row.get('class')):
-                continue
+        for row in corpo.find_all('tr', class_=lambda x: x != 'spacer'):
+            if 'thead' in (row.get('class') or []): continue
             
             cols = row.find_all(['th', 'td'])
-            
-            # Estrutura FBRef: 0=Pos, 1=Squad, 2=MP, 9=Pts, 10=GD
             if len(cols) >= 10:
                 try:
+                    # Limpeza de texto para evitar erros de banco
                     nome_time = cols[1].text.strip()
-                    # Limpa o nome do time (remove espaços extras)
-                    nome_time = " ".join(nome_time.split())
-                    
-                    # Tenta pegar o escudo (src da imagem)
                     img = cols[1].find('img')
-                    escudo_url = img['src'] if img else ""
+                    escudo = img['src'] if img else ""
 
                     times.append({
                         "liga": liga_id,
                         "posicao": int(cols[0].text.strip().replace('.', '')),
                         "time": nome_time,
-                        "escudo": escudo_url,
+                        "escudo": escudo,
                         "jogos": int(cols[2].text.strip()),
                         "pontos": int(cols[9].text.strip()),
                         "sg": int(cols[10].text.strip().replace('+', ''))
                     })
-                except Exception as e:
+                except Exception:
                     continue
                     
         return times
@@ -94,28 +87,27 @@ def capturar_dados(liga_id, url):
         return []
 
 def main():
-    dados_acumulados = []
-    
+    dados_totais = []
     for liga_id, url in LIGAS.items():
-        times_liga = capturar_dados(liga_id, url)
-        if times_liga:
-            dados_acumulados.extend(times_liga)
-            print(f"✅ {liga_id}: {len(times_liga)} times capturados.")
+        resultado = capturar_dados(liga_id, url)
+        if resultado:
+            dados_totais.extend(resultado)
+            print(f"✅ {liga_id}: {len(resultado)} times.")
         
-        # O FBRef bloqueia se fizermos muitas requisições rápidas
-        time.sleep(random.uniform(5, 8))
+        # Pausa maior para evitar ser banido pelo FBRef
+        time.sleep(random.uniform(6, 10))
 
-    if dados_acumulados:
-        print(f"📤 Enviando {len(dados_acumulados)} times para o Supabase...")
+    if dados_totais:
+        print(f"📤 Enviando {len(dados_totais)} registros para o Supabase...")
         try:
-            # Limpa e insere
+            # Limpa e insere novos dados
             supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-            supabase.table("tabelas_ligas").insert(dados_acumulados).execute()
-            print("🚀 SUCESSO TOTAL!")
+            supabase.table("tabelas_ligas").insert(dados_totais).execute()
+            print("🚀 SUCESSO! Banco atualizado.")
         except Exception as e:
-            print(f"❌ Erro ao salvar no banco: {e}")
+            print(f"❌ Erro no banco: {e}")
     else:
-        print("⚠️ Falha geral: Nenhum dado extraído das URLs.")
+        print("⚠️ Nada foi coletado.")
 
 if __name__ == "__main__":
     main()
