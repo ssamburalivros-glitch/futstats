@@ -14,24 +14,36 @@ LIGAS = {
 }
 
 def pegar_forma_real(espn_id, team_id):
-    """Busca os últimos 5 jogos reais no calendário do time"""
+    """Busca os últimos 5 jogos reais no calendário específico do time"""
     try:
+        # Endpoint de calendário/resultados do time
         url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/teams/{team_id}/schedule"
         res = requests.get(url, timeout=10)
         eventos = res.json().get('events', [])
         resultados = []
         
+        # Pega os jogos encerrados de trás para frente
         for evento in reversed(eventos):
             if len(resultados) >= 5: break
+            
             if evento['status']['type']['description'] == "Final":
                 comp = evento['competitions'][0]
-                meu_time = next(t for t in comp['competitors'] if t['id'] == team_id)
-                if meu_time.get('winner') is True: resultados.append('V')
+                equipes = comp['competitors']
+                
+                # Identifica meu time na partida
+                meu_time = next(t for t in equipes if t['id'] == team_id)
+                
+                if meu_time.get('winner') is True:
+                    resultados.append('V')
                 elif meu_time.get('winner') is False:
-                    adv = next(t for t in comp['competitors'] if t['id'] != team_id)
-                    resultados.append('E' if adv.get('winner') is False else 'D')
+                    # Verifica se o adversário venceu ou se foi empate
+                    adversario = next(t for t in equipes if t['id'] != team_id)
+                    resultados.append('E' if adversario.get('winner') is False else 'D')
+        
+        # Inverte para ficar na ordem cronológica correta (mais antigo para o mais novo)
         return "".join(reversed(resultados))
-    except: return "EEEEE"
+    except:
+        return ""
 
 def capturar_liga(liga_id, espn_id):
     print(f"📡 Processando {liga_id}...")
@@ -40,17 +52,19 @@ def capturar_liga(liga_id, espn_id):
         data = requests.get(url, timeout=20).json()
         entries = data['children'][0]['standings']['entries']
         lista = []
+        
         for entry in entries:
             s = entry['stats']
             team = entry['team']
             
-            # Função para converter qualquer valor para INT puro (remove o .0 se houver)
+            # Converte valores numéricos com segurança (evita o erro 38.0)
             def to_int(name):
                 try:
                     val = next(i['value'] for i in s if i['name'] == name)
-                    return int(float(val)) # Converte texto/float para float e depois para int
+                    return int(float(val))
                 except: return 0
 
+            # BUSCA OS RESULTADOS REAIS (V-E-D)
             forma_real = pegar_forma_real(espn_id, team['id'])
             
             lista.append({
@@ -61,29 +75,31 @@ def capturar_liga(liga_id, espn_id):
                 "jogos": to_int('gamesPlayed'),
                 "pontos": to_int('points'),
                 "sg": to_int('pointDifferential'),
-                "forma": forma_real
+                "forma": forma_real if forma_real else "S_DADOS"
             })
-        print(f"✅ {liga_id}: {len(lista)} times.")
+            # Pequena pausa para não sobrecarregar a API
+            time.sleep(0.5) 
+            
+        print(f"✅ {liga_id} concluída.")
         return lista
     except Exception as e:
         print(f"❌ Erro {liga_id}: {e}")
         return []
 
 def main():
-    dados = []
+    dados_finais = []
     for lid, eid in LIGAS.items():
         res = capturar_liga(lid, eid)
-        if res: dados.extend(res)
-        time.sleep(1) 
+        if res: dados_finais.extend(res)
 
-    if dados:
-        print(f"📤 Enviando {len(dados)} registros para o Supabase...")
+    if dados_finais:
+        print(f"📤 Enviando {len(dados_finais)} registros para o Supabase...")
         try:
             supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-            supabase.table("tabelas_ligas").insert(dados).execute()
+            supabase.table("tabelas_ligas").insert(dados_finais).execute()
             print("🚀 SUCESSO!")
         except Exception as e:
-            print(f"❌ Erro no Supabase: {e}")
+            print(f"❌ Erro Supabase: {e}")
 
 if __name__ == "__main__":
     main()
