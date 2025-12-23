@@ -2,9 +2,9 @@ name: Atualizar Dados FutStats
 
 on:
   schedule:
-    # Roda a cada 2 minutos para manter o Ao Vivo sempre atualizado
+    # Mantive 2 minutos para o placar ao vivo ser rápido
     - cron: '*/2 * * * *'
-  workflow_dispatch: # Permite rodar manualmente clicando em "Run Workflow"
+  workflow_dispatch: 
 
 jobs:
   build:
@@ -21,7 +21,8 @@ jobs:
 
       - name: Instalar Dependências
         run: |
-          pip install requests supabase
+          python -m pip install --upgrade pip
+          pip install requests supabase google-generativeai
 
       - name: 📡 Executar Crawler Ao Vivo
         env:
@@ -29,25 +30,13 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python crawler_ao_vivo.py
 
-      - name: 📊 Executar Crawler de Tabelas
+      - name: 📊 Executar Crawler de Tabelas (Dados Sólidos)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python crawler.py
 
-      - name: 🔄 Executar Crawler de Forma (Últimos 5 Jogos)
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-        run: python crawler_forma.py
-
-        - name: Executar Crawler de Tabelas
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-        run: python crawler_forma.py
-
-      - name: Gerar Análise IA
+      - name: 🤖 Gerar Análise com IA
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
