@@ -1,6 +1,5 @@
 import os
 import requests
-import time
 import re
 from supabase import create_client
 
@@ -18,99 +17,86 @@ LIGAS = {
     "DE": "ger.1", "IT": "ita.1", "PT": "por.1"
 }
 
-def pegar_forma_pelo_historico(espn_id, team_id):
-    """Busca a forma real varrendo os eventos da temporada"""
-    try:
-        # Endpoint de competições da temporada para o time específico
-        url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/teams/{team_id}/schedule"
-        res = requests.get(url, headers=HEADERS, timeout=10).json()
-        
-        eventos = res.get('events', [])
-        resultados = []
-        
-        # Filtrar apenas jogos que já terminaram
-        for ev in reversed(eventos):
-            if len(resultados) >= 5: break
-            
-            status = ev.get('status', {}).get('type', {}).get('description', '')
-            if status == "Final":
-                comp = ev.get('competitions', [{}])[0]
-                competitors = comp.get('competitors', [])
-                
-                meu_time = next((t for t in competitors if str(t['id']) == str(team_id)), None)
-                if not meu_time: continue
-                
-                # Checar vencedor
-                if meu_time.get('winner') is True:
-                    resultados.append('V')
-                elif meu_time.get('winner') is False:
-                    # Se eu não venci, checo se o outro venceu. Se ninguém venceu, é Empate.
-                    outro_time = next((t for t in competitors if str(t['id']) != str(team_id)), None)
-                    if outro_time and outro_time.get('winner') is True:
-                        resultados.append('D')
-                    else:
-                        resultados.append('E')
-        
-        return "".join(reversed(resultados))
-    except:
-        return ""
-
-def sincronizar_tudo():
+def capturar_forma_ligas():
     dados_totais = []
 
-    for liga_nome, espn_slug in LIGAS.items():
-        print(f"📡 Processando {liga_nome}...")
-        url_tabela = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_slug}/standings"
+    for liga_id, espn_slug in LIGAS.items():
+        print(f"📡 Processando {liga_id}...")
         
+        # 1. Pegar a tabela (Standings)
+        url_tab = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_slug}/standings"
+        # 2. Pegar os jogos recentes (Scoreboard) - Buscamos os últimos 30 dias para garantir 5 jogos
+        url_jogos = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_slug}/scoreboard?limit=100"
+
         try:
-            res_tab = requests.get(url_tabela, headers=HEADERS, timeout=20).json()
-            entries = res_tab.get('children', [{}])[0].get('standings', {}).get('entries', [])
+            res_tab = requests.get(url_tab, headers=HEADERS).json()
+            res_jogos = requests.get(url_jogos, headers=HEADERS).json()
             
+            entries = res_tab.get('children', [{}])[0].get('standings', {}).get('entries', [])
+            eventos = res_jogos.get('events', [])
+
+            # Criar um dicionário para armazenar a forma de cada time
+            formas_map = {}
+
             for entry in entries:
-                team = entry.get('team', {})
-                stats = entry.get('stats', [])
-                team_name = team.get('displayName')
-                team_id = team.get('id')
-
-                # Tenta pegar a forma
-                forma = pegar_forma_pelo_historico(espn_slug, team_id)
+                team_id = str(entry['team']['id'])
+                historico = []
                 
-                # Se falhar, tenta o campo de sumário da tabela como última opção
-                if not forma:
-                    for s in stats:
-                        if s.get('name') in ['summary', 'form']:
-                            val = s.get('displayValue', '')
-                            forma = re.sub(r'[^WLTwedv]', '', val).upper().replace('W','V').replace('L','D').replace('T','E')
+                # Procurar nos eventos os jogos finalizados deste time
+                # Varremos do mais novo para o mais antigo
+                for ev in eventos:
+                    if len(historico) >= 5: break
+                    
+                    status = ev.get('status', {}).get('type', {}).get('description', '')
+                    if status == "Final":
+                        comp = ev.get('competitions', [{}])[0]
+                        teams = comp.get('competitors', [])
+                        
+                        meu_time = next((t for t in teams if str(t['id']) == team_id), None)
+                        if meu_time:
+                            if meu_time.get('winner') is True:
+                                historico.append('V')
+                            elif meu_time.get('winner') is False:
+                                outro = next((t for t in teams if str(t['id']) != team_id), None)
+                                if outro and outro.get('winner') is True:
+                                    historico.append('D')
+                                else:
+                                    historico.append('E')
+                
+                # Inverter para ficar cronológico e preencher se faltar
+                resultado_final = "".join(reversed(historico))
+                if not resultado_final: resultado_final = "EEEEE"
+                formas_map[team_id] = resultado_final
 
-                # Se ainda assim não tiver nada, coloca o padrão
-                if not forma: forma = "EEEEE"
+            # Montar lista final para o Supabase
+            for entry in entries:
+                team = entry['team']
+                stats = entry['stats']
+                team_id = str(team['id'])
 
                 def get_stat(name):
                     try: return int(float(next(s['value'] for s in stats if s['name'] == name)))
                     except: return 0
 
-                print(f"   ⚽ {team_name}: {forma}")
-
                 dados_totais.append({
-                    "liga": liga_nome,
+                    "liga": liga_id,
                     "posicao": get_stat('rank'),
-                    "time": team_name,
+                    "time": team['displayName'],
                     "escudo": team.get('logos', [{}])[0].get('href', ""),
                     "jogos": get_stat('gamesPlayed'),
                     "pontos": get_stat('points'),
                     "sg": get_stat('pointDifferential'),
-                    "forma": forma
+                    "forma": formas_map.get(team_id, "EEEEE")
                 })
-                time.sleep(0.3) # Evita bloqueio por excesso de requisições
+                print(f"   ⚽ {team['displayName']}: {formas_map.get(team_id)}")
 
         except Exception as e:
-            print(f"❌ Erro na liga {liga_nome}: {e}")
+            print(f"❌ Erro na liga {liga_id}: {e}")
 
     if dados_totais:
-        # Atualiza Supabase
         supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
         supabase.table("tabelas_ligas").insert(dados_totais).execute()
         print(f"🚀 {len(dados_totais)} times sincronizados!")
 
 if __name__ == "__main__":
-    sincronizar_tudo()
+    capturar_forma_ligas()
