@@ -1,5 +1,6 @@
 import os
-from google import genai
+import requests
+import json
 from supabase import create_client
 
 # --- CONFIGURAÇÃO ---
@@ -9,19 +10,16 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# FORÇAR VERSÃO V1 PARA EVITAR O ERRO 404 DA V1BETA
-client = genai.Client(api_key=GEMINI_API_KEY, http_options={'api_version': 'v1'})
-
 def gerar_comentario_ia():
-    print("📡 Lendo dados para análise...")
+    print("📡 Lendo dados do Supabase...")
     
     try:
-        # Busca os líderes de cada liga
+        # 1. Busca os líderes das ligas
         res = supabase.table("tabelas_ligas").select("time, liga, pontos, posicao, sg").order("posicao").limit(40).execute()
         dados = res.data
         
         if not dados:
-            print("❌ Sem dados na tabela para analisar.")
+            print("❌ Sem dados na tabela.")
             return
 
         resumo_texto = ""
@@ -29,30 +27,35 @@ def gerar_comentario_ia():
             if t['posicao'] <= 3:
                 resumo_texto += f"- {t['time']} ({t['liga']}): {t['pontos']} pts, SG {t['sg']}\n"
 
-        print("🤖 Gerando insight com Gemini 1.5 Flash (v1)...")
-        
-        prompt = f"""
-        Você é um analista de futebol. Escreva um resumo muito curto (máximo 200 caracteres) 
-        sobre os líderes atuais destas ligas. Use emojis.
-        
-        Dados:
-        {resumo_texto}
-        """
+        print("🤖 Chamando Gemini via REST API...")
 
-        # Chamada simplificada
-        response = client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=prompt
-        )
+        # 2. Configura a chamada direta ao Google
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
         
-        comentario = response.text.strip()
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": f"Você é um analista de futebol. Resuma os líderes das ligas (máximo 200 caracteres) com emojis. Dados:\n{resumo_texto}"
+                }]
+            }]
+        }
+        headers = {'Content-Type': 'application/json'}
 
-        # Atualiza o Supabase
-        supabase.table("site_info").update({"comentario_ia": comentario}).eq("id", 1).execute()
-        print(f"✅ Análise enviada: {comentario}")
+        # 3. Faz a requisição
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        resultado = response.json()
+
+        if response.status_code == 200:
+            texto_ia = resultado['candidates'][0]['content']['parts'][0]['text'].strip()
+            
+            # 4. Atualiza o Supabase
+            supabase.table("site_info").update({"comentario_ia": texto_ia}).eq("id", 1).execute()
+            print(f"✅ Sucesso: {texto_ia}")
+        else:
+            print(f"❌ Erro na API do Google: {resultado}")
 
     except Exception as e:
-        print(f"❌ Erro Detalhado: {e}")
+        print(f"❌ Erro Geral: {e}")
 
 if __name__ == "__main__":
     gerar_comentario_ia()
