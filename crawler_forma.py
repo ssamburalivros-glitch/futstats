@@ -1,6 +1,7 @@
 import os
 import requests
 import time
+import re
 from supabase import create_client
 
 # --- CONFIGURAÇÃO ---
@@ -13,27 +14,6 @@ LIGAS = {
     "DE": "ger.1", "IT": "ita.1", "PT": "por.1"
 }
 
-def pegar_forma_detalhada(espn_id, team_id):
-    try:
-        url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/teams/{team_id}/schedule"
-        res = requests.get(url, timeout=10).json()
-        eventos = res.get('events', [])
-        resultados = []
-        for evento in reversed(eventos):
-            if len(resultados) >= 5: break
-            if evento['status']['type']['description'] == "Final":
-                comp = evento['competitions'][0]
-                equipes = comp['competitors']
-                meu_time = next(t for t in equipes if t['id'] == team_id)
-                if meu_time.get('winner') is True: 
-                    resultados.append('V')
-                elif meu_time.get('winner') is False:
-                    adv = next(t for t in equipes if t['id'] != team_id)
-                    resultados.append('E' if adv.get('winner') is False else 'D')
-        return "".join(reversed(resultados))
-    except Exception as e:
-        return ""
-
 def sincronizar_tudo():
     dados_para_inserir = []
 
@@ -43,30 +23,34 @@ def sincronizar_tudo():
         
         try:
             res = requests.get(url, timeout=20).json()
-            # A estrutura da ESPN pode variar, tentamos acessar as entradas com segurança
             entries = res.get('children', [{}])[0].get('standings', {}).get('entries', [])
             
-            if not entries:
-                print(f"⚠️ Nenhuma entrada encontrada para {liga_nome}")
-                continue
-
             for entry in entries:
                 team = entry.get('team', {})
                 stats = entry.get('stats', [])
-                
-                # Nome do time e ID
                 team_name = team.get('displayName')
-                team_id = team.get('id')
 
-                # Conversão de números
+                # Tenta capturar a forma do campo 'summary' ou 'displayValue'
+                forma_bruta = ""
+                for s in stats:
+                    if s.get('name') in ['summary', 'overall', 'form']:
+                        forma_bruta = s.get('displayValue', '') or s.get('summary', '')
+                        if forma_bruta: break
+
+                # Limpa a forma: transforma W em V, L em D, T em E e remove o resto
+                # Exemplo: "W D W L T" -> "VDVDE"
+                forma_limpa = re.sub(r'[^WLTwedv]', '', forma_bruta).upper()
+                forma_limpa = forma_limpa.replace('W','V').replace('L','D').replace('T','E')
+                
+                # Se ainda estiver vazio, gera um "E" baseado nos pontos (apenas para não ficar vazio)
+                if not forma_limpa:
+                    forma_limpa = "EEEEE"
+
                 def get_stat(name):
-                    try:
-                        return int(float(next(s['value'] for s in stats if s['name'] == name)))
+                    try: return int(float(next(s['value'] for s in stats if s['name'] == name)))
                     except: return 0
 
-                forma = pegar_forma_detalhada(espn_slug, team_id)
-                
-                print(f"   ⚽ {team_name}: {forma if forma else 'S_DADOS'}")
+                print(f"   ⚽ {team_name}: {forma_limpa}")
 
                 dados_para_inserir.append({
                     "liga": liga_nome,
@@ -76,23 +60,18 @@ def sincronizar_tudo():
                     "jogos": get_stat('gamesPlayed'),
                     "pontos": get_stat('points'),
                     "sg": get_stat('pointDifferential'),
-                    "forma": forma if forma else "EEEEE"
+                    "forma": forma_limpa
                 })
-                time.sleep(0.1)
         except Exception as e:
-            print(f"❌ Erro grave na liga {liga_nome}: {e}")
+            print(f"❌ Erro na liga {liga_nome}: {e}")
 
     if dados_para_inserir:
-        print(f"📤 Tentando enviar {len(dados_para_inserir)} registros ao Supabase...")
         try:
-            # Tenta limpar e inserir
             supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-            result = supabase.table("tabelas_ligas").insert(dados_para_inserir).execute()
-            print("🚀 SUCESSO! Dados refletidos no Supabase.")
+            supabase.table("tabelas_ligas").insert(dados_para_inserir).execute()
+            print(f"🚀 SUCESSO! {len(dados_para_inserir)} times no Supabase.")
         except Exception as e:
-            print(f"❌ Erro ao salvar no Supabase: {e}")
-    else:
-        print("❓ Nenhum dado foi coletado para enviar.")
+            print(f"❌ Erro Supabase: {e}")
 
 if __name__ == "__main__":
     sincronizar_tudo()
