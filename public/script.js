@@ -4,7 +4,7 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ESCUDO_FALLBACK = 'https://cdn-icons-png.flaticon.com/512/53/53283.png';
 
-// --- 1. CARREGAR JOGOS AO VIVO (CARDS SUPERIORES) ---
+// --- 1. CARREGAR JOGOS AO VIVO (CARDS) ---
 async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
     if (!container) return;
@@ -31,30 +31,32 @@ async function carregarAoVivo() {
                 </div>
             `).join('');
         } else {
-            container.innerHTML = '<p style="color: #666; padding: 20px;">Nenhum jogo ao vivo no momento.</p>';
+            container.innerHTML = '<p style="color: #888; padding: 20px;">Nenhum jogo ao vivo no momento.</p>';
         }
     } catch (e) {
-        console.error("Erro ao carregar jogos ao vivo:", e);
+        console.error("Erro ao carregar ao vivo:", e);
     }
 }
 
-// --- 2. MOSTRAR MODAL (ESTATÍSTICAS DO TIME) ---
+// --- 2. MODAL DE ESTATÍSTICAS E FORMA (V-E-D) ---
 function mostrarStatsTime(nome, escudo, pts, jogos, sg, formaString) {
     const modal = document.getElementById('modal-time');
     const detalhes = document.getElementById('detalhes-time');
+    if (!modal || !detalhes) return;
     
-    const aproveitamentoCalc = jogos > 0 ? (pts / (jogos * 3)) * 100 : 0;
+    const aproveitamento = jogos > 0 ? (pts / (jogos * 3)) * 100 : 0;
     
-    // LIMPEZA: Remove tudo que não for V, E ou D
+    // LIMPEZA: Remove qualquer caractere que não seja V, E ou D (ex: "S_DADOS")
     let formaLimpa = (formaString || '').toUpperCase().replace(/[^VED]/g, '');
 
     let formaArray;
-    // Se o banco estiver vazio ou com erro, gera baseado no aproveitamento
-    if (formaLimpa.length < 2) {
-        if (aproveitamentoCalc >= 65) formaArray = ['V', 'V', 'E', 'V', 'V'];
-        else if (aproveitamentoCalc >= 40) formaArray = ['V', 'E', 'D', 'E', 'V'];
+    // Se o crawler de forma ainda não tiver dados, usamos um fallback visual baseado no desempenho
+    if (formaLimpa.length < 1) {
+        if (aproveitamento >= 60) formaArray = ['V', 'V', 'E', 'V', 'V'];
+        else if (aproveitamento >= 40) formaArray = ['V', 'E', 'D', 'E', 'V'];
         else formaArray = ['D', 'D', 'E', 'D', 'D'];
     } else {
+        // Pega os últimos 5 resultados reais do banco
         formaArray = formaLimpa.split('').slice(-5);
     }
 
@@ -70,10 +72,10 @@ function mostrarStatsTime(nome, escudo, pts, jogos, sg, formaString) {
             <div class="form-streak">${formaHtml}</div>
         </div>
         <div class="stats-grid">
-            <div class="stat-card"><span class="stat-value">${pts}</span>Pts</div>
-            <div class="stat-card"><span class="stat-value">${jogos}</span>Jogos</div>
-            <div class="stat-card"><span class="stat-value">${sg > 0 ? '+' + sg : sg}</span>SG</div>
-            <div class="stat-card"><span class="stat-value">${aproveitamentoCalc.toFixed(1)}%</span>Aprov.</div>
+            <div class="stat-card"><b>${pts}</b><br><small>PTS</small></div>
+            <div class="stat-card"><b>${jogos}</b><br><small>JOGOS</small></div>
+            <div class="stat-card"><b>${sg > 0 ? '+' + sg : sg}</b><br><small>SG</small></div>
+            <div class="stat-card"><b>${aproveitamento.toFixed(1)}%</b><br><small>APROV.</small></div>
         </div>
     `;
     modal.style.display = "block";
@@ -84,7 +86,7 @@ async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
     if (!corpo) return;
     
-    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#888;">Carregando...</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#888;">Atualizando dados...</td></tr>';
 
     try {
         const { data, error } = await _supabase
@@ -98,11 +100,11 @@ async function carregarTabela(liga) {
         if (data) {
             corpo.innerHTML = data.map(t => `
                 <tr onclick="mostrarStatsTime('${t.time}', '${t.escudo}', ${t.pontos}, ${t.jogos}, ${t.sg}, '${t.forma || ''}')" style="cursor:pointer">
-                    <td class="txt-center" style="font-weight:800; color:#aaa;">${t.posicao}</td>
+                    <td class="txt-center" style="font-weight:800; color:#888;">${t.posicao}</td>
                     <td>
                         <div class="team-row">
                             <img src="${t.escudo || ESCUDO_FALLBACK}" class="escudo-tab">
-                            <span style="font-weight:600;">${t.time}</span>
+                            <span>${t.time}</span>
                         </div>
                     </td>
                     <td class="txt-center">${t.jogos}</td>
@@ -114,23 +116,25 @@ async function carregarTabela(liga) {
     } catch (e) { console.error("Erro na tabela:", e); }
 }
 
-// --- 4. INICIALIZAÇÃO ---
+// --- 4. INICIALIZAÇÃO E EVENTOS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Chama as duas funções ao carregar a página
+    // Carregamento inicial
     carregarAoVivo();
     carregarTabela('BR');
 
-    // Controle da Modal
+    // Configuração da Modal
     const modal = document.getElementById('modal-time');
     const closeBtn = document.querySelector('.close-modal');
+    
     if (closeBtn) {
         closeBtn.onclick = () => modal.style.display = "none";
     }
+    
     window.onclick = (e) => {
         if (e.target == modal) modal.style.display = "none";
     };
 
-    // Filtros de Ligas
+    // Filtros de Ligas (Pills)
     document.querySelectorAll('.pill').forEach(btn => {
         btn.addEventListener('click', () => {
             const active = document.querySelector('.pill.active');
@@ -139,4 +143,5 @@ document.addEventListener('DOMContentLoaded', () => {
             carregarTabela(btn.dataset.liga);
         });
     });
+});
 });
