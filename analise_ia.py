@@ -3,49 +3,49 @@ import requests
 import json
 from supabase import create_client
 
-# Pega as variáveis do GitHub
 url_supa = os.environ.get("SUPABASE_URL")
 key_supa = os.environ.get("SUPABASE_KEY")
 gemini_key = os.environ.get("GEMINI_API_KEY")
 
 def rodar():
-    print("--- INICIANDO PROCESSO IA ---")
+    print("--- INICIANDO PROCESSO IA (VERSÃO ESTÁVEL V1) ---")
     
     try:
-        # 1. Conecta ao Supabase
         supabase = create_client(url_supa, key_supa)
         
-        # 2. Busca dados da tabela (Ajuste o nome se sua tabela for diferente)
         print("📡 Buscando dados...")
         res = supabase.table("tabelas_ligas").select("time, pontos").limit(5).execute()
+        texto_dados = ", ".join([f"{t['time']} ({t['pontos']}pts)" for t in res.data])
         
-        texto_dados = "Times: " + ", ".join([f"{t['time']} ({t['pontos']}pts)" for t in res.data])
-        print(f"✅ Dados encontrados: {texto_dados}")
-
-        # 3. Chama o Gemini via URL Direta (Mais estável)
-        print("🤖 Chamando Gemini...")
-        url_ia = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+        # MUDANÇA AQUI: v1 em vez de v1beta
+        print("🤖 Chamando Gemini 1.5 Flash (v1)...")
+        url_ia = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={gemini_key}"
         
         payload = {
             "contents": [{
-                "parts": [{"text": f"Escreva uma frase curta sobre estes times: {texto_dados}"}]
-            }]
+                "parts": [{"text": f"Escreva uma frase de 15 palavras com emojis sobre o topo do Brasileirão: {texto_dados}"}]
+            }],
+            "generationConfig": {
+                "maxOutputTokens": 100
+            }
         }
 
         response = requests.post(url_ia, json=payload, timeout=30)
+        resultado = response.json()
         
         if response.status_code == 200:
-            comentario = response.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+            comentario = resultado['candidates'][0]['content']['parts'][0]['text'].strip()
             print(f"✍️ IA diz: {comentario}")
             
-            # 4. Salva no Supabase (ID 1 deve existir!)
+            # Salva no banco
             supabase.table("site_info").update({"comentario_ia": comentario}).eq("id", 1).execute()
-            print("💾 Salvo no Banco de Dados!")
+            print("💾 Salvo no Banco de Dados com sucesso!")
         else:
-            print(f"❌ Erro na IA: {response.text}")
+            print(f"❌ Erro na API: {response.status_code}")
+            print(f"Mensagem: {json.dumps(resultado, indent=2)}")
 
     except Exception as e:
-        print(f"💥 ERRO CRÍTICO: {str(e)}")
+        print(f"💥 ERRO: {str(e)}")
 
 if __name__ == "__main__":
     rodar()
