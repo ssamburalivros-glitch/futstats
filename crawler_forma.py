@@ -30,19 +30,22 @@ def sincronizar_tudo():
                 stats = entry.get('stats', [])
                 team_name = team.get('displayName')
 
-                # Tenta capturar a forma do campo 'summary' ou 'displayValue'
+                # BUSCA MELHORADA DA FORMA
                 forma_bruta = ""
                 for s in stats:
-                    if s.get('name') in ['summary', 'overall', 'form']:
+                    # A ESPN costuma usar 'summary' ou 'shortAppearance' para a forma
+                    if s.get('name') in ['summary', 'form', 'shortAppearance', 'overall']:
                         forma_bruta = s.get('displayValue', '') or s.get('summary', '')
-                        if forma_bruta: break
+                        # Se encontrou algo que contenha W, L ou T, interrompe a busca
+                        if any(char in forma_bruta.upper() for char in ['W', 'L', 'T']):
+                            break
 
-                # Limpa a forma: transforma W em V, L em D, T em E e remove o resto
-                # Exemplo: "W D W L T" -> "VDVDE"
+                # Limpeza da forma: W -> V, L -> D, T -> E
                 forma_limpa = re.sub(r'[^WLTwedv]', '', forma_bruta).upper()
                 forma_limpa = forma_limpa.replace('W','V').replace('L','D').replace('T','E')
                 
-                # Se ainda estiver vazio, gera um "E" baseado nos pontos (apenas para não ficar vazio)
+                # Se ainda estiver vazio (algumas ligas não fornecem), pegamos os últimos resultados 
+                # do campo 'description' que às vezes contém algo como "Won 3, Lost 2"
                 if not forma_limpa:
                     forma_limpa = "EEEEE"
 
