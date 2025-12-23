@@ -1,12 +1,13 @@
+// Configurações do Supabase
 const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ESCUDO_FALLBACK = 'https://cdn-icons-png.flaticon.com/512/53/53283.png';
 
-// --- 1. CARREGAR COMENTÁRIO DA IA ---
+// 1. CARREGAR COMENTÁRIO DA IA
 async function carregarIA() {
-    const box = document.getElementById('ia-box');
+    const boxIA = document.getElementById('ia-box');
     try {
         const { data, error } = await _supabase
             .from('site_info')
@@ -15,19 +16,16 @@ async function carregarIA() {
             .single();
 
         if (data && data.comentario_ia) {
-            box.innerHTML = data.comentario_ia;
+            boxIA.innerText = data.comentario_ia;
         }
     } catch (e) {
-        console.error("Erro IA:", e);
-        box.innerText = "IA temporariamente fora de campo.";
+        console.error("Erro ao buscar IA:", e);
     }
 }
 
-// --- 2. CARREGAR JOGOS AO VIVO ---
+// 2. CARREGAR JOGOS AO VIVO
 async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
-    if (!container) return;
-
     try {
         const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
         if (data && data.length > 0) {
@@ -47,36 +45,16 @@ async function carregarAoVivo() {
                     <div class="hero-status">${j.status}</div>
                 </div>
             `).join('');
+        } else {
+            container.innerHTML = '<p style="color: #666; text-align: center; width: 100%;">Nenhum jogo ao vivo no momento.</p>';
         }
     } catch (e) { console.error(e); }
 }
 
-// --- 3. MODAL DE STATS (FOCO EM NÚMEROS) ---
-function mostrarStatsTime(nome, escudo, pts, jogos, sg) {
-    const modal = document.getElementById('modal-time');
-    const detalhes = document.getElementById('detalhes-time');
-    
-    const aproveitamento = jogos > 0 ? (pts / (jogos * 3)) * 100 : 0;
-
-    detalhes.innerHTML = `
-        <div style="text-align:center; margin-bottom: 20px;">
-            <img src="${escudo || ESCUDO_FALLBACK}" style="width:70px; height:70px; object-fit:contain;">
-            <h2 style="color:#fff; margin-top:10px;">${nome}</h2>
-        </div>
-        <div class="stats-grid">
-            <div class="stat-card"><b>${pts}</b><br><small>PTS</small></div>
-            <div class="stat-card"><b>${jogos}</b><br><small>JOGOS</small></div>
-            <div class="stat-card"><b>${sg > 0 ? '+' + sg : sg}</b><br><small>SG</small></div>
-            <div class="stat-card"><b>${aproveitamento.toFixed(1)}%</b><br><small>APROV.</small></div>
-        </div>
-    `;
-    modal.style.display = "block";
-}
-
-// --- 4. CARREGAR TABELA ---
+// 3. CARREGAR TABELA DE CLASSIFICAÇÃO
 async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
-    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Carregando...</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Carregando tabela...</td></tr>';
 
     try {
         const { data } = await _supabase
@@ -104,16 +82,34 @@ async function carregarTabela(liga) {
     } catch (e) { console.error(e); }
 }
 
-// --- INICIALIZAÇÃO ---
+// 4. MODAL DE STATS
+function mostrarStatsTime(nome, escudo, pts, jogos, sg) {
+    const modal = document.getElementById('modal-time');
+    const detalhes = document.getElementById('detalhes-time');
+    const aprov = jogos > 0 ? ((pts / (jogos * 3)) * 100).toFixed(1) : 0;
+
+    detalhes.innerHTML = `
+        <div style="text-align:center; margin-bottom: 20px;">
+            <img src="${escudo || ESCUDO_FALLBACK}" style="width:60px;">
+            <h2 style="margin-top:10px;">${nome}</h2>
+        </div>
+        <div class="stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="stat-card"><b>${pts}</b><br>PTS</div>
+            <div class="stat-card"><b>${jogos}</b><br>JOGOS</div>
+            <div class="stat-card"><b>${sg}</b><br>SG</div>
+            <div class="stat-card"><b>${aprov}%</b><br>APROV.</div>
+        </div>
+    `;
+    modal.style.display = "block";
+}
+
+// INICIALIZAÇÃO
 document.addEventListener('DOMContentLoaded', () => {
     carregarIA();
     carregarAoVivo();
     carregarTabela('BR');
 
-    const modal = document.getElementById('modal-time');
-    document.querySelector('.close-modal').onclick = () => modal.style.display = "none";
-    window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
-
+    // Eventos de clique nas ligas (Pills)
     document.querySelectorAll('.pill').forEach(btn => {
         btn.onclick = () => {
             document.querySelector('.pill.active').classList.remove('active');
@@ -121,4 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
             carregarTabela(btn.dataset.liga);
         };
     });
+
+    // Fechar Modal
+    const modal = document.getElementById('modal-time');
+    document.querySelector('.close-modal').onclick = () => modal.style.display = "none";
+    window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
 });
