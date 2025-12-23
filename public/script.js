@@ -1,3 +1,4 @@
+// --- CONFIGURAÇÃO DO SUPABASE ---
 const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -38,7 +39,25 @@ async function carregarAoVivo() {
     }
 }
 
-// --- 2. MODAL DE ESTATÍSTICAS E FORMA (V-E-D) ---
+// --- 2. AUXILIAR: GERAR BOLINHAS DE FORMA ---
+function gerarBolinhasForma(formaString) {
+    // Se não houver dados, retorna vazio ou um aviso
+    if (!formaString || formaString === "EEEEE") {
+        return '<small style="color:#666">Dados sendo processados...</small>';
+    }
+
+    // Transforma a string "VVEDV" em bolinhas coloridas
+    return formaString.split('').map(letra => {
+        const resultado = letra.toUpperCase();
+        let classe = 'e'; // Padrão Empate
+        if (resultado === 'V') classe = 'v';
+        if (resultado === 'D') classe = 'd';
+        
+        return `<span class="ball ${classe}">${resultado}</span>`;
+    }).join('');
+}
+
+// --- 3. MODAL DE ESTATÍSTICAS ---
 function mostrarStatsTime(nome, escudo, pts, jogos, sg, formaString) {
     const modal = document.getElementById('modal-time');
     const detalhes = document.getElementById('detalhes-time');
@@ -46,30 +65,14 @@ function mostrarStatsTime(nome, escudo, pts, jogos, sg, formaString) {
     
     const aproveitamento = jogos > 0 ? (pts / (jogos * 3)) * 100 : 0;
     
-    // LIMPEZA: Remove qualquer caractere que não seja V, E ou D (ex: "S_DADOS")
-    let formaLimpa = (formaString || '').toUpperCase().replace(/[^VED]/g, '');
-
-    let formaArray;
-    // Se o crawler de forma ainda não tiver dados, usamos um fallback visual baseado no desempenho
-    if (formaLimpa.length < 1) {
-        if (aproveitamento >= 60) formaArray = ['V', 'V', 'E', 'V', 'V'];
-        else if (aproveitamento >= 40) formaArray = ['V', 'E', 'D', 'E', 'V'];
-        else formaArray = ['D', 'D', 'E', 'D', 'D'];
-    } else {
-        // Pega os últimos 5 resultados reais do banco
-        formaArray = formaLimpa.split('').slice(-5);
-    }
-
-    const formaHtml = formaArray.map(res => {
-        let classe = res === 'V' ? 'v' : (res === 'D' ? 'd' : 'e');
-        return `<span class="ball ${classe}">${res}</span>`;
-    }).join('');
+    // Gera o HTML das bolinhas usando a função auxiliar
+    const formaHtml = gerarBolinhasForma(formaString);
 
     detalhes.innerHTML = `
         <div style="text-align:center; margin-bottom: 25px;">
             <img src="${escudo || ESCUDO_FALLBACK}" style="width:80px; height:80px; object-fit:contain; margin-bottom:12px;">
-            <h2 style="font-size: 1.8rem; font-weight: 900; color: #fff;">${nome}</h2>
-            <div class="form-streak">${formaHtml}</div>
+            <h2 style="font-size: 1.8rem; font-weight: 900; color: #fff; margin:0;">${nome}</h2>
+            <div class="form-streak" style="margin-top:15px;">${formaHtml}</div>
         </div>
         <div class="stats-grid">
             <div class="stat-card"><b>${pts}</b><br><small>PTS</small></div>
@@ -81,12 +84,12 @@ function mostrarStatsTime(nome, escudo, pts, jogos, sg, formaString) {
     modal.style.display = "block";
 }
 
-// --- 3. CARREGAR TABELA DE CLASSIFICAÇÃO ---
+// --- 4. CARREGAR TABELA DE CLASSIFICAÇÃO ---
 async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
     if (!corpo) return;
     
-    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#888;">Atualizando dados...</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#888;">Carregando classificação...</td></tr>';
 
     try {
         const { data, error } = await _supabase
@@ -113,16 +116,17 @@ async function carregarTabela(liga) {
                 </tr>
             `).join('');
         }
-    } catch (e) { console.error("Erro na tabela:", e); }
+    } catch (e) { 
+        console.error("Erro na tabela:", e);
+        corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>';
+    }
 }
 
-// --- 4. INICIALIZAÇÃO E EVENTOS ---
+// --- 5. INICIALIZAÇÃO E EVENTOS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Carregamento inicial
     carregarAoVivo();
     carregarTabela('BR');
 
-    // Configuração da Modal
     const modal = document.getElementById('modal-time');
     const closeBtn = document.querySelector('.close-modal');
     
@@ -134,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target == modal) modal.style.display = "none";
     };
 
-    // Filtros de Ligas (Pills)
     document.querySelectorAll('.pill').forEach(btn => {
         btn.addEventListener('click', () => {
             const active = document.querySelector('.pill.active');
@@ -143,5 +146,4 @@ document.addEventListener('DOMContentLoaded', () => {
             carregarTabela(btn.dataset.liga);
         });
     });
-});
 });
