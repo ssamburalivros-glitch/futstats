@@ -69,3 +69,27 @@ tr:hover { background: #334155; cursor: pointer; }
     border-radius: 20px; cursor: pointer; 
 }
 .pill.active { background: var(--accent); }
+#ia-container {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid #4834d4;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(72, 52, 212, 0.3);
+}
+
+.ia-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: #4834d4;
+    font-weight: bold;
+}
+
+#ia-box {
+    color: #ecf0f1;
+    font-style: italic;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
