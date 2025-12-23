@@ -78,18 +78,28 @@ tr:hover { background: #334155; cursor: pointer; }
     box-shadow: 0 4px 15px rgba(72, 52, 212, 0.3);
 }
 
+#ia-container {
+    background: rgba(26, 26, 46, 0.8);
+    border: 1px solid #4834d4;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 20px auto;
+    max-width: 1200px;
+    box-shadow: 0 0 15px rgba(72, 52, 212, 0.4);
+}
+
 .ia-header {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 8px;
     color: #4834d4;
     font-weight: bold;
+    margin-bottom: 10px;
 }
 
 #ia-box {
-    color: #ecf0f1;
+    color: #fff;
     font-style: italic;
-    line-height: 1.5;
     font-size: 0.95rem;
+    line-height: 1.6;
 }
