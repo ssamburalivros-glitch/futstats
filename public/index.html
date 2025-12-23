@@ -3,55 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats Pro | Premium</title>
+    <title>FutStats - Resultados e Tabelas</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="container">
-        <header class="main-header">
-            <div class="logo-container">
-                <img src="logo.png" alt="Logo" class="main-logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'">
-                <h1>Fut<span class="green">Stats</span></h1>
-            </div>
-            <p class="subtitle">Estatísticas de Elite em Tempo Real</p>
-        </header>
+    <header>
+        <h1>FutStats</h1>
+        <div id="lista-ao-vivo" class="hero-scroll">
+            <p style="color: #888; text-align: center; width: 100%;">Carregando jogos ao vivo...</p>
+        </div>
+    </header>
 
-        <section class="live-section">
-            <div class="section-title"><span class="dot"></span><h2>DESTAQUES AO VIVO</h2></div>
-            <div id="lista-ao-vivo" class="hero-grid"></div>
-        </section>
-
-        <nav class="nav-pills">
+    <main>
+        <div class="tabs">
             <button class="pill active" data-liga="BR">Brasileirão</button>
             <button class="pill" data-liga="PL">Premier League</button>
             <button class="pill" data-liga="ES">La Liga</button>
-            <button class="pill" data-liga="DE">Bundesliga</button>
-            <button class="pill" data-liga="IT">Serie A</button>
-            <button class="pill" data-liga="PT">Liga Portugal</button>
-        </nav>
+            <button class="pill" data-liga="IT">Série A</button>
+        </div>
 
-        <div class="table-container">
+        <div class="tabela-container">
             <table>
                 <thead>
                     <tr>
-                        <th class="txt-center">POS</th>
-                        <th>CLUBE</th>
+                        <th class="txt-center">#</th>
+                        <th>Time</th>
                         <th class="txt-center">J</th>
                         <th class="txt-center">SG</th>
-                        <th class="txt-center">PTS</th>
+                        <th class="txt-center">Pts</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-corpo">
                     </tbody>
             </table>
         </div>
-    </div>
+    </main>
 
     <div id="modal-time" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-            <div id="detalhes-time"></div>
+            <div id="detalhes-time">
+                </div>
         </div>
     </div>
 
