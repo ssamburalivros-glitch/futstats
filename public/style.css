@@ -1,247 +1,71 @@
-/* --- CONFIGURAÇÕES GERAIS --- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-
 :root {
-    --bg: #050505;
-    --card-bg: #121212;
-    --border: #222;
-    --green: #00ff66;
-    --text: #ffffff;
-    --text-dim: #888;
-    --red: #ff3b30;
-    --gray: #555;
-}
-
-* { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-    -webkit-font-smoothing: antialiased;
+    --bg: #0f172a;
+    --card: #1e293b;
+    --accent: #3b82f6;
+    --win: #22c55e;
+    --draw: #94a3b8;
+    --loss: #ef4444;
 }
 
 body {
-    background-color: var(--bg);
-    color: var(--text);
+    background: var(--bg);
+    color: white;
     font-family: 'Inter', sans-serif;
-    padding: 20px;
-    line-height: 1.5;
+    margin: 0; padding: 20px;
 }
 
-.container { 
-    max-width: 1100px; 
-    margin: 0 auto; 
+/* Cards Ao Vivo */
+.hero-scroll {
+    display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px;
 }
-
-/* --- HEADER E LOGO --- */
-.main-header { 
-    text-align: center; 
-    padding: 40px 0; 
-}
-
-.logo-container { 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    gap: 15px; 
-}
-
-.main-logo { 
-    height: 75px; 
-    width: auto; 
-    filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
-}
-
-.main-header h1 { 
-    font-size: 3rem; 
-    font-weight: 900; 
-    letter-spacing: -2px; 
-}
-
-.green { color: var(--green); }
-
-.subtitle { 
-    color: var(--text-dim); 
-    font-size: 1rem; 
-    margin-top: 5px;
-    font-weight: 500;
-}
-
-/* --- SEÇÃO DE DESTAQUES (CARDS GIGANTES) --- */
-.section-title { 
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
-    margin-bottom: 20px; 
-}
-
-.dot { 
-    width: 10px; 
-    height: 10px; 
-    background: var(--red); 
-    border-radius: 50%; 
-    box-shadow: 0 0 10px var(--red); 
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.4; }
-    100% { opacity: 1; }
-}
-
-.hero-grid { 
-    display: flex; 
-    gap: 20px; 
-    overflow-x: auto; 
-    padding: 10px 5px 25px 5px; 
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    cursor: grab;
-}
-
-.hero-grid:active { cursor: grabbing; }
-
-/* BARRA DE ROLAGEM ESTILIZADA */
-.hero-grid::-webkit-scrollbar { height: 6px; }
-.hero-grid::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-.hero-grid::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-.hero-grid::-webkit-scrollbar-thumb:hover { background: var(--green); }
-
 .card-hero {
-    min-width: 340px;
-    height: 210px;
-    scroll-snap-align: start;
-    background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.9)), 
-                url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1000');
-    background-size: cover;
-    background-position: center;
-    border-radius: 28px;
-    padding: 25px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    border: 1px solid var(--border);
-    transition: transform 0.3s ease;
+    background: var(--card); padding: 15px; border-radius: 12px;
+    min-width: 250px; text-align: center; border: 1px solid #334155;
 }
+.hero-teams { display: flex; justify-content: space-between; align-items: center; }
+.hero-logo { width: 30px; height: 30px; }
+.hero-score { font-size: 1.2rem; font-weight: 800; color: var(--accent); }
+.hero-status { font-size: 0.8rem; color: #94a3b8; margin-top: 5px; }
 
-.card-hero:hover { transform: scale(1.02); border-color: var(--green); }
-
-.hero-teams { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.hero-team-box { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100px; }
-.hero-logo { width: 50px; height: 50px; object-fit: contain; }
-.hero-name { font-size: 0.8rem; font-weight: 700; text-align: center; }
-.hero-score { font-size: 2.5rem; font-weight: 900; }
-.hero-status { font-size: 0.75rem; color: var(--green); font-weight: 800; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 50px; align-self: center; }
-
-/* --- FILTROS (PILLS) --- */
-.nav-pills { 
-    display: flex; 
-    gap: 10px; 
-    justify-content: center; 
-    margin: 40px 0; 
-    flex-wrap: wrap; 
-}
-
-.pill { 
-    background: var(--card-bg); 
-    border: 1px solid var(--border); 
-    color: var(--text);
-    padding: 12px 25px; 
-    border-radius: 100px; 
-    font-weight: 600; 
-    cursor: pointer; 
-    transition: 0.3s;
-}
-
-.pill.active { background: var(--text); color: #000; border-color: var(--text); }
-
-/* --- TABELA --- */
-.table-container { 
-    background: var(--card-bg); 
-    border-radius: 24px; 
-    padding: 10px; 
-    border: 1px solid var(--border); 
-    overflow-x: auto;
-}
-
-table { width: 100%; border-collapse: collapse; min-width: 500px; }
-th { color: var(--text-dim); font-size: 0.75rem; padding: 15px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
-td { padding: 18px 15px; border-bottom: 1px solid #1a1a1a; font-weight: 600; }
+/* Tabela */
+.tabela-container { background: var(--card); border-radius: 12px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 15px; text-align: left; border-bottom: 1px solid #334155; }
 .txt-center { text-align: center; }
-.team-row { display: flex; align-items: center; gap: 15px; }
-.escudo-tab { width: 28px; height: 28px; object-fit: contain; }
+.team-row { display: flex; align-items: center; gap: 10px; }
+.escudo-tab { width: 24px; height: 24px; object-fit: contain; }
+tr:hover { background: #334155; cursor: pointer; }
 
-/* --- MODAL DE ESTATÍSTICAS --- */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.9);
-    backdrop-filter: blur(8px);
+/* Cores SG */
+.green { color: var(--win); }
+.red { color: var(--loss); }
+
+/* Modal e Bolinhas VED */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; }
+.modal-content { 
+    background: var(--card); width: 90%; max-width: 400px; 
+    margin: 100px auto; padding: 25px; border-radius: 16px; position: relative; 
 }
+.close-modal { position: absolute; right: 20px; top: 15px; font-size: 24px; cursor: pointer; }
 
-.modal-content {
-    background: var(--card-bg);
-    margin: 5% auto;
-    padding: 30px;
-    border: 1px solid var(--border);
-    width: 90%;
-    max-width: 450px;
-    border-radius: 30px;
-    position: relative;
-    animation: slideUp 0.4s ease-out;
+.form-streak { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+.ball {
+    width: 24px; height: 24px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white;
 }
+.v { background: var(--win); }
+.e { background: var(--draw); }
+.d { background: var(--loss); }
 
-@keyframes slideUp {
-    from { transform: translateY(50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+/* Grid de Estatísticas */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+.stat-card { background: #0f172a; padding: 15px; border-radius: 8px; text-align: center; }
+.stat-card b { font-size: 1.3rem; display: block; }
+
+/* Abas */
+.tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+.pill { 
+    background: var(--card); border: none; color: white; padding: 10px 20px; 
+    border-radius: 20px; cursor: pointer; 
 }
-
-.close-modal {
-    position: absolute;
-    right: 25px; top: 20px;
-    color: var(--text-dim);
-    font-size: 30px;
-    cursor: pointer;
-}
-
-.stats-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 15px; 
-    margin-top: 25px; 
-}
-
-.stat-card {
-    background: rgba(255,255,255,0.03);
-    padding: 20px;
-    border-radius: 20px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-
-.stat-value { display: block; font-size: 1.6rem; font-weight: 900; color: var(--green); }
-.stat-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
-
-/* CÍRCULOS DE FORMA (V-E-D) */
-.form-streak { display: flex; justify-content: center; gap: 8px; margin-top: 15px; }
-.ball { 
-    width: 28px; height: 28px; 
-    border-radius: 50%; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 0.75rem; 
-    font-weight: 900; 
-}
-.v { background: var(--green); color: #000; }
-.d { background: var(--red); color: #fff; }
-.e { background: var(--gray); color: #fff; }
-
-/* Responsividade */
-@media (max-width: 600px) {
-    .main-header h1 { font-size: 2.2rem; }
-    .card-hero { min-width: 290px; height: 180px; }
-}
+.pill.active { background: var(--accent); }
