@@ -13,82 +13,86 @@ LIGAS = {
     "DE": "ger.1", "IT": "ita.1", "PT": "por.1"
 }
 
-def capturar_forma_equipe(espn_id, team_id):
-    """Analisa as últimas 5 partidas finalizadas para gerar a string VED"""
+def pegar_forma_detalhada(espn_id, team_id):
     try:
         url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/teams/{team_id}/schedule"
-        response = requests.get(url, timeout=10)
-        data = response.json()
-        eventos = data.get('events', [])
-        
+        res = requests.get(url, timeout=10).json()
+        eventos = res.get('events', [])
         resultados = []
-        # Percorremos do mais recente para o mais antigo
         for evento in reversed(eventos):
-            if len(resultados) >= 5:
-                break
-            
-            # Verificamos se o jogo já terminou
+            if len(resultados) >= 5: break
             if evento['status']['type']['description'] == "Final":
-                competicao = evento['competitions'][0]
-                equipes = competicao['competitors']
-                
-                # Identifica a nossa equipe na partida
+                comp = evento['competitions'][0]
+                equipes = comp['competitors']
                 meu_time = next(t for t in equipes if t['id'] == team_id)
-                
-                # Lógica de Vitória/Empate/Derrota
-                if meu_time.get('winner') is True:
+                if meu_time.get('winner') is True: 
                     resultados.append('V')
                 elif meu_time.get('winner') is False:
-                    # Se o meu time não venceu, verificamos se o outro também não (Empate)
-                    adversario = next(t for t in equipes if t['id'] != team_id)
-                    if adversario.get('winner') is False:
-                        resultados.append('E')
-                    else:
-                        resultados.append('D')
-        
-        # Inverte para manter a ordem cronológica (mais antigo -> mais recente)
+                    adv = next(t for t in equipes if t['id'] != team_id)
+                    resultados.append('E' if adv.get('winner') is False else 'D')
         return "".join(reversed(resultados))
     except Exception as e:
-        print(f"Erro ao buscar forma do time {team_id}: {e}")
         return ""
 
-def atualizar_forma_total():
-    # 1. Busca todos os times cadastrados no seu Supabase
-    try:
-        print("🔍 Buscando times no banco de dados...")
-        response = supabase.table("tabelas_ligas").select("time, liga, escudo").execute()
-        times_db = response.data
+def sincronizar_tudo():
+    dados_para_inserir = []
+
+    for liga_nome, espn_slug in LIGAS.items():
+        print(f"📡 Lendo Liga: {liga_nome}...")
+        url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_slug}/standings"
         
-        # 2. Como precisamos do ID da ESPN que não está no seu banco, 
-        # vamos buscar a classificação atual para mapear Nome -> ID
-        for liga_nome, espn_slug in LIGAS.items():
-            print(f"📡 Processando Forma: {liga_nome}")
-            url_standings = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_slug}/standings"
-            standings_data = requests.get(url_standings).json()
+        try:
+            res = requests.get(url, timeout=20).json()
+            # A estrutura da ESPN pode variar, tentamos acessar as entradas com segurança
+            entries = res.get('children', [{}])[0].get('standings', {}).get('entries', [])
             
-            entries = standings_data['children'][0]['standings']['entries']
-            
+            if not entries:
+                print(f"⚠️ Nenhuma entrada encontrada para {liga_nome}")
+                continue
+
             for entry in entries:
-                team_info = entry['team']
-                team_name = team_info['displayName']
-                team_id = team_info['id']
+                team = entry.get('team', {})
+                stats = entry.get('stats', [])
                 
-                # Busca a forma detalhada
-                nova_forma = capturar_forma_equipe(espn_slug, team_id)
+                # Nome do time e ID
+                team_name = team.get('displayName')
+                team_id = team.get('id')
+
+                # Conversão de números
+                def get_stat(name):
+                    try:
+                        return int(float(next(s['value'] for s in stats if s['name'] == name)))
+                    except: return 0
+
+                forma = pegar_forma_detalhada(espn_slug, team_id)
                 
-                if nova_forma:
-                    # 3. Atualiza apenas a coluna 'forma' no Supabase para aquele time
-                    supabase.table("tabelas_ligas")\
-                        .update({"forma": nova_forma})\
-                        .eq("time", team_name)\
-                        .eq("liga", liga_nome)\
-                        .execute()
-                    print(f"✅ {team_name}: {nova_forma}")
-                
-                time.sleep(0.5) # Evita bloqueio da API
-                
-    except Exception as e:
-        print(f"❌ Erro geral: {e}")
+                print(f"   ⚽ {team_name}: {forma if forma else 'S_DADOS'}")
+
+                dados_para_inserir.append({
+                    "liga": liga_nome,
+                    "posicao": get_stat('rank'),
+                    "time": team_name,
+                    "escudo": team.get('logos', [{}])[0].get('href', ""),
+                    "jogos": get_stat('gamesPlayed'),
+                    "pontos": get_stat('points'),
+                    "sg": get_stat('pointDifferential'),
+                    "forma": forma if forma else "EEEEE"
+                })
+                time.sleep(0.1)
+        except Exception as e:
+            print(f"❌ Erro grave na liga {liga_nome}: {e}")
+
+    if dados_para_inserir:
+        print(f"📤 Tentando enviar {len(dados_para_inserir)} registros ao Supabase...")
+        try:
+            # Tenta limpar e inserir
+            supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
+            result = supabase.table("tabelas_ligas").insert(dados_para_inserir).execute()
+            print("🚀 SUCESSO! Dados refletidos no Supabase.")
+        except Exception as e:
+            print(f"❌ Erro ao salvar no Supabase: {e}")
+    else:
+        print("❓ Nenhum dado foi coletado para enviar.")
 
 if __name__ == "__main__":
-    atualizar_forma_total()
+    sincronizar_tudo()
