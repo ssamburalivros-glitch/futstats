@@ -12,50 +12,50 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def gerar_comentario_ia():
     print("📡 Lendo dados do Supabase...")
-    
     try:
-        # 1. Busca os líderes das ligas
-        res = supabase.table("tabelas_ligas").select("time, liga, pontos, posicao, sg").order("posicao").limit(40).execute()
+        res = supabase.table("tabelas_ligas").select("time, liga, pontos, posicao").order("posicao").limit(30).execute()
         dados = res.data
+        if not dados: return
         
-        if not dados:
-            print("❌ Sem dados na tabela.")
+        resumo = "\n".join([f"{t['time']} ({t['liga']}): {t['pontos']} pts" for t in dados if t['posicao'] <= 3])
+
+        # 1. Tenta descobrir quais modelos você pode usar
+        print("🔍 Verificando modelos disponíveis na sua chave...")
+        list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={GEMINI_API_KEY}"
+        list_res = requests.get(list_url).json()
+        
+        # Filtra modelos que suportam geração de conteúdo
+        modelos_validos = [m['name'] for m in list_res.get('models', []) if 'generateContent' in m.get('supportedGenerationMethods', [])]
+        
+        if not modelos_validos:
+            print("❌ Nenhum modelo encontrado para esta chave. Verifique o Google AI Studio.")
             return
 
-        resumo_texto = ""
-        for t in dados:
-            if t['posicao'] <= 3:
-                resumo_texto += f"- {t['time']} ({t['liga']}): {t['pontos']} pts, SG {t['sg']}\n"
+        # Prioriza Flash, depois Pro, depois o primeiro da lista
+        modelo_escolhido = next((m for m in modelos_validos if "gemini-1.5-flash" in m), 
+                               next((m for m in modelos_validos if "gemini-pro" in m), modelos_validos[0]))
+        
+        print(f"🤖 Usando modelo: {modelo_escolhido}")
 
-        print("🤖 Chamando Gemini via REST API...")
-
-        # 2. Configura a chamada direta ao Google
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+        # 2. Chama a API com o modelo correto
+        gen_url = f"https://generativelanguage.googleapis.com/v1beta/{modelo_escolhido}:generateContent?key={GEMINI_API_KEY}"
         
         payload = {
-            "contents": [{
-                "parts": [{
-                    "text": f"Você é um analista de futebol. Resuma os líderes das ligas (máximo 200 caracteres) com emojis. Dados:\n{resumo_texto}"
-                }]
-            }]
+            "contents": [{"parts": [{"text": f"Resuma os líderes em 1 frase curta com emojis:\n{resumo}"}]}]
         }
-        headers = {'Content-Type': 'application/json'}
-
-        # 3. Faz a requisição
-        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        
+        response = requests.post(gen_url, headers={'Content-Type': 'application/json'}, data=json.dumps(payload))
         resultado = response.json()
 
         if response.status_code == 200:
-            texto_ia = resultado['candidates'][0]['content']['parts'][0]['text'].strip()
-            
-            # 4. Atualiza o Supabase
-            supabase.table("site_info").update({"comentario_ia": texto_ia}).eq("id", 1).execute()
-            print(f"✅ Sucesso: {texto_ia}")
+            texto = resultado['candidates'][0]['content']['parts'][0]['text'].strip()
+            supabase.table("site_info").update({"comentario_ia": texto}).eq("id", 1).execute()
+            print(f"✅ Sucesso: {texto}")
         else:
-            print(f"❌ Erro na API do Google: {resultado}")
+            print(f"❌ Erro final: {resultado}")
 
     except Exception as e:
-        print(f"❌ Erro Geral: {e}")
+        print(f"❌ Erro: {e}")
 
 if __name__ == "__main__":
     gerar_comentario_ia()
