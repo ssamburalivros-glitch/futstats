@@ -22,6 +22,7 @@ jobs:
       - name: Instalar Dependências
         run: |
           pip install requests supabase
+          pip install -r requirements.txt
 
       - name: 📡 Executar Crawler Ao Vivo
         env:
