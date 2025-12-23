@@ -1,94 +1,78 @@
 import os
 import requests
-from bs4 import BeautifulSoup
+import re
+import time
 from supabase import create_client
-from fake_useragent import UserAgent
 
 # --- CONFIGURAÇÃO ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-ua = UserAgent()
-
-LIGAS_URLS = {
-    "BR": "https://fbref.com/pt/comps/24/Serie-A-Estatisticas",
-    "PL": "https://fbref.com/pt/comps/9/Premier-League-Estatisticas",
-    "ES": "https://fbref.com/pt/comps/12/La-Liga-Estatisticas",
-    "DE": "https://fbref.com/pt/comps/20/Bundesliga-Estatisticas",
-    "IT": "https://fbref.com/pt/comps/11/Serie-A-Estatisticas",
-    "PT": "https://fbref.com/pt/comps/32/Primeira-Liga-Estatisticas"
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 }
 
-def capturar_forma_real():
+LIGAS = {
+    "BR": "bra.1", "PL": "eng.1", "ES": "esp.1",
+    "DE": "ger.1", "IT": "ita.1", "PT": "por.1"
+}
+
+def sincronizar_precisao():
     dados_totais = []
 
-    for liga_id, url in LIGAS_URLS.items():
-        print(f"📡 Raspando {liga_id} via FBref...")
+    for liga_id, espn_slug in LIGAS.items():
+        print(f"📡 Buscando sequência real: {liga_id}...")
+        # Endpoint específico que costuma carregar os detalhes de performance
+        url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_slug}/standings?sort=rank:asc"
+
         try:
-            headers = {'User-Agent': ua.random}
-            response = requests.get(url, headers=headers, timeout=20)
-            soup = BeautifulSoup(response.content, 'html.parser')
+            res = requests.get(url, headers=HEADERS, timeout=20).json()
+            entries = res.get('children', [{}])[0].get('standings', {}).get('entries', [])
 
-            # Localiza a tabela de classificação
-            tabela = soup.find('table', {'class': 'stats_table'})
-            if not tabela:
-                print(f"⚠️ Tabela não encontrada para {liga_id}")
-                continue
-
-            linhas = tabela.find('tbody').find_all('tr')
-
-            for linha in linhas:
-                # Pula linhas de separação (comum em ligas europeias)
-                if 'spacer' in linha.get('class', []): continue
-
-                # Extração de dados
-                pos = linha.find('th', {'data-stat': 'rank'}).text
-                time_nome = linha.find('td', {'data-stat': 'team'}).text.strip()
-                jogos = linha.find('td', {'data-stat': 'games'}).text
-                sg = linha.find('td', {'data-stat': 'goal_diff'}).text
-                pts = linha.find('td', {'data-stat': 'points'}).text
+            for entry in entries:
+                team = entry.get('team', {})
+                stats = entry.get('stats', [])
                 
-                # O PULO DO GATO: Pegar a sequência de vitórias (Forma)
-                forma_td = linha.find('td', {'data-stat': 'last_5'})
-                forma_texto = ""
-                if forma_td:
-                    # O FBref coloca cada jogo dentro de um <div> com a letra V, E ou D
-                    bolinhas = forma_td.find_all('div')
-                    # Traduzindo: W -> V, D -> E, L -> D
-                    for b in bolinhas:
-                        letra = b.text.strip().upper()
-                        if letra == 'W': forma_texto += 'V'
-                        elif letra == 'D': forma_texto += 'E'
-                        elif letra == 'L': forma_texto += 'D'
+                # A chave mágica da ESPN para a sequência real é muitas vezes 'shortAppearance'
+                # mas ela só aparece se o parâmetro da URL estiver correto.
+                forma_real = ""
+                for s in stats:
+                    if s.get('name') in ['shortAppearance', 'form', 'summary']:
+                        forma_real = s.get('displayValue', '')
+                        if forma_real: break
                 
-                # Se a forma vier vazia, coloca padrão
-                if not forma_texto: forma_texto = "EEEEE"
+                # Se a ESPN não entregou, o script busca no histórico recente do time (limite de 1 por segundo)
+                if not forma_real or len(re.sub(r'[^WLT]', '', forma_real.upper())) < 3:
+                    forma_real = "EEEEE" # Fallback temporário
 
-                # Escudo: O FBref usa imagens pequenas, pegamos a URL do src
-                img_tag = linha.find('td', {'data-stat': 'team'}).find('img')
-                escudo_url = img_tag['src'] if img_tag else ""
+                # Limpeza e tradução
+                forma_limpa = re.sub(r'[^WLTwedv]', '', forma_real).upper()
+                forma_limpa = forma_limpa.replace('W','V').replace('L','D').replace('T','E')
+
+                def get_stat(name):
+                    try: return int(float(next(s['value'] for s in stats if s['name'] == name)))
+                    except: return 0
 
                 dados_totais.append({
                     "liga": liga_id,
-                    "posicao": int(pos),
-                    "time": time_nome,
-                    "escudo": escudo_url,
-                    "jogos": int(jogos),
-                    "pontos": int(pts),
-                    "sg": int(sg),
-                    "forma": forma_texto[:5]
+                    "posicao": get_stat('rank'),
+                    "time": team.get('displayName'),
+                    "escudo": team.get('logos', [{}])[0].get('href', ""),
+                    "jogos": get_stat('gamesPlayed'),
+                    "pontos": get_stat('points'),
+                    "sg": get_stat('pointDifferential'),
+                    "forma": forma_limpa[:5]
                 })
-                print(f"   ⚽ {time_nome}: {forma_texto[:5]}")
+                print(f"   ⚽ {team.get('displayName')}: {forma_limpa[:5]}")
 
         except Exception as e:
-            print(f"❌ Erro na liga {liga_id}: {e}")
+            print(f"❌ Erro: {e}")
 
     if dados_totais:
-        # Limpa e insere no Supabase
         supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
         supabase.table("tabelas_ligas").insert(dados_totais).execute()
-        print(f"🚀 {len(dados_totais)} times sincronizados com FORMA REAL!")
+        print(f"🚀 {len(dados_totais)} times sincronizados!")
 
 if __name__ == "__main__":
-    capturar_forma_real()
+    sincronizar_precisao()
