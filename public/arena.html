@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena H2H | FutStats</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <div class="logo-container" onclick="window.location.href='index.html'" style="cursor:pointer">
+                <img src="logo.png" alt="FS" class="site-logo-img">
+                <h1 class="logo">Fut<span class="neon-blue">Stats</span></h1>
+            </div>
+            <button class="btn-neural-fechar" onclick="window.location.href='index.html'" style="margin:0; padding: 5px 15px;">VOLTAR</button>
+        </div>
+    </header>
+
+    <main style="padding: 20px;">
+        <section id="h2h-section">
+            <div class="glass-panel arena-border">
+                <div class="arena-header">
+                    <h2 class="cyber-title">ARENA <span class="neon-purple">H2H</span></h2>
+                    <p style="font-size: 0.7rem; color: #555; text-align: center; margin-bottom: 20px;">SELECIONE OS TIMES PARA COMPARATIVO NEURAL</p>
+                </div>
+
+                <div class="h2h-controls-complex">
+                    <div class="control-group">
+                        <label>DESAFIANTE A</label>
+                        <select id="liga-a" class="cyber-select">
+                            <option value="">Escolha a Liga</option>
+                            <option value="BR">Brasil</option>
+                            <option value="PL">Inglaterra</option>
+                            <option value="ES">Espanha</option>
+                            <option value="IT">Itália</option>
+                            <option value="DE">Alemanha</option>
+                            <option value="FR">França</option>
+                            <option value="SA">Arábia Saudita</option>
+                            <option value="NL">Holanda</option>
+                        </select>
+                        <select id="time-a" class="cyber-select" disabled>
+                            <option value="">Selecione o Time</option>
+                        </select>
+                    </div>
+                    
+                    <div class="vs-badge">VS</div>
+
+                    <div class="control-group">
+                        <label>DESAFIANTE B</label>
+                        <select id="liga-b" class="cyber-select">
+                            <option value="">Escolha a Liga</option>
+                            <option value="BR">Brasil</option>
+                            <option value="PL">Inglaterra</option>
+                            <option value="ES">Espanha</option>
+                            <option value="IT">Itália</option>
+                            <option value="DE">Alemanha</option>
+                            <option value="FR">França</option>
+                            <option value="SA">Arábia Saudita</option>
+                            <option value="NL">Holanda</option>
+                        </select>
+                        <select id="time-b" class="cyber-select" disabled>
+                            <option value="">Selecione o Time</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="h2h-display" style="display: none; padding: 40px 20px;">
+                    <div class="h2h-arena" style="display: flex; justify-content: space-around; align-items: center; gap: 20px;">
+                        <div class="team-gladiator" style="text-align: center;">
+                            <div class="power-rank" id="power-a" style="font-size: 2.5rem; color: var(--neon-blue); font-family: 'Orbitron';">--</div>
+                            <img id="img-a" src="" style="width: 80px; height: 80px; object-fit: contain; margin: 15px 0;">
+                            <h3 id="name-a" style="font-size: 1.2rem; text-transform: uppercase;">--</h3>
+                        </div>
+
+                        <div class="vs-central" style="font-family: 'Orbitron'; font-size: 1.5rem; opacity: 0.2;">VS</div>
+
+                        <div class="team-gladiator" style="text-align: center;">
+                            <div class="power-rank" id="power-b" style="font-size: 2.5rem; color: var(--neon-purple); font-family: 'Orbitron';">--</div>
+                            <img id="img-b" src="" style="width: 80px; height: 80px; object-fit: contain; margin: 15px 0;">
+                            <h3 id="name-b" style="font-size: 1.2rem; text-transform: uppercase;">--</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
