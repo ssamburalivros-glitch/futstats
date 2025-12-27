@@ -299,3 +299,68 @@ td {
     background: var(--neon-blue);
     transition: width 0.3s;
 }
+/* --- RECUPERAR BARRA DE ROLAGEM AO VIVO --- */
+.hero-grid {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto; /* Garante o scroll horizontal */
+    padding: 20px;
+    /* Estilização da barra de rolagem para aparecer no Windows/Chrome */
+    scrollbar-width: thin; 
+    scrollbar-color: var(--neon-blue) #111;
+}
+
+.hero-grid::-webkit-scrollbar {
+    height: 6px; /* Altura da barra horizontal */
+    display: block !important; /* Força a exibição */
+}
+
+.hero-grid::-webkit-scrollbar-track {
+    background: #050505;
+    border-radius: 10px;
+}
+
+.hero-grid::-webkit-scrollbar-thumb {
+    background: var(--neon-blue);
+    border-radius: 10px;
+    box-shadow: 0 0 5px var(--neon-blue);
+}
+
+/* --- PADRONIZAÇÃO DOS SELETORES H2H --- */
+.cyber-select {
+    width: 100%; /* Ocupa todo o espaço do container group */
+    background: #000;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 12px;
+    border-radius: 5px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none; /* Remove seta padrão do sistema */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%234834d4' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+.cyber-select:focus {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 10px rgba(72, 52, 212, 0.4);
+    outline: none;
+}
+
+.cyber-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #1a1a1a;
+}
+
+/* Ajuste do grupo para não esmagar os selects */
+.control-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px; /* Largura mínima para os selects não sumirem */
+    flex: 1;
+}
