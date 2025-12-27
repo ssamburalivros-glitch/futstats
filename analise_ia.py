@@ -39,7 +39,7 @@ def gerar_analise_ia():
                 {"role": "system", "content": prompt_system},
                 {"role": "user", "content": f"Contexto atual: {contexto}"}
             ],
-            model="llama3-8b-8192", # Modelo muito rápido e eficiente
+            model="llama-3.3-70b-versatile", # Modelo muito rápido e eficiente
             temperature=0.7,
         )
 
