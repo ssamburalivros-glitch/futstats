@@ -1,105 +1,48 @@
+/* --- CONFIGURAÇÕES GERAIS E CORES --- */
 :root {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --accent: #3b82f6;
-    --win: #22c55e;
-    --draw: #94a3b8;
-    --loss: #ef4444;
+    --bg-dark: #0a0a12;
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --neon-blue: #4834d4;
+    --neon-purple: #be2edd;
+    --text-main: #e0e0e0;
+    --font-cyber: 'Orbitron', sans-serif;
+    --font-main: 'Rajdhani', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-    background: var(--bg);
-    color: white;
-    font-family: 'Inter', sans-serif;
-    margin: 0; padding: 20px;
-}
-
-/* Cards Ao Vivo */
-.hero-scroll {
-    display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px;
-}
-.card-hero {
-    background: var(--card); padding: 15px; border-radius: 12px;
-    min-width: 250px; text-align: center; border: 1px solid #334155;
-}
-.hero-teams { display: flex; justify-content: space-between; align-items: center; }
-.hero-logo { width: 30px; height: 30px; }
-.hero-score { font-size: 1.2rem; font-weight: 800; color: var(--accent); }
-.hero-status { font-size: 0.8rem; color: #94a3b8; margin-top: 5px; }
-
-/* Tabela */
-.tabela-container { background: var(--card); border-radius: 12px; overflow: hidden; }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 15px; text-align: left; border-bottom: 1px solid #334155; }
-.txt-center { text-align: center; }
-.team-row { display: flex; align-items: center; gap: 10px; }
-.escudo-tab { width: 24px; height: 24px; object-fit: contain; }
-tr:hover { background: #334155; cursor: pointer; }
-
-/* Cores SG */
-.green { color: var(--win); }
-.red { color: var(--loss); }
-
-/* Modal e Bolinhas VED */
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; }
-.modal-content { 
-    background: var(--card); width: 90%; max-width: 400px; 
-    margin: 100px auto; padding: 25px; border-radius: 16px; position: relative; 
-}
-.close-modal { position: absolute; right: 20px; top: 15px; font-size: 24px; cursor: pointer; }
-
-.form-streak { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
-.ball {
-    width: 24px; height: 24px; border-radius: 50%; display: flex;
-    align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: white;
-}
-.v { background: var(--win); }
-.e { background: var(--draw); }
-.d { background: var(--loss); }
-
-/* Grid de Estatísticas */
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-.stat-card { background: #0f172a; padding: 15px; border-radius: 8px; text-align: center; }
-.stat-card b { font-size: 1.3rem; display: block; }
-
-/* Abas */
-.tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-.pill { 
-    background: var(--card); border: none; color: white; padding: 10px 20px; 
-    border-radius: 20px; cursor: pointer; 
-}
-.pill.active { background: var(--accent); }
-#ia-container {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    border: 1px solid #4834d4;
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 15px rgba(72, 52, 212, 0.3);
-}
-
-#ia-container {
-    background: rgba(26, 26, 46, 0.8);
-    border: 1px solid #4834d4;
-    border-radius: 12px;
-    padding: 15px;
-    margin: 20px auto;
-    max-width: 1200px;
-    box-shadow: 0 0 15px rgba(72, 52, 212, 0.4);
-}
-
-.ia-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #4834d4;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-#ia-box {
-    color: #fff;
-    font-style: italic;
-    font-size: 0.95rem;
+    background-color: var(--bg-dark);
+    background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #0a0a12 100%);
+    color: var(--text-main);
+    font-family: var(--font-main);
     line-height: 1.6;
+    overflow-x: hidden;
 }
+
+/* --- HEADER E LOGO --- */
+header {
+    padding: 2rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(72, 52, 212, 0.2);
+}
+
+.logo {
+    font-family: var(--font-cyber);
+    font-size: 2.5rem;
+    letter-spacing: 5px;
+    text-shadow: 0 0 10px var(--neon-blue);
+}
+
+.neon-blue { color: var(--neon-blue); }
+.neon-purple { color: var(--neon-purple); }
+
+/* --- SEÇÃO IA (SCANNER EFFECT) --- */
+#ia-insights {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 0 15
