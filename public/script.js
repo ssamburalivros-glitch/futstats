@@ -1,252 +1,196 @@
-// --- CONFIGURAÇÃO ---
-const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// --- CONFIGURAÇÃO DO NÚCLEO ---
+const _supabase = supabase.createClient(
+    "SUA_URL_DO_SUPABASE", 
+    "SUA_CHAVE_ANON_DO_SUPABASE"
+);
 
-const ESCUDO_FALLBACK = 'https://cdn-icons-png.flaticon.com/512/53/53283.png';
-
-let dadosTimesGlobal = [];
-let timeA_Selecionado = null;
-let timeB_Selecionado = null;
-let chartInstance = null;
-
-// --- INICIALIZAÇÃO ---
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log("Sistema Neural Iniciado.");
-    await carregarIA();
-    await carregarAoVivo();
-    await buscarDadosTabela();
-    
-    configurarEventosH2H();
-    configurarFiltrosLigaTabela();
+// --- INICIALIZAÇÃO DO SISTEMA ---
+document.addEventListener('DOMContentLoaded', () => {
+    carregarIA();            // Inicia IA (lendo do banco)
+    carregarAoVivo();        // Inicia Feed de Jogos
+    carregarTabela('BR');    // Inicia Tabela (Brasil por padrão)
+    configurarFiltrosLigas(); // Ativa botões de ligas
+    configurarH2H();         // Ativa seletores da Arena
 });
 
-// --- 1. BUSCA DE DADOS ---
-async function buscarDadosTabela() {
-    try {
-        const { data } = await _supabase.from('tabelas_ligas').select('*').order('pontos', { ascending: false });
-        if (data) {
-            dadosTimesGlobal = data;
-            renderizarTabela('BR');
-        }
-    } catch (e) { console.error("Erro dados:", e); }
-}
-
-async function carregarAoVivo() {
-    const { data } = await _supabase.from('jogos_ao_vivo').select('*');
-    const container = document.getElementById('lista-ao-vivo');
-    
-    if (container && data) {
-        container.innerHTML = data.map(j => `
-            <div class="card-hero">
-                <div style="font-size:0.7rem; color:var(--neon-purple); margin-bottom:10px;">● ${j.status}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div class="team-v">
-                        <img src="${j.logo_casa || ESCUDO_FALLBACK}">
-                        <span style="font-size:0.8rem; display:block; margin-top:5px;">${j.time_casa}</span>
-                    </div>
-                    <div class="hero-score">${j.placar}</div>
-                    <div class="team-v">
-                        <img src="${j.logo_fora || ESCUDO_FALLBACK}">
-                        <span style="font-size:0.8rem; display:block; margin-top:5px;">${j.time_fora}</span>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
-}
-
-// --- IA COM EFEITO TYPEWRITER ---
+// --- 1. INTELIGÊNCIA ARTIFICIAL (ECONÔMICA) ---
 async function carregarIA() {
     try {
-        const { data, error } = await _supabase.from('site_info').select('comentario_ia').eq('id', 1).single();
+        // Busca o comentário que o Python já salvou no banco
+        const { data, error } = await _supabase
+            .from('site_info')
+            .select('comentario_ia')
+            .eq('id', 1)
+            .single();
+
         const boxIA = document.getElementById('ia-box');
-
-        if (!boxIA) return;
-
         if (data && data.comentario_ia) {
             let texto = data.comentario_ia;
-            boxIA.innerText = "";
             let i = 0;
+            boxIA.innerHTML = "";
 
-            // Efeito de digitação letra por letra
             function digitar() {
                 if (i < texto.length) {
-                    boxIA.innerText += texto.charAt(i);
+                    boxIA.innerHTML += texto.charAt(i);
                     i++;
-                    setTimeout(digitar, 35); // Velocidade da digitação
+                    setTimeout(digitar, 30);
                 }
             }
             digitar();
-            
-            const scanner = document.querySelector('.ia-scanner');
-            if(scanner) scanner.style.background = 'var(--neon-blue)';
         }
     } catch (e) { console.error("Erro IA:", e); }
 }
 
-// --- 2. LÓGICA DO H2H ---
-function configurarEventosH2H() {
-    document.getElementById('liga-a').addEventListener('change', (e) => preencherSelectTime('a', e.target.value));
-    document.getElementById('time-a').addEventListener('change', atualizarComparativo);
-    document.getElementById('liga-b').addEventListener('change', (e) => preencherSelectTime('b', e.target.value));
-    document.getElementById('time-b').addEventListener('change', atualizarComparativo);
+// --- 2. TABELAS E FILTROS ---
+async function carregarTabela(siglaLiga) {
+    try {
+        const { data, error } = await _supabase
+            .from('tabelas_ligas')
+            .select('*')
+            .eq('liga', siglaLiga)
+            .order('posicao', { ascending: true });
+
+        if (error) throw error;
+        renderizarTabela(data);
+    } catch (err) { console.error("Erro Tabela:", err); }
 }
 
-function preencherSelectTime(lado, liga) {
-    const selectTime = document.getElementById(`time-${lado}`);
-    const timesFiltrados = dadosTimesGlobal.filter(t => t.liga === liga);
-    
-    let html = '<option value="">Selecione o Time</option>';
-    timesFiltrados.forEach(t => { html += `<option value="${t.time}">${t.time}</option>`; });
-    selectTime.innerHTML = html;
-    selectTime.disabled = false;
-}
+function renderizarTabela(dados) {
+    const corpo = document.getElementById('tabela-corpo');
+    corpo.innerHTML = "";
 
-function atualizarComparativo() {
-    const nomeA = document.getElementById('time-a').value;
-    const nomeB = document.getElementById('time-b').value;
+    dados.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "row-interativa";
+        tr.onclick = () => abrirModalTime(item); // Clique para o Modal Estiloso
 
-    if (!nomeA || !nomeB) return;
-
-    timeA_Selecionado = dadosTimesGlobal.find(t => t.time === nomeA);
-    timeB_Selecionado = dadosTimesGlobal.find(t => t.time === nomeB);
-
-    document.getElementById('h2h-display').style.display = 'block';
-    document.getElementById('name-a').innerText = timeA_Selecionado.time;
-    document.getElementById('img-a').src = timeA_Selecionado.escudo || ESCUDO_FALLBACK;
-    document.getElementById('name-b').innerText = timeB_Selecionado.time;
-    document.getElementById('img-b').src = timeB_Selecionado.escudo || ESCUDO_FALLBACK;
-
-    renderBarrasStats(timeA_Selecionado, timeB_Selecionado);
-}
-
-function renderBarrasStats(tA, tB) {
-    const container = document.getElementById('stats-rows');
-    const stats = [
-        { l: 'PONTOS', a: tA.pontos, b: tB.pontos },
-        { l: 'SALDO', a: tA.sg, b: tB.sg }
-    ];
-
-    container.innerHTML = stats.map(s => {
-        const total = (Math.abs(s.a) + Math.abs(s.b)) || 1;
-        const widthA = (Math.abs(s.a) / total) * 100;
-        return `
-            <div style="margin-bottom:10px;">
-                <div style="display:flex; justify-content:space-between; font-size:0.7rem;">
-                    <span>${s.a}</span> <span style="color:#666">${s.l}</span> <span>${s.b}</span>
-                </div>
-                <div style="display:flex; height:4px; background:#111; border-radius:2px; overflow:hidden; margin-top:3px;">
-                    <div style="width:${widthA}%; background:var(--neon-blue);"></div>
-                    <div style="width:${100 - widthA}%; background:var(--neon-purple);"></div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// --- 3. TABELA ---
-function renderizarTabela(liga) {
-    const tbody = document.getElementById('tabela-corpo');
-    const times = dadosTimesGlobal.filter(t => t.liga === liga);
-
-    tbody.innerHTML = times.map((t, i) => `
-        <tr onclick="abrirModalUnico('${t.time}')" style="cursor:pointer">
-            <td style="text-align:center; color:#444;">${i+1}</td>
+        tr.innerHTML = `
+            <td class="pos-cell">${item.posicao}</td>
             <td>
                 <div class="team-clickable">
-                    <img src="${t.escudo || ESCUDO_FALLBACK}" class="team-cell-img">
-                    <span>${t.time}</span>
+                    <img src="${item.escudo}" class="team-cell-img">
+                    <span>${item.time}</span>
                 </div>
             </td>
-            <td style="text-align:center;">${t.jogos}</td>
-            <td style="text-align:center; color:var(--neon-blue); font-weight:bold;">${t.pontos}</td>
-        </tr>
-    `).join('');
-}
-
-function configurarFiltrosLigaTabela() {
-    document.querySelectorAll('.league-btn').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelector('.league-btn.active').classList.remove('active');
-            btn.classList.add('active');
-            renderizarTabela(btn.dataset.liga);
-        };
+            <td align="center">${item.jogos}</td>
+            <td align="center" class="pts-cell">${item.pontos}</td>
+        `;
+        corpo.appendChild(tr);
     });
 }
 
-// --- 4. GRÁFICOS E MODAL ---
-async function abrirModalUnico(nomeTime) {
-    const time = dadosTimesGlobal.find(t => t.time === nomeTime);
-    if(time) {
-        timeA_Selecionado = time;
-        timeB_Selecionado = null;
-        abrirEstatisticasCompletas(true);
-    }
+function configurarFiltrosLigas() {
+    document.querySelectorAll('.league-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.league-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            carregarTabela(this.dataset.liga);
+        });
+    });
 }
 
-async function abrirEstatisticasCompletas(modoSingle = false) {
-    const loader = document.getElementById('neural-loader');
-    const modal = document.getElementById('modal-stats');
+// --- 3. MODAL DE DETALHES DO TIME ---
+function abrirModalTime(time) {
+    document.getElementById('modal-nome-time').innerText = time.time;
+    document.getElementById('modal-escudo').src = time.escudo;
+    document.getElementById('modal-liga-badge').innerText = `LIGA: ${time.liga}`;
+    document.getElementById('modal-pos').innerText = `${time.posicao}º`;
+    document.getElementById('modal-pts').innerText = time.pontos;
+    document.getElementById('modal-jogos').innerText = time.jogos;
+    document.getElementById('modal-sg').innerText = time.sg;
+
+    // Lógica da Forma (VVDEE)
+    const containerForma = document.getElementById('modal-forma-list');
+    containerForma.innerHTML = "";
+    time.forma.split('').forEach(res => {
+        const item = document.createElement('div');
+        item.className = 'forma-item';
+        item.innerText = res;
+        if(res === 'V') item.style.color = "#00ff41";
+        else if(res === 'D') item.style.color = "#ff4d4d";
+        containerForma.appendChild(item);
+    });
+
+    document.getElementById('modal-time').style.display = 'flex';
+}
+
+function fecharModalTime() {
+    document.getElementById('modal-time').style.display = 'none';
+}
+
+// --- 4. ARENA H2H (DINÂMICA) ---
+function configurarH2H() {
+    const ligasH2H = ['liga-a', 'liga-b'];
     
-    loader.style.display = 'flex';
-    await new Promise(r => setTimeout(r, 500));
-    loader.style.display = 'none';
-    modal.style.display = 'flex';
+    ligasH2H.forEach(id => {
+        document.getElementById(id).addEventListener('change', async function() {
+            const lado = id.split('-')[1]; // a ou b
+            const timeSelect = document.getElementById(`time-${lado}`);
+            
+            timeSelect.disabled = true;
+            timeSelect.innerHTML = '<option>Carregando...</option>';
 
-    renderizarGrafico(modoSingle);
+            const { data } = await _supabase
+                .from('tabelas_ligas')
+                .select('time, escudo, pontos, forma, sg')
+                .eq('liga', this.value)
+                .order('time');
+
+            timeSelect.innerHTML = '<option value="">Selecione o Time</option>';
+            data.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = JSON.stringify(t); // Guarda o objeto inteiro na opção
+                opt.innerText = t.time;
+                timeSelect.appendChild(opt);
+            });
+            timeSelect.disabled = false;
+        });
+    });
+
+    // Evento para mostrar o duelo quando o segundo time for escolhido
+    document.getElementById('time-b').addEventListener('change', processarDuelo);
 }
 
-function renderizarGrafico(modoSingle) {
-    const ctx = document.getElementById('statsChart').getContext('2d');
-    if (chartInstance) chartInstance.destroy();
+function processarDuelo() {
+    const dataA = JSON.parse(document.getElementById('time-a').value);
+    const dataB = JSON.parse(document.getElementById('time-b').value);
 
-    const containerText = document.getElementById('conteudo-detalhado');
+    if (dataA && dataB) {
+        document.getElementById('h2h-display').style.display = 'block';
+        
+        // Atualiza Escudos e Nomes
+        document.getElementById('img-a').src = dataA.escudo;
+        document.getElementById('name-a').innerText = dataA.time;
+        document.getElementById('img-b').src = dataB.escudo;
+        document.getElementById('name-b').innerText = dataB.time;
 
-    if (modoSingle) {
-        // MODO BARRAS (UM TIME)
-        chartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Pontos', 'Saldo', 'Vitórias'],
-                datasets: [{
-                    label: timeA_Selecionado.time,
-                    data: [timeA_Selecionado.pontos, timeA_Selecionado.sg, timeA_Selecionado.vitorias || 0],
-                    backgroundColor: '#4834d4'
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-        containerText.innerHTML = `<h3 style="color:var(--neon-blue)">Análise: ${timeA_Selecionado.time}</h3>`;
-    } else {
-        // MODO PIZZA (PROBABILIDADE H2H)
-        const forcaA = (timeA_Selecionado.pontos * 0.6) + (timeA_Selecionado.sg * 0.4) + 5;
-        const forcaB = (timeB_Selecionado.pontos * 0.6) + (timeB_Selecionado.sg * 0.4) + 5;
-        const total = forcaA + forcaB;
-        const probA = Math.round((forcaA / total) * 100);
-        const probB = 100 - probA;
-
-        chartInstance = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: [timeA_Selecionado.time, timeB_Selecionado.time],
-                datasets: [{
-                    data: [probA, probB],
-                    backgroundColor: ['#4834d4', '#be2edd'],
-                    hoverOffset: 15,
-                    borderWidth: 0
-                }]
-            },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#fff' } } }
-            }
-        });
-        containerText.innerHTML = `<h3 style="color:#00ff41; text-align:center;">CHANCE DE VITÓRIA: ${probA}% VS ${probB}%</h3>`;
+        // Cálculo Simples de Power Rank (Exemplo)
+        const powerA = Math.min(99, (dataA.pontos * 1.5) + (dataA.sg * 0.5)).toFixed(0);
+        const powerB = Math.min(99, (dataB.pontos * 1.5) + (dataB.sg * 0.5)).toFixed(0);
+        
+        document.getElementById('power-a').innerText = powerA;
+        document.getElementById('power-b').innerText = powerB;
     }
 }
 
-function fecharModal() {
-    document.getElementById('modal-stats').style.display = 'none';
+// --- 5. JOGOS AO VIVO ---
+async function carregarAoVivo() {
+    const { data } = await _supabase.from('jogos_ao_vivo').select('*');
+    const container = document.getElementById('lista-ao-vivo');
+    if (!data || data.length === 0) {
+        container.innerHTML = "<p style='padding:20px; color:#444;'>Nenhum jogo detectado no radar.</p>";
+        return;
+    }
+    
+    container.innerHTML = data.map(jogo => `
+        <div class="card-hero">
+            <div class="hero-score">${jogo.placar_casa} - ${jogo.placar_fora}</div>
+            <div class="team-v">
+                <img src="${jogo.escudo_casa}">
+                <span>vs</span>
+                <img src="${jogo.escudo_fora}">
+            </div>
+            <div style="font-size:0.6rem; color:var(--neon-blue); margin-top:5px;">${jogo.tempo || 'AO VIVO'}</div>
+        </div>
+    `).join('');
 }
