@@ -1,9 +1,10 @@
-/* --- CONFIGURAÇÕES GERAIS E CORES --- */
+/* --- 1. RESET E VARIÁVEIS --- */
 :root {
     --bg-dark: #0a0a12;
     --glass-bg: rgba(255, 255, 255, 0.03);
     --neon-blue: #4834d4;
     --neon-purple: #be2edd;
+    --neon-fire: #ff4757;
     --text-main: #e0e0e0;
     --font-cyber: 'Orbitron', sans-serif;
     --font-main: 'Rajdhani', sans-serif;
@@ -20,13 +21,13 @@ body {
     background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #0a0a12 100%);
     color: var(--text-main);
     font-family: var(--font-main);
-    line-height: 1.6;
     overflow-x: hidden;
+    min-height: 100vh;
 }
 
-/* --- HEADER E LOGO --- */
+/* --- 2. LAYOUT PRINCIPAL (ORGANIZAÇÃO MAIN) --- */
 header {
-    padding: 2rem;
+    padding: 20px;
     text-align: center;
     border-bottom: 1px solid rgba(72, 52, 212, 0.2);
 }
@@ -38,48 +39,163 @@ header {
     text-shadow: 0 0 10px var(--neon-blue);
 }
 
-.neon-blue { color: var(--neon-blue); }
-.neon-purple { color: var(--neon-purple); }
+/* O "Pulo do Gato": Centraliza e limita a largura de todo o conteúdo */
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px; /* Espaçamento igual entre todas as seções */
+}
 
-/* --- SEÇÃO IA (SCANNER EFFECT) --- */
-#ia-insights {
-    max-width: 1000px;
-    margin: 20px auto;
-    padding: 0 15
-/* Ajuste global para imagens de times */
+/* --- 3. COMPONENTES REUTILIZÁVEIS (GLASSMORPISM) --- */
+.glass-panel {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* --- 4. CONTROLE DE IMAGENS (CORREÇÃO DO ERRO) --- */
 img {
     max-width: 100%;
     height: auto;
-}
-
-/* Tamanho fixo para escudos na Arena H2H */
-.gladiator-card img {
-    width: 150px !important; /* Tamanho controlado */
-    height: 150px !important;
     object-fit: contain;
-    margin: 10px 0;
 }
 
-/* Ajuste para os cards de jogos ao vivo (onde está o erro da foto) */
+/* Tamanho dos escudos nos cards "Ao Vivo" */
+.team-v img {
+    width: 60px !important;
+    height: 60px !important;
+    margin-bottom: 10px;
+}
+
+/* Tamanho dos escudos no Comparador H2H */
+.gladiator-card img {
+    width: 120px !important;
+    height: 120px !important;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+}
+
+/* Tamanho dos escudos na Tabela */
+.team-cell img {
+    width: 25px !important;
+    height: 25px !important;
+}
+
+/* --- 5. ARENA H2H (ESTILO GLADIADORES) --- */
+.h2h-arena {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr;
+    gap: 20px;
+    align-items: center;
+    margin-top: 30px;
+}
+
+.power-rank {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-cyber);
+    font-size: 1.3rem;
+    border: 3px solid;
+    background: #000;
+}
+
+.color-a { color: var(--neon-blue); border-color: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); }
+.color-b { color: var(--neon-purple); border-color: var(--neon-purple); box-shadow: 0 0 15px var(--neon-purple); }
+
+/* Efeito ON FIRE 🔥 */
+.on-fire {
+    animation: pulseFire 1.5s infinite alternate;
+    border-color: var(--neon-fire) !important;
+    color: var(--neon-fire) !important;
+}
+
+@keyframes pulseFire {
+    from { box-shadow: 0 0 10px var(--neon-fire); }
+    to { box-shadow: 0 0 30px var(--neon-fire), 0 0 10px orange; }
+}
+
+/* --- 6. BARRAS DE ESTATÍSTICAS --- */
+.stat-item { margin-bottom: 15px; }
+.stat-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.bar-container {
+    height: 8px;
+    background: #111;
+    border-radius: 4px;
+    display: flex;
+    overflow: hidden;
+}
+
+.bar-fill-left { background: var(--neon-blue); transition: width 1s ease-out; }
+.bar-fill-right { background: var(--neon-purple); transition: width 1s ease-out; border-left: 1px solid #000; }
+
+/* --- 7. JOGOS AO VIVO (GRID) --- */
 .hero-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
-    padding: 20px;
-    align-items: start;
 }
 
-.team-v img {
-    width: 60px !important; /* Evita que o ícone ocupe a tela toda */
-    height: 60px !important;
-    object-fit: contain;
+.card-hero {
+    background: var(--glass-bg);
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
-/* Garante que o container H2H não espalhe */
-.h2h-arena {
+.hero-score {
+    font-family: var(--font-cyber);
+    font-size: 1.8rem;
+    margin: 0 15px;
+}
+
+/* --- 8. TABELAS --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 12px;
+    font-family: var(--font-cyber);
+    font-size: 0.7rem;
+    color: var(--neon-blue);
+    border-bottom: 1px solid var(--neon-blue);
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.team-cell {
     display: flex;
-    justify-content: space-around;
     align-items: center;
-    flex-wrap: wrap; /* Para não quebrar em telas menores */
-    gap: 20px;
+    gap: 10px;
+}
+
+/* --- 9. RESPONSIVIDADE --- */
+@media (max-width: 768px) {
+    .h2h-arena {
+        grid-template-columns: 1fr;
+    }
+    .logo { font-size: 1.8rem; }
 }
