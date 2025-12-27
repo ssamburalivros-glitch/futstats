@@ -3,24 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Pro Dashboard</title>
+    <title>FutStats | Dashboard Neural Pro</title>
+    
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
+    <div id="neural-loader" class="loader-overlay" style="display: none;">
+        <div class="loader-content">
+            <div class="scanner-line"></div>
+            <h3 class="cyber-title">PROCESSANDO <span class="neon-blue">DADOS NEURAIS</span></h3>
+            <div class="progress-container">
+                <div id="neural-progress-bar" class="progress-fill"></div>
+            </div>
+            <p id="loader-status">Sincronizando Scrapers...</p>
+        </div>
+    </div>
+
     <header>
-        <h1 class="logo">FUT<span class="neon-blue">STATS</span></h1>
+        <div class="header-content">
+            <h1 class="logo">FUT<span class="neon-blue">STATS</span></h1>
+            <div class="neural-status">
+                <span class="pulse-dot"></span> LIVE DATA STREAM
+            </div>
+        </div>
     </header>
 
     <main>
-        <section id="ao-vivo">
-            <div class="section-header">
-                <h2><span class="dot-live"></span> AO VIVO</h2>
-                <span class="scroll-hint">Deslize →</span>
+        <section id="ia-insights">
+            <div class="ia-card">
+                <div class="ia-scanner"></div>
+                <div class="ia-header">
+                    <span>🤖</span>
+                    <h3>IA NEURAL ANALYSIS</h3>
+                </div>
+                <p id="ia-box">Iniciando conexão com a rede neural...</p>
             </div>
-            <div id="lista-ao-vivo" class="hero-grid"></div>
+        </section>
+
+        <section id="ao-vivo">
+            <div class="section-header-flex">
+                <h2 class="cyber-subtitle">● AO VIVO</h2>
+                <span class="scroll-hint">Deslize para o lado →</span>
+            </div>
+            <div id="lista-ao-vivo" class="hero-grid">
+                </div>
         </section>
 
         <section id="h2h-section">
@@ -32,9 +62,19 @@
                 </div>
 
                 <div class="h2h-controls">
-                    <select id="time-a" class="cyber-select"></select>
+                    <div class="select-wrapper">
+                        <select id="time-a" class="cyber-select">
+                            <option value="">Carregando times...</option>
+                        </select>
+                    </div>
+                    
                     <div class="vs-badge">VS</div>
-                    <select id="time-b" class="cyber-select"></select>
+
+                    <div class="select-wrapper">
+                        <select id="time-b" class="cyber-select">
+                            <option value="">Carregando times...</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div id="h2h-display" style="display: none;">
@@ -48,7 +88,7 @@
                         <div class="stats-center">
                             <div id="stats-rows"></div>
                             <button class="btn-full-stats" onclick="abrirEstatisticasCompletas()">
-                                <span class="icon">📊</span> ACESSAR ANÁLISE COMPLETA
+                                📊 ACESSAR ANÁLISE COMPLETA
                             </button>
                         </div>
 
@@ -63,32 +103,31 @@
         </section>
 
         <section id="classificacao">
-            <div class="leagues-container">
-                <button class="league-btn active" data-liga="BR">
-                    <img src="https://flagcdn.com/w40/br.png"> <span>BRASIL</span>
-                </button>
-                <button class="league-btn" data-liga="PL">
-                    <img src="https://flagcdn.com/w40/gb-eng.png"> <span>INGLATERRA</span>
-                </button>
-                <button class="league-btn" data-liga="ES">
-                    <img src="https://flagcdn.com/w40/es.png"> <span>ESPANHA</span>
-                </button>
-                <button class="league-btn" data-liga="IT">
-                    <img src="https://flagcdn.com/w40/it.png"> <span>ITÁLIA</span>
-                </button>
+            <div class="leagues-wrapper">
+                <h2 class="cyber-subtitle">WORLD LEAGUES</h2>
+                <div class="leagues-container">
+                    <button class="league-btn active" data-liga="BR"><img src="https://flagcdn.com/w40/br.png"> <span>BRASIL</span></button>
+                    <button class="league-btn" data-liga="PL"><img src="https://flagcdn.com/w40/gb-eng.png"> <span>INGLATERRA</span></button>
+                    <button class="league-btn" data-liga="ES"><img src="https://flagcdn.com/w40/es.png"> <span>ESPANHA</span></button>
+                    <button class="league-btn" data-liga="IT"><img src="https://flagcdn.com/w40/it.png"> <span>ITÁLIA</span></button>
+                    <button class="league-btn" data-liga="DE"><img src="https://flagcdn.com/w40/de.png"> <span>ALEMANHA</span></button>
+                    <button class="league-btn" data-liga="PT"><img src="https://flagcdn.com/w40/pt.png"> <span>PORTUGAL</span></button>
+                </div>
             </div>
 
-            <div class="glass-panel table-wrapper">
+            <div class="glass-panel table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th style="width: 40px;">#</th>
                             <th>TIME</th>
                             <th>J</th>
+                            <th>SG</th>
                             <th>PTS</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-corpo"></tbody>
+                    <tbody id="tabela-corpo">
+                        </tbody>
                 </table>
             </div>
         </section>
@@ -96,14 +135,18 @@
 
     <div id="modal-stats" class="modal-full">
         <div class="modal-nav">
-            <button onclick="fecharModal()" class="btn-back">← VOLTAR AO DASHBOARD</button>
+            <button onclick="fecharModal()" class="btn-back">← VOLTAR</button>
             <h2 class="cyber-title">DETALHAMENTO <span class="neon-blue">NEURAL</span></h2>
-        </div>
+            <div style="width: 80px;"></div> </div>
         <div class="modal-body">
             <div id="conteudo-detalhado" class="grid-detalhes">
                 </div>
         </div>
     </div>
+
+    <footer>
+        <p>FUTSTATS TERMINAL // v2.0 // 2025</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
