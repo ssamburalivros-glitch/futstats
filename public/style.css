@@ -357,3 +357,39 @@ td {
     text-align: center;
     box-shadow: 0 0 30px rgba(72, 52, 212, 0.5);
 }
+/* Container que segura o logo e o nome */
+.hero-team-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80px; /* Largura fixa para manter o placar centralizado */
+    gap: 8px;
+}
+
+/* O LOGO propriamente dito */
+.hero-logo {
+    width: 45px !important;  /* Força o tamanho pequeno */
+    height: 45px !important; /* Força o tamanho pequeno */
+    object-fit: contain;     /* Não deixa a imagem esticar */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); /* Dá profundidade */
+}
+
+/* Ajuste do nome do time embaixo do logo */
+.hero-name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Corta nomes muito longos com ... */
+    max-width: 90px;
+}
+
+/* Ajuste do placar para não ficar espremido */
+.hero-score {
+    font-size: 2rem;
+    font-weight: 900;
+    min-width: 100px;
+    text-align: center;
+}
