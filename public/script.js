@@ -7,128 +7,147 @@ const ESCUDO_PADRAO = "https://cdn-icons-png.flaticon.com/512/53/53244.png";
 
 // --- INICIALIZAÇÃO SEGURA ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Funções exclusivas da HOME (index.html)
-    if (document.getElementById('tabela-corpo')) {
+    // Detecta em qual página estamos para não rodar script onde não deve
+    const ehHome = document.getElementById('tabela-corpo');
+    const ehArena = document.getElementById('liga-a');
+
+    if (ehHome) {
         carregarIA();
         carregarAoVivo();
         carregarTabela('BR');
         configurarFiltrosLigas();
     }
 
-    // 2. Funções exclusivas da ARENA (arena.html)
-    if (document.getElementById('liga-a')) {
+    if (ehArena) {
         configurarH2H();
     }
+
+    // Listener global para fechar modal
+    const closeBtn = document.querySelector('.close-modal');
+    if (closeBtn) closeBtn.onclick = fecharModalTime;
+    
+    window.onclick = (e) => {
+        const modal = document.getElementById('modal-time');
+        if (e.target == modal) fecharModalTime();
+    };
 });
 
 // --- FUNÇÕES DA HOME ---
+
 async function carregarIA() {
     try {
         const { data } = await _supabase.from('site_info').select('comentario_ia').eq('id', 1).single();
         const boxIA = document.getElementById('ia-box');
-        if (data?.comentario_ia && boxIA) boxIA.innerText = data.comentario_ia;
-    } catch (e) { console.error("IA Offline"); }
+        if (data?.comentario_ia && boxIA) {
+            boxIA.innerText = data.comentario_ia;
+        }
+    } catch (e) { 
+        console.warn("IA offline ou campo inexistente."); 
+    }
 }
 
-// --- 1. CARREGAR JOGOS AO VIVO (VERSÃO CORRIGIDA E COMPLETA) ---
 async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
-    if (!container) {
-        console.error("ERRO: O elemento #lista-ao-vivo não existe no seu HTML.");
-        return;
-    }
+    if (!container) return;
 
     try {
-        console.log("Tentando buscar dados do Supabase...");
-        
-        // 1. Chamada ao Banco
         const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
         
-        // 2. Erro de Conexão ou Permissão
-        if (error) {
-            console.error("ERRO DO SUPABASE:", error.message);
-            container.innerHTML = `<p style="color:orange">Erro na tabela: ${error.message}</p>`;
-            return;
-        }
+        if (error) throw error;
 
-        // 3. Verificação de Dados Vazios
         if (!data || data.length === 0) {
-            console.warn("AVISO: A tabela 'jogos_ao_vivo' está vazia no seu banco.");
-            container.innerHTML = '<p style="color:#666">Nenhum jogo ao vivo no momento.</p>';
+            container.innerHTML = '<p style="color:#888; padding:20px; width:100%; text-align:center;">Aguardando jogos começarem...</p>';
             return;
         }
 
-        console.log("SUCESSO: Dados recebidos:", data);
-
-        // 4. Renderização
         container.innerHTML = data.map(j => {
-            // Se o placar vier vazio, usamos 0x0
+            // Garante que valores nulos não quebrem o HTML
             const placar = j.placar || "0 - 0";
-            
+            const timeC = j.time_casa || "Mandante";
+            const timeF = j.time_fora || "Visitante";
+            const status = j.status || "Tempo Real";
+
             return `
                 <div class="card-hero">
                     <div class="hero-teams">
                         <div class="hero-team-box">
-                            <img src="${j.logo_casa || ESCUDO_FALLBACK}" class="hero-logo" onerror="this.src='${ESCUDO_FALLBACK}'">
-                            <span class="hero-name">${j.time_casa || 'Indefinido'}</span>
+                            <img src="${j.logo_casa || ESCUDO_PADRAO}" class="hero-logo" onerror="this.src='${ESCUDO_PADRAO}'">
+                            <span class="hero-name">${timeC}</span>
                         </div>
                         <div class="hero-score">${placar}</div>
                         <div class="hero-team-box">
-                            <img src="${j.logo_fora || ESCUDO_FALLBACK}" class="hero-logo" onerror="this.src='${ESCUDO_FALLBACK}'">
-                            <span class="hero-name">${j.time_fora || 'Indefinido'}</span>
+                            <img src="${j.logo_fora || ESCUDO_PADRAO}" class="hero-logo" onerror="this.src='${ESCUDO_PADRAO}'">
+                            <span class="hero-name">${timeF}</span>
                         </div>
                     </div>
-                    <div class="hero-status">${j.status || 'Tempo Real'}</div>
+                    <div class="hero-status"><span class="live-dot"></span> ${status}</div>
                 </div>
             `;
         }).join('');
 
     } catch (e) {
-        console.error("ERRO CRÍTICO NO JS:", e);
-        container.innerHTML = '<p style="color:red">Erro interno ao carregar dados.</p>';
+        console.error("Erro ao vivo:", e);
+        container.innerHTML = '<p style="color:#555; text-align:center; width:100%;">Serviço de placares temporariamente indisponível.</p>';
     }
 }
-// --- FUNÇÃO PARA CARREGAR A TABELA ---
+
 async function carregarTabela(liga) {
+    const corpo = document.getElementById('tabela-corpo');
+    if (!corpo) return;
+
     try {
         const { data, error } = await _supabase.from('tabelas_ligas').select('*').eq('liga', liga).order('posicao');
-        const corpo = document.getElementById('tabela-corpo');
         
-        if (error || !corpo) return;
+        if (error) throw error;
 
         corpo.innerHTML = data.map(item => {
-            // Transformamos o objeto em string para passar no clique
-            const dadosTime = JSON.stringify(item).replace(/'/g, "&apos;"); 
+            // Proteção contra aspas no nome do time ao converter para JSON
+            const dadosTime = JSON.stringify(item).replace(/'/g, "&apos;");
             
             return `
                 <tr class="row-interativa" onclick='abrirModalTime(${dadosTime})'>
                     <td>${item.posicao}º</td>
                     <td>
                         <div class="team-clickable">
-                            <img src="${item.escudo || ESCUDO_PADRAO}" class="team-cell-img">
+                            <img src="${item.escudo || ESCUDO_PADRAO}" class="team-cell-img" onerror="this.src='${ESCUDO_PADRAO}'">
                             <span>${item.time}</span>
                         </div>
                     </td>
                     <td align="center">${item.jogos}</td>
-                    <td align="center" style="color:var(--neon-blue); font-weight:bold;">${item.pontos}</td>
+                    <td align="center" style="color:#00ff88; font-weight:bold;">${item.pontos}</td>
                 </tr>
             `;
         }).join('');
-    } catch (e) { console.error("Erro na tabela:", e); }
+    } catch (e) { 
+        console.error("Erro tabela:", e); 
+    }
 }
 
 // --- FUNÇÕES DO MODAL ---
+
 function abrirModalTime(time) {
     const modal = document.getElementById('modal-time');
     if (!modal) return;
 
-    // Preenche os dados
-    document.getElementById('modal-nome-time').innerText = time.time;
-    document.getElementById('modal-escudo').src = time.escudo || ESCUDO_PADRAO;
-    document.getElementById('modal-pos').innerText = time.posicao + "º";
-    document.getElementById('modal-pts').innerText = time.pontos;
+    // Atualiza os campos do modal com segurança
+    const campos = {
+        'modal-nome-time': time.time,
+        'modal-pos': (time.posicao || '0') + "º",
+        'modal-pts': time.pontos || '0',
+        'modal-v': time.vitorias || '0',
+        'modal-e': time.empates || '0',
+        'modal-d': time.derrotas || '0',
+        'modal-sg': time.sg || '0'
+    };
 
-    // Mostra o modal
+    for (let id in campos) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = campos[id];
+    }
+
+    const img = document.getElementById('modal-escudo');
+    if (img) img.src = time.escudo || ESCUDO_PADRAO;
+
     modal.style.display = 'flex';
 }
 
@@ -136,7 +155,9 @@ function fecharModalTime() {
     const modal = document.getElementById('modal-time');
     if (modal) modal.style.display = 'none';
 }
-// --- FUNÇÕES DA ARENA H2H ---
+
+// --- ARENA H2H ---
+
 function configurarH2H() {
     ['liga-a', 'liga-b'].forEach(id => {
         const el = document.getElementById(id);
@@ -147,14 +168,16 @@ function configurarH2H() {
             const selectTime = document.getElementById(`time-${lado}`);
             const { data } = await _supabase.from('tabelas_ligas').select('*').eq('liga', this.value).order('time');
             
-            selectTime.innerHTML = '<option value="">Selecione o Time</option>';
-            data?.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = JSON.stringify(t);
-                opt.innerText = t.time;
-                selectTime.appendChild(opt);
-            });
-            selectTime.disabled = false;
+            if (selectTime) {
+                selectTime.innerHTML = '<option value="">Selecione o Time</option>';
+                data?.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = JSON.stringify(t);
+                    opt.innerText = t.time;
+                    selectTime.appendChild(opt);
+                });
+                selectTime.disabled = false;
+            }
         });
     });
 
@@ -175,55 +198,49 @@ function processarDuelo(a, b) {
     if (!display) return;
     display.style.display = 'block';
 
-    // Preenchimento de dados
+    // Imagens e Nomes
     document.getElementById('img-a').src = a.escudo || ESCUDO_PADRAO;
     document.getElementById('img-b').src = b.escudo || ESCUDO_PADRAO;
     document.getElementById('name-a').innerText = a.time;
     document.getElementById('name-b').innerText = b.time;
-    document.getElementById('pos-a').innerText = `${a.posicao}º`;
-    document.getElementById('pos-b').innerText = `${b.posicao}º`;
-    document.getElementById('pts-a').innerText = a.pontos;
-    document.getElementById('pts-b').innerText = b.pontos;
-    document.getElementById('sg-a').innerText = a.sg || 0;
-    document.getElementById('sg-b').innerText = b.sg || 0;
 
-    // Cálculo de Probabilidade
-    const pA = (a.pontos * 0.7) + ((a.sg || 0) * 0.3) + 1;
-    const pB = (b.pontos * 0.7) + ((b.sg || 0) * 0.3) + 1;
+    // Estatísticas Base
+    const stats = ['posicao', 'pontos', 'sg'];
+    stats.forEach(s => {
+        document.getElementById(`${s.substring(0,3)}-a`).innerText = a[s] || 0;
+        document.getElementById(`${s.substring(0,3)}-b`).innerText = b[s] || 0;
+    });
+
+    // Probabilidade Realista
+    const pA = (a.pontos * 0.6) + ((a.sg || 0) * 0.4) + 10;
+    const pB = (b.pontos * 0.6) + ((b.sg || 0) * 0.4) + 10;
+    
     const winA = Math.round((pA / (pA + pB)) * 100);
     const winB = 100 - winA;
 
-    document.getElementById('bar-a').style.width = `${winA}%`;
-    document.getElementById('bar-b').style.width = `${winB}%`;
-    document.getElementById('perc-a').innerText = `${winA}%`;
-    document.getElementById('perc-b').innerText = `${winB}%`;
+    const barA = document.getElementById('bar-a');
+    const barB = document.getElementById('bar-b');
+    if(barA && barB) {
+        barA.style.width = `${winA}%`;
+        barB.style.width = `${winB}%`;
+        document.getElementById('perc-a').innerText = `${winA}%`;
+        document.getElementById('perc-b').innerText = `${winB}%`;
+    }
 
     const pred = document.getElementById('prediction-text');
-    pred.innerText = winA > winB + 5 ? `FAVORITO: ${a.time}` : winB > winA + 5 ? `FAVORITO: ${b.time}` : "EQUILÍBRIO: EMPATE";
+    if(pred) {
+        pred.innerText = winA > winB + 8 ? `PROBABILIDADE: ${a.time} FAVORITO` : 
+                         winB > winA + 8 ? `PROBABILIDADE: ${b.time} FAVORITO` : 
+                         "PROBABILIDADE: JOGO EQUILIBRADO";
+    }
 }
 
-// --- MODAL E FILTROS ---
 function configurarFiltrosLigas() {
     document.querySelectorAll('.league-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.onclick = function() {
             document.querySelectorAll('.league-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             carregarTabela(this.dataset.liga);
-        });
+        };
     });
-}
-
-function abrirModalTime(time) {
-    const modal = document.getElementById('modal-time');
-    if (!modal) return;
-    document.getElementById('modal-nome-time').innerText = time.time;
-    document.getElementById('modal-escudo').src = time.escudo || ESCUDO_PADRAO;
-    document.getElementById('modal-pos').innerText = time.posicao;
-    document.getElementById('modal-pts').innerText = time.pontos;
-    modal.style.display = 'flex';
-}
-
-function fecharModalTime() {
-    const modal = document.getElementById('modal-time');
-    if (modal) modal.style.display = 'none';
 }
