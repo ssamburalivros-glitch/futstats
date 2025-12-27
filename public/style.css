@@ -1,190 +1,301 @@
-/* --- 1. CONFIGURAÇÕES BASE --- */
+/* --- VARIÁVEIS E CORES NEURAIS --- */
 :root {
-    --bg-dark: #0a0a12;
-    --glass-bg: rgba(255, 255, 255, 0.04);
-    --neon-blue: #4834d4;
-    --neon-purple: #be2edd;
-    --neon-fire: #ff4757;
-    --text-main: #ecf0f1;
-    --font-cyber: 'Orbitron', sans-serif;
-    --font-main: 'Rajdhani', sans-serif;
+    --bg-deep: #020205;        /* Fundo quase preto */
+    --bg-panel: #0a0a0f;      /* Painéis secundários */
+    --neon-blue: #4834d4;     /* Azul FutStats */
+    --neon-purple: #be2edd;   /* Roxo Arena */
+    --neon-green: #00ff41;    /* Verde Matrix (IA) */
+    --text-main: #e0e0e0;     /* Texto principal */
+    --text-dim: #666666;      /* Texto secundário */
+    --glass: rgba(255, 255, 255, 0.03);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* --- RESET E GERAL --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 body {
-    background-color: var(--bg-dark);
-    background-image: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #05050a 100%);
+    background-color: var(--bg-deep);
     color: var(--text-main);
-    font-family: var(--font-main);
+    font-family: 'Rajdhani', sans-serif;
+    line-height: 1.6;
     overflow-x: hidden;
 }
 
-main {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 20px;
-    display: flex; flex-direction: column; gap: 40px;
+/* --- HEADER E LOGO --- */
+header {
+    background: #000;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 15px 0;
+    text-align: center;
 }
 
-/* --- 2. JOGOS AO VIVO (ROLAGEM CORRIGIDA) --- */
+.logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    font-weight: 700;
+}
+
+.neon-blue { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+
+/* --- SEÇÃO IA (CYBER TERMINAL) --- */
+#ia-insights {
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.ia-card {
+    background: var(--bg-panel);
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden; /* Necessário para o efeito de scanner */
+}
+
+.ia-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: var(--neon-green);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+}
+
+#ia-box {
+    font-family: 'Courier New', monospace;
+    color: var(--neon-green);
+    font-size: 1rem;
+    min-height: 40px;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+}
+
+#ia-box::after {
+    content: '_';
+    animation: blink 0.8s infinite;
+}
+
+/* Efeito de Scanner passando */
+.ia-card::before {
+    content: "";
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(transparent, rgba(72, 52, 212, 0.05), transparent);
+    animation: scanner 4s infinite linear;
+}
+
+@keyframes scanner {
+    0% { top: -100%; }
+    100% { top: 100%; }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* --- GRID AO VIVO (SCROLL HORIZONTAL) --- */
 .hero-grid {
     display: flex;
-    flex-wrap: nowrap; /* Impede quebrar linha */
-    overflow-x: auto; /* Força rolagem */
     gap: 15px;
-    padding: 10px 0 20px;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    padding: 10px 20px;
+    scrollbar-width: none; /* Firefox */
 }
 
-/* Estilo da barra de rolagem */
-.hero-grid::-webkit-scrollbar { height: 6px; }
-.hero-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; }
-.hero-grid::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
+.hero-grid::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
 .card-hero {
-    flex: 0 0 280px; /* CRÍTICO: Impede o card de encolher */
-    background: var(--glass-bg);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    flex: 0 0 240px;
+    background: var(--bg-panel);
+    border: 1px solid #1a1a1a;
+    border-radius: 10px;
     padding: 15px;
+    text-align: center;
 }
 
-.hero-score { font-family: var(--font-cyber); font-size: 1.5rem; color: #fff; }
-.team-v img { width: 40px !important; height: 40px !important; object-fit: contain; }
+.hero-score {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    color: #fff;
+    background: #111;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
 
-/* --- 3. IMAGENS & ESCUDOS (TRAVADOS) --- */
-img { max-width: 100%; height: auto; display: block; }
-.shield-main { width: 90px !important; height: 90px !important; margin: 10px auto; object-fit: contain; }
-.team-cell-img { width: 28px !important; height: 28px !important; object-fit: contain; }
+.team-v img { width: 35px; height: 35px; object-fit: contain; }
 
-/* --- 4. H2H AVANÇADO (CASCATA) --- */
-.h2h-controls-complex {
+/* --- TABELAS E FILTROS --- */
+.leagues-filter {
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* Alinha na base */
-    gap: 15px;
-    margin: 30px 0;
-    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-.control-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.control-group label {
-    font-size: 0.75rem;
-    color: var(--neon-purple);
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.cyber-select, .cyber-select-sm {
-    background: #080808;
-    color: #fff;
+.league-btn {
+    background: #111;
     border: 1px solid #333;
-    padding: 10px;
-    border-radius: 6px;
-    font-family: var(--font-main);
-    outline: none;
+    color: #888;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
     transition: 0.3s;
 }
 
-.cyber-select-sm { width: 160px; border-color: rgba(72, 52, 212, 0.5); }
-.cyber-select { width: 200px; border-color: rgba(190, 46, 221, 0.5); }
-
-.cyber-select:disabled { opacity: 0.5; cursor: not-allowed; }
-.cyber-select:focus, .cyber-select-sm:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(72,52,212,0.3); }
-
-.vs-badge {
-    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-cyber); font-size: 0.8rem;
-    box-shadow: 0 0 15px var(--neon-blue);
-    margin-bottom: 5px; /* Ajuste visual */
-}
-
-/* --- 5. TABELA INTERATIVA --- */
-.team-clickable {
-    display: flex; align-items: center; gap: 10px;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 4px;
-    transition: background 0.2s;
-}
-.team-clickable:hover { background: rgba(255,255,255,0.05); }
-.team-clickable span { font-weight: 600; color: #ddd; }
-
-/* --- 6. MODAL & GRÁFICO --- */
-.modal-full {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: #05050a; z-index: 5000;
-    display: none; flex-direction: column;
-    animation: fadeUp 0.3s ease-out;
-}
-
-.modal-nav {
-    padding: 20px; background: rgba(0,0,0,0.6);
-    display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 1px solid #222;
-}
-
-.modal-body {
-    padding: 30px; overflow-y: auto; flex-grow: 1;
-    display: flex; flex-direction: column; align-items: center; gap: 30px;
-}
-
-/* Container do Chart.js */
-.chart-container-wrapper {
-    width: 100%; max-width: 800px;
-    height: 350px;
-    background: rgba(255,255,255,0.02);
-    padding: 15px; border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-
-.grid-detalhes {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px; width: 100%; max-width: 1000px;
+.league-btn.active {
+    border-color: var(--neon-blue);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(72, 52, 212, 0.3);
 }
 
 .glass-panel {
-    background: var(--glass-bg); backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.05);
-    padding: 20px; border-radius: 12px;
+    background: var(--bg-panel);
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    margin: 0 20px;
+    padding: 15px;
 }
 
-/* --- 7. LOADING OVERLAY --- */
-.loader-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); z-index: 9999;
-    display: flex; align-items: center; justify-content: center;
+table {
+    width: 100%;
+    border-collapse: collapse;
 }
-.progress-container {
-    width: 300px; height: 4px; background: #222;
-    border-radius: 2px; margin-top: 15px; overflow: hidden;
+
+th {
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #1a1a1a;
 }
-.progress-fill {
-    width: 0%; height: 100%;
+
+td {
+    padding: 12px 0;
+    border-bottom: 1px solid #111;
+    font-size: 0.9rem;
+}
+
+.team-clickable {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.team-cell-img { width: 22px; height: 22px; object-fit: contain; }
+
+/* --- ARENA H2H --- */
+.arena-selectors {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.cyber-select {
+    background: #000;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: 'Rajdhani', sans-serif;
+    width: 140px;
+}
+
+.h2h-display-box {
+    text-align: center;
+    padding: 20px;
+    border: 1px dashed #333;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.3);
+}
+
+.btn-neural {
+    background: var(--neon-blue);
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 20px;
+    width: 100%;
+}
+
+/* --- MODAL E GRÁFICOS --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background: var(--bg-panel);
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid var(--neon-blue);
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.chart-container {
+    height: 250px;
+    margin: 20px 0;
+}
+
+/* --- LOADER --- */
+#neural-loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-deep);
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.loader-bar {
+    width: 200px;
+    height: 2px;
+    background: #111;
+    margin-top: 15px;
+    overflow: hidden;
+}
+
+.loader-progress {
+    width: 0%;
+    height: 100%;
     background: var(--neon-blue);
     transition: width 0.3s;
 }
-
-/* Auxiliares */
-.header-content { text-align: center; padding: 30px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.logo { font-size: 2.5rem; letter-spacing: 3px; font-family: var(--font-cyber); }
-.btn-back { background: transparent; border: 1px solid #444; color: #fff; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
-.btn-full-stats {
-    width: 100%; padding: 15px; margin-top: 20px;
-    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-    border: none; color: #fff; font-weight: bold; border-radius: 8px; cursor: pointer;
-}
-
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@media (max-width: 768px) { .h2h-controls-complex { flex-direction: column; align-items: center; } .cyber-select-sm, .cyber-select { width: 100%; } }
