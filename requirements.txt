@@ -1,7 +1,8 @@
 requests-html
 beautifulsoup4
 supabase
+groq
 fake-useragent
 lxml_html_clean
 playwright
-groq
+
