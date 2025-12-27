@@ -4,19 +4,29 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// --- INICIALIZAÇÃO ---
+// Brasão padrão para evitar espaços vazios ou erros de imagem (404/DNS)
+const ESCUDO_PADRAO = "https://cdn-icons-png.flaticon.com/512/53/53244.png";
+
+// --- INICIALIZAÇÃO INTELIGENTE ---
 document.addEventListener('DOMContentLoaded', () => {
-    carregarIA();
-    carregarAoVivo();
-    carregarTabela('BR');
-    configurarFiltrosLigas();
-    configurarH2H();
+    // Detecta se estamos na HOME
+    if (document.getElementById('tabela-corpo')) {
+        carregarIA();
+        carregarAoVivo();
+        carregarTabela('BR');
+        configurarFiltrosLigas();
+    }
+
+    // Detecta se estamos na ARENA H2H
+    if (document.getElementById('liga-a')) {
+        configurarH2H();
+    }
 });
 
-// --- 1. IA INSIGHTS (CACHE DO BANCO) ---
+// --- 1. IA INSIGHTS (HOME) ---
 async function carregarIA() {
     try {
-        const { data, error } = await _supabase
+        const { data } = await _supabase
             .from('site_info')
             .select('comentario_ia')
             .eq('id', 1)
@@ -35,107 +45,80 @@ async function carregarIA() {
                 }
             }
             digitar();
-        } else {
-            boxIA.innerText = "IA Offline: Aguardando processamento de metadados...";
         }
-    } catch (e) { console.error("Erro IA:", e); }
+    } catch (e) { console.error("IA Offline"); }
 }
 
-// --- 2. TABELAS E FILTROS ---
+// --- 2. JOGOS AO VIVO (HOME - ANTI-ERRO) ---
+async function carregarAoVivo() {
+    try {
+        const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
+        const container = document.getElementById('lista-ao-vivo');
+        
+        if (error || !data || data.length === 0) {
+            container.innerHTML = "<p style='color:#444; padding:20px; font-size:0.7rem;'>RADAR BUSCANDO FREQUÊNCIAS...</p>";
+            return;
+        }
+
+        container.innerHTML = data.map(jogo => {
+            // Proteção contra links quebrados ou undefined
+            const imgC = (jogo.escudo_casa && jogo.escudo_casa.startsWith('http')) ? jogo.escudo_casa : ESCUDO_PADRAO;
+            const imgF = (jogo.escudo_fora && jogo.escudo_fora.startsWith('http')) ? jogo.escudo_fora : ESCUDO_PADRAO;
+
+            return `
+                <div class="card-hero">
+                    <div style="font-size:0.55rem; color:var(--neon-blue); font-weight:bold; margin-bottom:5px;">
+                        ${jogo.tempo || 'LIVE'}
+                    </div>
+                    <div class="hero-score">${jogo.placar_casa ?? 0} - ${jogo.placar_fora ?? 0}</div>
+                    <div class="team-v">
+                        <img src="${imgC}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
+                        <span style="font-size:0.6rem; opacity:0.3;">VS</span>
+                        <img src="${imgF}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
+                    </div>
+                    <div style="font-size:0.5rem; color:#666; text-transform:uppercase; white-space:nowrap; overflow:hidden; width:100%;">
+                        ${(jogo.time_casa || '---').substring(0, 10)}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (e) { console.error("Erro Live Feeds"); }
+}
+
+// --- 3. TABELA DE CLASSIFICAÇÃO (HOME) ---
 async function carregarTabela(siglaLiga) {
     try {
-        const { data, error } = await _supabase
-            .from('tabelas_ligas')
-            .select('*')
-            .eq('liga', siglaLiga)
-            .order('posicao', { ascending: true });
+        const { data } = await _supabase.from('tabelas_ligas').select('*').eq('liga', siglaLiga).order('posicao');
+        const corpo = document.getElementById('tabela-corpo');
+        if (!corpo) return;
+        
+        corpo.innerHTML = "";
+        if (data) {
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "row-interativa";
+                tr.onclick = () => abrirModalTime(item);
+                
+                const esc = (item.escudo && item.escudo.startsWith('http')) ? item.escudo : ESCUDO_PADRAO;
 
-        if (error) throw error;
-        renderizarTabela(data);
-    } catch (err) { console.error("Erro Tabela:", err); }
+                tr.innerHTML = `
+                    <td style="font-size:0.75rem; color:#444;">${item.posicao}</td>
+                    <td>
+                        <div class="team-clickable">
+                            <img src="${esc}" class="team-cell-img" onerror="this.src='${ESCUDO_PADRAO}'">
+                            <span>${item.time}</span>
+                        </div>
+                    </td>
+                    <td align="center">${item.jogos}</td>
+                    <td align="center" style="color:var(--neon-blue); font-weight:bold;">${item.pontos}</td>
+                `;
+                corpo.appendChild(tr);
+            });
+        }
+    } catch (e) { console.error("Erro Tabela"); }
 }
 
-function renderizarTabela(dados) {
-    const corpo = document.getElementById('tabela-corpo');
-    corpo.innerHTML = "";
-
-    if (!dados || dados.length === 0) {
-        corpo.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Nenhum dado encontrado para esta liga.</td></tr>';
-        return;
-    }
-
-    dados.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.className = "row-interativa";
-        tr.onclick = () => abrirModalTime(item);
-
-        // Fallback para evitar 404 se a imagem sumir
-        const escudoFinal = item.escudo || 'https://via.placeholder.com/24';
-
-        tr.innerHTML = `
-            <td style="color:#666; font-family:'Orbitron'; font-size:0.8rem;">${item.posicao}</td>
-            <td>
-                <div class="team-clickable">
-                    <img src="${escudoFinal}" class="team-cell-img" onerror="this.src='https://via.placeholder.com/24'">
-                    <span>${item.time}</span>
-                </div>
-            </td>
-            <td align="center">${item.jogos}</td>
-            <td align="center" style="font-weight:bold; color:var(--neon-blue);">${item.pontos}</td>
-        `;
-        corpo.appendChild(tr);
-    });
-}
-
-function configurarFiltrosLigas() {
-    document.querySelectorAll('.league-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.league-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            carregarTabela(this.dataset.liga);
-        });
-    });
-}
-
-// --- 3. MODAL DE DETALHES ---
-function abrirModalTime(time) {
-    if (!time) return;
-
-    document.getElementById('modal-nome-time').innerText = time.time || "Time Desconhecido";
-    document.getElementById('modal-escudo').src = time.escudo || 'https://via.placeholder.com/80';
-    document.getElementById('modal-liga-badge').innerText = `LIGA: ${time.liga}`;
-    document.getElementById('modal-pos').innerText = `${time.posicao || '--'}º`;
-    document.getElementById('modal-pts').innerText = time.pontos || '0';
-    document.getElementById('modal-jogos').innerText = time.jogos || '0';
-    document.getElementById('modal-sg').innerText = time.sg || '0';
-
-    const containerForma = document.getElementById('modal-forma-list');
-    containerForma.innerHTML = "";
-    
-    const formaStr = time.forma && time.forma !== "S_DADOS" ? time.forma : "";
-    
-    if (formaStr) {
-        formaStr.split('').forEach(res => {
-            const item = document.createElement('div');
-            item.className = 'forma-item';
-            item.innerText = res;
-            if(res === 'V') item.style.color = "#00ff41";
-            else if(res === 'D') item.style.color = "#ff4d4d";
-            else item.style.color = "#888";
-            containerForma.appendChild(item);
-        });
-    } else {
-        containerForma.innerHTML = "<span style='font-size:0.7rem; color:#444;'>SEM DADOS RECENTES</span>";
-    }
-
-    document.getElementById('modal-time').style.display = 'flex';
-}
-
-function fecharModalTime() {
-    document.getElementById('modal-time').style.display = 'none';
-}
-
-// --- 4. ARENA H2H ---
+// --- 4. ARENA H2H (PÁGINA ARENA.HTML) ---
 function configurarH2H() {
     const ids = ['liga-a', 'liga-b'];
     ids.forEach(id => {
@@ -148,7 +131,7 @@ function configurarH2H() {
             if (!this.value) return;
 
             timeSelect.disabled = true;
-            timeSelect.innerHTML = '<option>Carregando...</option>';
+            timeSelect.innerHTML = '<option>Aguarde...</option>';
 
             const { data } = await _supabase
                 .from('tabelas_ligas')
@@ -157,81 +140,64 @@ function configurarH2H() {
                 .order('time');
 
             timeSelect.innerHTML = '<option value="">Selecione o Time</option>';
-            if (data) {
-                data.forEach(t => {
-                    const opt = document.createElement('option');
-                    opt.value = JSON.stringify(t);
-                    opt.innerText = t.time;
-                    timeSelect.appendChild(opt);
-                });
-            }
+            data?.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = JSON.stringify(t);
+                opt.innerText = t.time;
+                timeSelect.appendChild(opt);
+            });
             timeSelect.disabled = false;
         });
     });
 
-    document.getElementById('time-b').addEventListener('change', processarDuelo);
+    document.getElementById('time-b')?.addEventListener('change', () => {
+        try {
+            const valA = document.getElementById('time-a').value;
+            const valB = document.getElementById('time-b').value;
+            if (!valA || !valB) return;
+
+            const a = JSON.parse(valA);
+            const b = JSON.parse(valB);
+
+            document.getElementById('h2h-display').style.display = 'block';
+            document.getElementById('img-a').src = a.escudo || ESCUDO_PADRAO;
+            document.getElementById('img-a').onerror = function() { this.src = ESCUDO_PADRAO; };
+            document.getElementById('name-a').innerText = a.time;
+            
+            document.getElementById('img-b').src = b.escudo || ESCUDO_PADRAO;
+            document.getElementById('img-b').onerror = function() { this.src = ESCUDO_PADRAO; };
+            document.getElementById('name-b').innerText = b.time;
+
+            // Cálculo Simples de Power Rank
+            document.getElementById('power-a').innerText = Math.min(99, (a.pontos * 1.5)).toFixed(0);
+            document.getElementById('power-b').innerText = Math.min(99, (b.pontos * 1.5)).toFixed(0);
+        } catch (e) { console.error("Erro no Duelo"); }
+    });
 }
 
-function processarDuelo() {
-    try {
-        const valA = document.getElementById('time-a').value;
-        const valB = document.getElementById('time-b').value;
-        if (!valA || !valB) return;
-
-        const dataA = JSON.parse(valA);
-        const dataB = JSON.parse(valB);
-
-        document.getElementById('h2h-display').style.display = 'block';
-        document.getElementById('img-a').src = dataA.escudo || '';
-        document.getElementById('name-a').innerText = dataA.time;
-        document.getElementById('img-b').src = dataB.escudo || '';
-        document.getElementById('name-b').innerText = dataB.time;
-
-        // Power Rank Simples
-        const pA = Math.min(99, (dataA.pontos * 1.2) + (dataA.sg * 0.5)).toFixed(0);
-        const pB = Math.min(99, (dataB.pontos * 1.2) + (dataB.sg * 0.5)).toFixed(0);
-        document.getElementById('power-a').innerText = pA;
-        document.getElementById('power-b').innerText = pB;
-    } catch (e) { console.error("Erro Duelo:", e); }
+// --- 5. FUNÇÕES DE SUPORTE ---
+function configurarFiltrosLigas() {
+    document.querySelectorAll('.league-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.league-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            carregarTabela(this.dataset.liga);
+        });
+    });
 }
 
-// --- 5. JOGOS AO VIVO ---
-async function carregarAoVivo() {
-    try {
-        const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
-        const container = document.getElementById('lista-ao-vivo');
-        
-        if (error || !data || data.length === 0) {
-            container.innerHTML = "<p style='color:#444; padding:20px;'>Aguardando próximos jogos...</p>";
-            return;
-        }
+function abrirModalTime(time) {
+    const modal = document.getElementById('modal-time');
+    if (!modal) return;
+    
+    document.getElementById('modal-nome-time').innerText = time.time;
+    document.getElementById('modal-escudo').src = (time.escudo && time.escudo.startsWith('http')) ? time.escudo : ESCUDO_PADRAO;
+    document.getElementById('modal-pos').innerText = time.posicao;
+    document.getElementById('modal-pts').innerText = time.pontos;
+    modal.style.display = 'flex';
+}
 
-        // Brasão padrão caso o link do banco esteja quebrado
-        const escudoPadrao = "https://cdn-icons-png.flaticon.com/512/53/53244.png";
-
-        container.innerHTML = data.map(jogo => {
-            // Limpeza de links: remove espaços ou valores inválidos
-            const imgC = (jogo.escudo_casa && jogo.escudo_casa.includes('http')) ? jogo.escudo_casa : escudoPadrao;
-            const imgF = (jogo.escudo_fora && jogo.escudo_fora.includes('http')) ? jogo.escudo_fora : escudoPadrao;
-
-            return `
-                <div class="card-hero">
-                    <div class="tempo-match" style="font-size:0.6rem; color:var(--neon-blue); font-weight:bold;">
-                        ${jogo.tempo || 'PRE-MATCH'}
-                    </div>
-                    <div class="hero-score">${jogo.placar_casa ?? 0} - ${jogo.placar_fora ?? 0}</div>
-                    <div class="team-v">
-                        <img src="${imgC}" class="img-mini" onerror="this.src='${escudoPadrao}'" alt="casa">
-                        <span style="font-size:0.6rem; opacity:0.5;">VS</span>
-                        <img src="${imgF}" class="img-mini" onerror="this.src='${escudoPadrao}'" alt="fora">
-                    </div>
-                    <div class="teams-names-mini" style="font-size:0.55rem; margin-top:5px; color:#888; text-transform:uppercase;">
-                        ${jogo.time_casa?.substring(0, 3)} x ${jogo.time_fora?.substring(0, 3)}
-                    </div>
-                </div>
-            `;
-        }).join('');
-    } catch (e) { 
-        console.error("Erro ao carregar Live Feeds:", e); 
-    }
+function fecharModalTime() {
+    const modal = document.getElementById('modal-time');
+    if (modal) modal.style.display = 'none';
 }
