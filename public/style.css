@@ -215,3 +215,30 @@ header {
     padding: 25px;
     border-radius: 15px;
 }
+/* Correção da Arena H2H */
+.h2h-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap; /* Para não quebrar no celular */
+    margin: 20px 0;
+}
+
+.cyber-select {
+    width: 250px !important; /* Define um tamanho fixo para os menus */
+    max-width: 100%;
+    background: #111;
+    color: #fff;
+    border: 1px solid var(--neon-purple);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.vs-badge {
+    min-width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
