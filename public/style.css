@@ -305,3 +305,31 @@ td {
     font-weight: bold;
     margin-top: 10px;
 }
+/* Localize ou adicione este seletor no seu CSS */
+.arena-callout {
+    background: linear-gradient(135deg, rgba(190, 46, 214, 0.2), rgba(72, 52, 212, 0.2)); /* Fundo levemente colorido */
+    border: 2px solid var(--neon-purple); /* Borda roxa sólida */
+    color: #ffffff; /* Cor do texto */
+    padding: 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(190, 46, 214, 0.2); /* Brilho externo */
+    text-align: center;
+}
+
+.arena-callout:hover {
+    background: var(--neon-purple); /* Fica todo roxo ao passar o mouse */
+    box-shadow: 0 0 30px rgba(190, 46, 214, 0.6); /* Brilho aumenta */
+    transform: scale(1.02); /* Dá um leve zoom */
+    cursor: pointer;
+}
+
+/* Ajuste das cores dos textos dentro do botão */
+.arena-callout h4 {
+    color: #fff !important;
+    text-shadow: 0 0 5px rgba(255,255,255,0.5);
+}
+
+.arena-callout p {
+    color: #e0e0e0 !important;
+}
