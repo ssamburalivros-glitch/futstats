@@ -46,53 +46,52 @@ def capturar_liga(liga_id, espn_id):
     print(f"📡 Processando {liga_id}...")
     url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/standings"
     try:
-        data = requests.get(url, timeout=20).json()
-        # A API da ESPN pode variar a estrutura dependendo da liga, 
-        # essa lógica abaixo cobre a maioria das ligas principais
-        entries = data['children'][0]['standings']['entries']
-        lista = []
+        res = requests.get(url, timeout=20).json()
         
+        # --- LÓGICA DE NAVEGAÇÃO SEGURA ---
+        # Tenta encontrar 'entries' em dois caminhos diferentes (Padrão ou Simplificado)
+        entries = []
+        if 'children' in res and len(res['children']) > 0:
+            # Caminho padrão (BR, PL, ES...)
+            entries = res['children'][0].get('standings', {}).get('entries', [])
+        elif 'standings' in res:
+            # Caminho simplificado (Muitas vezes usado na SA e NL)
+            entries = res['standings'].get('entries', [])
+        
+        if not entries:
+            print(f"⚠️ Aviso: Estrutura de dados da liga {liga_id} não reconhecida.")
+            return
+
+        lista = []
         for entry in entries:
-            stats = entry['stats']
-            team = entry['team']
+            stats = entry.get('stats', [])
+            team = entry.get('team', {})
             
-            # 1. Tenta pegar a forma simples da própria tabela
-            forma_bruta = ""
-            for s in stats:
-                if s.get('name') in ['summary', 'overall', 'form']:
-                    forma_bruta = s.get('summary') or s.get('displayValue', '')
-                    break
+            # Mapeamento dinâmico de estatísticas
+            s_map = {s['name']: s['value'] for s in stats if 'name' in s}
             
-            # Limpa a forma bruta (remove números e espaços)
-            forma_limpa = re.sub(r'[^WLTwedv]', '', forma_bruta).upper()
-            forma_limpa = forma_limpa.replace('W','V').replace('L','D').replace('T','E')
-
-            # 2. Se a forma da tabela estiver vazia, vai no calendário detalhado
-            if not forma_limpa or len(forma_limpa) < 2:
-                forma_limpa = pegar_forma_detalhada(espn_id, team['id'])
-
-            # Conversão de números segura
-            def to_int(name):
-                try:
-                    val = next(i['value'] for i in stats if i['name'] == name)
-                    return int(float(val))
-                except: return 0
-
-            lista.append({
+            item = {
                 "liga": liga_id,
-                "posicao": to_int('rank'),
-                "time": team['displayName'],
-                "escudo": team['logos'][0]['href'] if 'logos' in team else "",
-                "jogos": to_int('gamesPlayed'),
-                "pontos": to_int('points'),
-                "sg": to_int('pointDifferential'),
-                "forma": forma_limpa if forma_limpa else "S_DADOS"
-            })
-        return lista
-    except Exception as e:
-        print(f"❌ Erro {liga_id}: {e}")
-        return []
+                "posicao": entry.get('stats', [{}])[0].get('value'), # Geralmente o primeiro item é a posição
+                "time": team.get('displayName'),
+                "escudo": team.get('logos', [{}])[0].get('href') if team.get('logos') else "",
+                "jogos": s_map.get('gamesPlayed', 0),
+                "vitorias": s_map.get('wins', 0),
+                "empates": s_map.get('ties', 0),
+                "derrotas": s_map.get('losses', 0),
+                "sg": s_map.get('pointDifferential', 0),
+                "pontos": s_map.get('points', 0),
+                "forma": pegar_forma_detalhada(espn_id, team.get('id'))
+            }
+            lista.append(item)
+            
+        # Salva no Supabase (Upsert para não duplicar)
+        for time_data in lista:
+            supabase.table("tabelas_ligas").upsert(time_data, on_conflict="liga,time").execute()
 
+    except Exception as e:
+        print(f"❌ Erro {liga_id}: {str(e)}")
+        
 def main():
     dados_totais = []
     for lid, eid in LIGAS.items():
