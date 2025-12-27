@@ -67,25 +67,54 @@ async function carregarAoVivo() {
         }).join('');
     } catch (e) { console.error("Erro crítico ao carregar Ao Vivo:", e); }
 }
+// --- FUNÇÃO PARA CARREGAR A TABELA ---
 async function carregarTabela(liga) {
-    const { data } = await _supabase.from('tabelas_ligas').select('*').eq('liga', liga).order('posicao');
-    const corpo = document.getElementById('tabela-corpo');
-    if (!corpo) return;
-    corpo.innerHTML = data.map(item => `
-        <tr class="row-interativa" onclick='abrirModalTime(${JSON.stringify(item)})'>
-            <td style="font-size:0.7rem; color:#444;">${item.posicao}</td>
-            <td>
-                <div class="team-clickable">
-                    <img src="${item.escudo || ESCUDO_PADRAO}" class="team-cell-img" onerror="this.src='${ESCUDO_PADRAO}'">
-                    <span>${item.time}</span>
-                </div>
-            </td>
-            <td align="center">${item.jogos}</td>
-            <td align="center" style="color:var(--neon-blue); font-weight:bold;">${item.pontos}</td>
-        </tr>
-    `).join('');
+    try {
+        const { data, error } = await _supabase.from('tabelas_ligas').select('*').eq('liga', liga).order('posicao');
+        const corpo = document.getElementById('tabela-corpo');
+        
+        if (error || !corpo) return;
+
+        corpo.innerHTML = data.map(item => {
+            // Transformamos o objeto em string para passar no clique
+            const dadosTime = JSON.stringify(item).replace(/'/g, "&apos;"); 
+            
+            return `
+                <tr class="row-interativa" onclick='abrirModalTime(${dadosTime})'>
+                    <td>${item.posicao}º</td>
+                    <td>
+                        <div class="team-clickable">
+                            <img src="${item.escudo || ESCUDO_PADRAO}" class="team-cell-img">
+                            <span>${item.time}</span>
+                        </div>
+                    </td>
+                    <td align="center">${item.jogos}</td>
+                    <td align="center" style="color:var(--neon-blue); font-weight:bold;">${item.pontos}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (e) { console.error("Erro na tabela:", e); }
 }
 
+// --- FUNÇÕES DO MODAL ---
+function abrirModalTime(time) {
+    const modal = document.getElementById('modal-time');
+    if (!modal) return;
+
+    // Preenche os dados
+    document.getElementById('modal-nome-time').innerText = time.time;
+    document.getElementById('modal-escudo').src = time.escudo || ESCUDO_PADRAO;
+    document.getElementById('modal-pos').innerText = time.posicao + "º";
+    document.getElementById('modal-pts').innerText = time.pontos;
+
+    // Mostra o modal
+    modal.style.display = 'flex';
+}
+
+function fecharModalTime() {
+    const modal = document.getElementById('modal-time');
+    if (modal) modal.style.display = 'none';
+}
 // --- FUNÇÕES DA ARENA H2H ---
 function configurarH2H() {
     ['liga-a', 'liga-b'].forEach(id => {
