@@ -199,3 +199,112 @@ td {
     }
     .logo { font-size: 1.8rem; }
 }
+/* --- BOTÕES DE LIGA (ESTILO CYBER) --- */
+.leagues-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.league-btn {
+    background: #111;
+    border: 1px solid #333;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: var(--font-main);
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.league-btn img { width: 20px; border-radius: 2px; filter: grayscale(1); }
+
+.league-btn.active {
+    border-color: var(--neon-blue);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(72, 52, 212, 0.4);
+    background: rgba(72, 52, 212, 0.1);
+}
+.league-btn.active img { filter: grayscale(0); }
+
+/* --- H2H BATTLE ARENA HEADER --- */
+.arena-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+.arena-header .line {
+    height: 2px;
+    flex-grow: 1;
+    background: linear-gradient(90deg, transparent, var(--neon-purple), transparent);
+}
+.cyber-title {
+    font-family: var(--font-cyber);
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px var(--neon-purple);
+}
+
+/* --- BOTÃO ANÁLISE COMPLETA --- */
+.btn-full-stats {
+    width: 100%;
+    margin-top: 25px;
+    background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+    border: none;
+    padding: 15px;
+    color: #fff;
+    border-radius: 10px;
+    font-family: var(--font-cyber);
+    font-size: 0.8rem;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: 0.3s;
+}
+.btn-full-stats:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(190, 46, 221, 0.4);
+}
+
+/* --- MODAL FULLSCREEN (ABA DE STATS) --- */
+.modal-full {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg-dark);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+}
+
+.modal-nav {
+    padding: 20px;
+    border-bottom: 1px solid #222;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.btn-back {
+    background: none;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.grid-detalhes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 30px;
+    overflow-y: auto;
+}
