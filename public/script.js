@@ -30,42 +30,60 @@ async function carregarIA() {
     } catch (e) { console.error("IA Offline"); }
 }
 
+// --- 1. CARREGAR JOGOS AO VIVO (VERSÃO CORRIGIDA E COMPLETA) ---
 async function carregarAoVivo() {
+    const container = document.getElementById('lista-ao-vivo');
+    if (!container) return;
+
     try {
+        // Buscamos todos os dados da tabela
         const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
-        const container = document.getElementById('lista-ao-vivo');
         
-        if (error) {
-            console.error("Erro na consulta Supabase:", error);
-            return;
-        }
+        if (error) throw error;
 
-        console.log("Dados recebidos do Ao Vivo:", data); // Olhe isso no F12!
+        // LOG DE DEBUG: Abra o console (F12) e veja se os dados aparecem aqui
+        console.log("Dados recebidos do Supabase (Ao Vivo):", data);
 
-        if (!data || data.length === 0) {
-            container.innerHTML = "<p style='color:#444; padding:20px;'>Sem jogos ativos.</p>";
-            return;
-        }
+        if (data && data.length > 0) {
+            container.innerHTML = data.map(j => {
+                
+                /* AJUSTE DE SEGURANÇA: 
+                   Se no seu banco as colunas tiverem nomes diferentes, 
+                   ajuste aqui embaixo (ex: j.gols_casa x j.gols_fora)
+                */
+                const placarExibicao = j.placar ? j.placar : "0 - 0";
+                const tempoJogo = j.status || 'Tempo Real';
+                const logoCasa = j.logo_casa || ESCUDO_FALLBACK;
+                const logoFora = j.logo_fora || ESCUDO_FALLBACK;
 
-        container.innerHTML = data.map(jogo => {
-            // AJUSTE AQUI: Verifique se os nomes das colunas batem com o seu Supabase
-            const logoCasa = jogo.escudo_casa || jogo.logo_casa || ESCUDO_PADRAO;
-            const logoFora = jogo.escudo_fora || jogo.logo_fora || ESCUDO_PADRAO;
-
-            return `
-                <div class="card-hero">
-                    <div style="font-size:0.55rem; color:var(--neon-blue); font-weight:bold;">${jogo.tempo || 'LIVE'}</div>
-                    <div class="hero-score">${jogo.placar_casa ?? 0} - ${jogo.placar_fora ?? 0}</div>
-                    <div class="team-v">
-                        <img src="${logoCasa}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
-                        <span style="opacity:0.2; font-size:0.6rem;">VS</span>
-                        <img src="${logoFora}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
+                return `
+                    <div class="card-hero">
+                        <div class="hero-teams">
+                            <div class="hero-team-box">
+                                <img src="${logoCasa}" class="hero-logo" onerror="this.src='${ESCUDO_FALLBACK}'">
+                                <span class="hero-name">${j.time_casa || 'Mandante'}</span>
+                            </div>
+                            
+                            <div class="hero-score">${placarExibicao}</div>
+                            
+                            <div class="hero-team-box">
+                                <img src="${logoFora}" class="hero-logo" onerror="this.src='${ESCUDO_FALLBACK}'">
+                                <span class="hero-name">${j.time_fora || 'Visitante'}</span>
+                            </div>
+                        </div>
+                        <div class="hero-status">
+                            <span class="live-dot"></span> ${tempoJogo}
+                        </div>
                     </div>
-                    <div style="font-size:0.5rem; color:#666;">${(jogo.time_casa || '---').substring(0,10)}</div>
-                </div>
-            `;
-        }).join('');
-    } catch (e) { console.error("Erro crítico ao carregar Ao Vivo:", e); }
+                `;
+            }).join('');
+        } else {
+            container.innerHTML = '<p style="color: #666; padding: 20px; width: 100%; text-align: center;">Nenhum jogo ao vivo encontrado no banco.</p>';
+        }
+    } catch (e) {
+        console.error("Erro crítico ao carregar jogos ao vivo:", e);
+        container.innerHTML = '<p style="color: red; padding: 20px;">Erro ao conectar com a base de dados.</p>';
+    }
 }
 // --- FUNÇÃO PARA CARREGAR A TABELA ---
 async function carregarTabela(liga) {
