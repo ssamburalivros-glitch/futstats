@@ -226,3 +226,41 @@ td { padding: 15px; border-bottom: 1px solid #0f0f0f; transition: 0.2s; }
         width: 95%;
     }
 }
+/* Limita o tamanho de qualquer imagem no cabeçalho */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px; /* Trava a altura do header */
+}
+
+.site-logo-img {
+    max-height: 24px !important; /* Força o tamanho pequeno */
+    width: auto;
+    object-fit: contain;
+}
+
+/* Fix para os cards do Ao Vivo não ficarem gigantes ou com erro */
+.card-hero {
+    min-width: 160px;
+    max-width: 160px;
+    height: 110px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.team-v img {
+    width: 20px !important; /* Logos das partidas pequenos */
+    height: 20px !important;
+    object-fit: contain;
+}
+
+.hero-score {
+    font-family: 'Orbitron';
+    font-size: 1.1rem;
+    color: #fff;
+}
