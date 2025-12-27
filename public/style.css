@@ -197,3 +197,19 @@ td { padding: 10px; border-bottom: 1px solid #0a0a0a; font-size: 0.9rem; }
     flex-direction: column;
     align-items: center;
 }
+.arena-callout {
+    background: linear-gradient(90deg, rgba(72, 52, 212, 0.1), rgba(190, 46, 214, 0.1));
+    border: 1px dashed #333;
+    padding: 15px;
+    border-radius: 12px;
+    transition: 0.3s;
+}
+.arena-callout:hover {
+    border-color: var(--neon-purple);
+    background: rgba(190, 46, 214, 0.05);
+}
+.callout-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
