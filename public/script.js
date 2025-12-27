@@ -57,9 +57,43 @@ async function carregarAoVivo() {
 }
 
 async function carregarIA() {
-    const { data } = await _supabase.from('site_info').select('comentario_ia').eq('id', 1).single();
-    const el = document.getElementById('ia-box');
-    if (el && data) el.innerText = data.comentario_ia;
+    try {
+        // Busca o comentário no Supabase (tabela site_info, id 1)
+        const { data, error } = await _supabase
+            .from('site_info')
+            .select('comentario_ia')
+            .eq('id', 1)
+            .single();
+
+        // Pega o elemento HTML onde o texto vai aparecer
+        const boxIA = document.getElementById('ia-box');
+
+        // VERIFICAÇÃO DE SEGURANÇA (Isso corrige o erro do seu print)
+        if (!boxIA) {
+            console.error("Erro: Elemento 'ia-box' não encontrado no HTML.");
+            return;
+        }
+
+        if (error) {
+            console.error("Erro Supabase IA:", error);
+            boxIA.innerText = "⚠️ Falha na conexão neural.";
+            return;
+        }
+
+        if (data && data.comentario_ia) {
+            // Efeito de digitação (Typewriter) opcional ou texto direto
+            boxIA.innerText = data.comentario_ia;
+            
+            // Remove a animação de "scanner" se quiser, ou deixa ela lá
+            const scanner = document.querySelector('.ia-scanner');
+            if(scanner) scanner.style.background = 'var(--neon-blue)'; // Fica azul quando carrega
+        } else {
+            boxIA.innerText = "Sem dados neurais no momento.";
+        }
+
+    } catch (e) {
+        console.error("Erro fatal na função carregarIA:", e);
+    }
 }
 
 // --- 2. LÓGICA DO H2H (CASCATA: LIGA -> TIME) ---
