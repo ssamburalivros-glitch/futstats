@@ -202,33 +202,36 @@ async function carregarAoVivo() {
         const container = document.getElementById('lista-ao-vivo');
         
         if (error || !data || data.length === 0) {
-            container.innerHTML = "<p style='color:#444; padding:20px;'>Nenhum jogo ativo.</p>";
+            container.innerHTML = "<p style='color:#444; padding:20px;'>Aguardando próximos jogos...</p>";
             return;
         }
 
+        // Brasão padrão caso o link do banco esteja quebrado
+        const escudoPadrao = "https://cdn-icons-png.flaticon.com/512/53/53244.png";
+
         container.innerHTML = data.map(jogo => {
-            // Se as colunas no seu banco tiverem nomes diferentes, ajuste aqui:
-            const casa = jogo.time_casa || jogo.equipe_casa || "---";
-            const fora = jogo.time_fora || jogo.equipe_fora || "---";
-            const placarC = jogo.placar_casa ?? 0;
-            const placarF = jogo.placar_fora ?? 0;
-            const imgC = jogo.escudo_casa || '';
-            const imgF = jogo.escudo_fora || '';
+            // Limpeza de links: remove espaços ou valores inválidos
+            const imgC = (jogo.escudo_casa && jogo.escudo_casa.includes('http')) ? jogo.escudo_casa : escudoPadrao;
+            const imgF = (jogo.escudo_fora && jogo.escudo_fora.includes('http')) ? jogo.escudo_fora : escudoPadrao;
 
             return `
                 <div class="card-hero">
-                    <div style="font-size:0.6rem; color:#666; margin-bottom:5px;">${jogo.tempo || 'AO VIVO'}</div>
-                    <div class="hero-score">${placarC} - ${placarF}</div>
-                    <div class="team-v" style="display:flex; justify-content:center; gap:10px; align-items:center;">
-                        <img src="${imgC}" onerror="this.src='https://via.placeholder.com/20'">
-                        <span style="font-size:0.7rem;">vs</span>
-                        <img src="${imgF}" onerror="this.src='https://via.placeholder.com/20'">
+                    <div class="tempo-match" style="font-size:0.6rem; color:var(--neon-blue); font-weight:bold;">
+                        ${jogo.tempo || 'PRE-MATCH'}
                     </div>
-                    <div style="font-size:0.5rem; color:#aaa; margin-top:5px; white-space:nowrap; overflow:hidden;">
-                        ${casa} x ${fora}
+                    <div class="hero-score">${jogo.placar_casa ?? 0} - ${jogo.placar_fora ?? 0}</div>
+                    <div class="team-v">
+                        <img src="${imgC}" class="img-mini" onerror="this.src='${escudoPadrao}'" alt="casa">
+                        <span style="font-size:0.6rem; opacity:0.5;">VS</span>
+                        <img src="${imgF}" class="img-mini" onerror="this.src='${escudoPadrao}'" alt="fora">
+                    </div>
+                    <div class="teams-names-mini" style="font-size:0.55rem; margin-top:5px; color:#888; text-transform:uppercase;">
+                        ${jogo.time_casa?.substring(0, 3)} x ${jogo.time_fora?.substring(0, 3)}
                     </div>
                 </div>
             `;
         }).join('');
-    } catch (e) { console.error("Erro no Live:", e); }
+    } catch (e) { 
+        console.error("Erro ao carregar Live Feeds:", e); 
+    }
 }
