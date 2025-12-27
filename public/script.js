@@ -33,56 +33,59 @@ async function carregarIA() {
 // --- 1. CARREGAR JOGOS AO VIVO (VERSÃO CORRIGIDA E COMPLETA) ---
 async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
-    if (!container) return;
+    if (!container) {
+        console.error("ERRO: O elemento #lista-ao-vivo não existe no seu HTML.");
+        return;
+    }
 
     try {
-        // Buscamos todos os dados da tabela
+        console.log("Tentando buscar dados do Supabase...");
+        
+        // 1. Chamada ao Banco
         const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
         
-        if (error) throw error;
+        // 2. Erro de Conexão ou Permissão
+        if (error) {
+            console.error("ERRO DO SUPABASE:", error.message);
+            container.innerHTML = `<p style="color:orange">Erro na tabela: ${error.message}</p>`;
+            return;
+        }
 
-        // LOG DE DEBUG: Abra o console (F12) e veja se os dados aparecem aqui
-        console.log("Dados recebidos do Supabase (Ao Vivo):", data);
+        // 3. Verificação de Dados Vazios
+        if (!data || data.length === 0) {
+            console.warn("AVISO: A tabela 'jogos_ao_vivo' está vazia no seu banco.");
+            container.innerHTML = '<p style="color:#666">Nenhum jogo ao vivo no momento.</p>';
+            return;
+        }
 
-        if (data && data.length > 0) {
-            container.innerHTML = data.map(j => {
-                
-                /* AJUSTE DE SEGURANÇA: 
-                   Se no seu banco as colunas tiverem nomes diferentes, 
-                   ajuste aqui embaixo (ex: j.gols_casa x j.gols_fora)
-                */
-                const placarExibicao = j.placar ? j.placar : "0 - 0";
-                const tempoJogo = j.status || 'Tempo Real';
-                const logoCasa = j.logo_casa || ESCUDO_FALLBACK;
-                const logoFora = j.logo_fora || ESCUDO_FALLBACK;
+        console.log("SUCESSO: Dados recebidos:", data);
 
-                return `
-                    <div class="card-hero">
-                        <div class="hero-teams">
-                            <div class="hero-team-box">
-                                <img src="${logoCasa}" class="hero-logo" onerror="this.src='${ESCUDO_FALLBACK}'">
-                                <span class="hero-name">${j.time_casa || 'Mandante'}</span>
-                            </div>
-                            
-                            <div class="hero-score">${placarExibicao}</div>
-                            
-                            <div class="hero-team-box">
-                                <img src="${logoFora}" class="hero-logo" onerror="this.src='${ESCUDO_FALLBACK}'">
-                                <span class="hero-name">${j.time_fora || 'Visitante'}</span>
-                            </div>
+        // 4. Renderização
+        container.innerHTML = data.map(j => {
+            // Se o placar vier vazio, usamos 0x0
+            const placar = j.placar || "0 - 0";
+            
+            return `
+                <div class="card-hero">
+                    <div class="hero-teams">
+                        <div class="hero-team-box">
+                            <img src="${j.logo_casa || ESCUDO_FALLBACK}" class="hero-logo" onerror="this.src='${ESCUDO_FALLBACK}'">
+                            <span class="hero-name">${j.time_casa || 'Indefinido'}</span>
                         </div>
-                        <div class="hero-status">
-                            <span class="live-dot"></span> ${tempoJogo}
+                        <div class="hero-score">${placar}</div>
+                        <div class="hero-team-box">
+                            <img src="${j.logo_fora || ESCUDO_FALLBACK}" class="hero-logo" onerror="this.src='${ESCUDO_FALLBACK}'">
+                            <span class="hero-name">${j.time_fora || 'Indefinido'}</span>
                         </div>
                     </div>
-                `;
-            }).join('');
-        } else {
-            container.innerHTML = '<p style="color: #666; padding: 20px; width: 100%; text-align: center;">Nenhum jogo ao vivo encontrado no banco.</p>';
-        }
+                    <div class="hero-status">${j.status || 'Tempo Real'}</div>
+                </div>
+            `;
+        }).join('');
+
     } catch (e) {
-        console.error("Erro crítico ao carregar jogos ao vivo:", e);
-        container.innerHTML = '<p style="color: red; padding: 20px;">Erro ao conectar com a base de dados.</p>';
+        console.error("ERRO CRÍTICO NO JS:", e);
+        container.innerHTML = '<p style="color:red">Erro interno ao carregar dados.</p>';
     }
 }
 // --- FUNÇÃO PARA CARREGAR A TABELA ---
