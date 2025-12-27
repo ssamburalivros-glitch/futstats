@@ -1,16 +1,13 @@
-/* --- VARIÁVEIS E CORES NEURAIS --- */
+/* --- VARIÁVEIS E CONFIGURAÇÕES GERAIS --- */
 :root {
-    --bg-deep: #020205;        /* Fundo quase preto */
-    --bg-panel: #0a0a0f;      /* Painéis secundários */
-    --neon-blue: #4834d4;     /* Azul FutStats */
-    --neon-purple: #be2edd;   /* Roxo Arena */
-    --neon-green: #00ff41;    /* Verde Matrix (IA) */
-    --text-main: #e0e0e0;     /* Texto principal */
-    --text-dim: #666666;      /* Texto secundário */
+    --neon-blue: #4834d4;
+    --neon-purple: #be2ed6;
+    --bg-dark: #050505;
     --glass: rgba(255, 255, 255, 0.03);
+    --text-main: #ffffff;
+    --text-dim: #888888;
 }
 
-/* --- RESET E GERAL --- */
 * {
     margin: 0;
     padding: 0;
@@ -18,190 +15,90 @@
 }
 
 body {
-    background-color: var(--bg-deep);
+    background-color: var(--bg-dark);
     color: var(--text-main);
     font-family: 'Rajdhani', sans-serif;
-    line-height: 1.6;
     overflow-x: hidden;
+    line-height: 1.5;
 }
 
-/* --- HEADER E LOGO --- */
+/* --- HEADER E LOGO (REDUZIDO) --- */
 header {
-    background: #000;
+    padding: 12px 20px;
     border-bottom: 1px solid #1a1a1a;
-    padding: 15px 0;
-    text-align: center;
+    background: rgba(0, 0, 0, 0.9);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espaço entre ícone e texto */
+}
+
+.site-logo-img {
+    height: 24px; /* TAMANHO IDEAL PARA LOGO */
+    width: auto;
+    filter: drop-shadow(0 0 5px var(--neon-blue));
+    object-fit: contain;
 }
 
 .logo {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.6rem;
-    letter-spacing: 3px;
+    font-size: 1.1rem;
+    letter-spacing: 1.5px;
     font-weight: 700;
 }
 
-.neon-blue { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+.neon-blue { color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
 
-/* --- SEÇÃO IA (CYBER TERMINAL) --- */
-#ia-insights {
-    padding: 20px;
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-.ia-card {
-    background: var(--bg-panel);
-    border: 1px solid #1a1a1a;
-    border-radius: 8px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden; /* Necessário para o efeito de scanner */
-}
-
-.ia-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    color: var(--neon-green);
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.9rem;
-}
-
-#ia-box {
-    font-family: 'Courier New', monospace;
-    color: var(--neon-green);
-    font-size: 1rem;
-    min-height: 40px;
-    text-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
-}
-
-#ia-box::after {
-    content: '_';
-    animation: blink 0.8s infinite;
-}
-
-/* Efeito de Scanner passando */
-.ia-card::before {
-    content: "";
-    position: absolute;
-    top: -100%;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(transparent, rgba(72, 52, 212, 0.05), transparent);
-    animation: scanner 4s infinite linear;
-}
-
-@keyframes scanner {
-    0% { top: -100%; }
-    100% { top: 100%; }
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-}
-
-/* --- GRID AO VIVO (SCROLL HORIZONTAL) --- */
+/* --- LIVE FEEDS (SCROLL HORIZONTAL) --- */
 .hero-grid {
     display: flex;
     gap: 15px;
     overflow-x: auto;
-    padding: 10px 20px;
-    scrollbar-width: none; /* Firefox */
+    padding: 15px 5px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--neon-blue) transparent;
 }
 
-.hero-grid::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+.hero-grid::-webkit-scrollbar { height: 3px; }
+.hero-grid::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
 
 .card-hero {
-    flex: 0 0 240px;
-    background: var(--bg-panel);
-    border: 1px solid #1a1a1a;
+    min-width: 150px;
+    background: var(--glass);
+    border: 1px solid #222;
+    padding: 12px;
     border-radius: 10px;
-    padding: 15px;
     text-align: center;
-}
-
-.hero-score {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.2rem;
-    color: #fff;
-    background: #111;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-
-.team-v img { width: 35px; height: 35px; object-fit: contain; }
-
-/* --- TABELAS E FILTROS --- */
-.leagues-filter {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.league-btn {
-    background: #111;
-    border: 1px solid #333;
-    color: #888;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.7rem;
     transition: 0.3s;
 }
 
-.league-btn.active {
-    border-color: var(--neon-blue);
-    color: #fff;
-    box-shadow: 0 0 10px rgba(72, 52, 212, 0.3);
-}
-
-.glass-panel {
-    background: var(--bg-panel);
-    border: 1px solid #1a1a1a;
-    border-radius: 12px;
-    margin: 0 20px;
+/* --- ARENA H2H --- */
+.h2h-controls-complex {
+    display: flex;
+    align-items: center;
+    gap: 15px;
     padding: 15px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th {
-    color: var(--text-dim);
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #1a1a1a;
-}
-
-td {
-    padding: 12px 0;
-    border-bottom: 1px solid #111;
-    font-size: 0.9rem;
-}
-
-.team-clickable {
+.control-group {
+    flex: 1;
     display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.team-cell-img { width: 22px; height: 22px; object-fit: contain; }
-
-/* --- ARENA H2H --- */
-.arena-selectors {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 25px;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .cyber-select {
@@ -209,240 +106,67 @@ td {
     border: 1px solid #333;
     color: #fff;
     padding: 10px;
-    border-radius: 5px;
-    font-family: 'Rajdhani', sans-serif;
-    width: 140px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    font-family: 'Rajdhani';
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%234834d4' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
 }
 
-.h2h-display-box {
-    text-align: center;
-    padding: 20px;
-    border: 1px dashed #333;
+/* --- TABELAS --- */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    background: var(--glass);
     border-radius: 10px;
-    background: rgba(0,0,0,0.3);
 }
 
-.btn-neural {
-    background: var(--neon-blue);
-    color: #fff;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 5px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.8rem;
-    cursor: pointer;
-    margin-top: 20px;
-    width: 100%;
-}
+table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+th { padding: 12px; color: var(--text-dim); border-bottom: 1px solid #1a1a1a; text-align: left; font-size: 0.75rem; }
+td { padding: 12px; border-bottom: 1px solid #0f0f0f; }
 
-/* --- MODAL E GRÁFICOS --- */
-.modal {
+.row-interativa:hover { background: rgba(72, 52, 212, 0.05); cursor: pointer; }
+
+/* --- MODAL ESTILOSO --- */
+.modal-time-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.95);
-    display: none;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(12px);
+    display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
+    z-index: 1000;
 }
 
-.modal-content {
-    background: var(--bg-panel);
-    width: 90%;
-    max-width: 500px;
-    padding: 30px;
-    border-radius: 15px;
+.modal-time-content {
+    background: #0a0a0c;
     border: 1px solid var(--neon-blue);
-    position: relative;
+    width: 85%;
+    max-width: 380px;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(72, 52, 212, 0.3);
 }
 
-.close-modal {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    color: #fff;
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-
-.chart-container {
-    height: 250px;
+.modal-time-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
     margin: 20px 0;
 }
 
-/* --- LOADER --- */
-#neural-loader {
-    position: fixed;
-    inset: 0;
-    background: var(--bg-deep);
-    z-index: 10000;
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.loader-bar {
-    width: 200px;
-    height: 2px;
-    background: #111;
-    margin-top: 15px;
-    overflow: hidden;
-}
-
-.loader-progress {
-    width: 0%;
-    height: 100%;
-    background: var(--neon-blue);
-    transition: width 0.3s;
-}
-/* --- RECUPERAR BARRA DE ROLAGEM AO VIVO --- */
-.hero-grid {
-    display: flex;
-    gap: 15px;
-    overflow-x: auto; /* Garante o scroll horizontal */
-    padding: 20px;
-    /* Estilização da barra de rolagem para aparecer no Windows/Chrome */
-    scrollbar-width: thin; 
-    scrollbar-color: var(--neon-blue) #111;
-}
-
-.hero-grid::-webkit-scrollbar {
-    height: 6px; /* Altura da barra horizontal */
-    display: block !important; /* Força a exibição */
-}
-
-.hero-grid::-webkit-scrollbar-track {
-    background: #050505;
-    border-radius: 10px;
-}
-
-.hero-grid::-webkit-scrollbar-thumb {
-    background: var(--neon-blue);
-    border-radius: 10px;
-    box-shadow: 0 0 5px var(--neon-blue);
-}
-
-/* --- PADRONIZAÇÃO DOS SELETORES H2H --- */
-.cyber-select {
-    width: 100%; /* Ocupa todo o espaço do container group */
-    background: #000;
-    border: 1px solid #333;
-    color: #fff;
-    padding: 12px;
-    border-radius: 5px;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 500;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    appearance: none; /* Remove seta padrão do sistema */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%234834d4' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-}
-
-.cyber-select:focus {
-    border-color: var(--neon-blue);
-    box-shadow: 0 0 10px rgba(72, 52, 212, 0.4);
-    outline: none;
-}
-
-.cyber-select:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    border-color: #1a1a1a;
-}
-
-/* Ajuste do grupo para não esmagar os selects */
-.control-group {
-    display: flex;
-    flex-direction: column;
-    min-width: 200px; /* Largura mínima para os selects não sumirem */
-    flex: 1;
-}
-/* Overlay do Modal */
-.modal-time-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    animation: fadeIn 0.3s ease;
-}
-
-/* Conteúdo do Modal */
-.modal-time-content {
-    background: rgba(10, 10, 15, 0.9);
-    border: 1px solid var(--neon-blue);
-    box-shadow: 0 0 30px rgba(72, 52, 212, 0.2);
-    width: 90%;
-    max-width: 450px;
-    padding: 30px;
-    border-radius: 20px;
-    position: relative;
-    text-align: center;
-    transform: scale(0.9);
-    animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-.close-btn {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 2rem;
-    color: var(--text-dim);
-    cursor: pointer;
-}
-
-.modal-time-header h2 {
-    font-family: 'Orbitron', sans-serif;
-    margin: 15px 0 5px;
-    letter-spacing: 2px;
-}
-
-.escudo-wrapper img {
-    width: 80px;
-    height: 80px;
-    filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
-}
-
-.badge-liga {
-    font-size: 0.7rem;
-    color: var(--neon-blue);
-    border: 1px solid var(--neon-blue);
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 10px;
-    font-weight: bold;
-}
-
-/* Grid de Status */
-.modal-time-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin: 25px 0;
-}
-
 .stat-card {
-    background: rgba(255, 255, 255, 0.03);
-    padding: 15px;
-    border-radius: 12px;
-    border-bottom: 2px solid #222;
+    background: #111;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #1a1a1a;
 }
 
-.stat-card .label { font-size: 0.65rem; color: #666; display: block; }
-.stat-card .value { font-family: 'Orbitron'; font-size: 1.2rem; display: block; }
+.stat-card .label { font-size: 0.6rem; color: #666; display: block; text-transform: uppercase; }
+.stat-card .value { font-family: 'Orbitron'; font-size: 1.1rem; color: #fff; }
 
 .forma-flex {
     display: flex;
@@ -452,28 +176,35 @@ td {
 }
 
 .forma-item {
-    width: 30px;
-    height: 30px;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-family: 'Orbitron';
     font-weight: bold;
     font-size: 0.8rem;
 }
 
 .btn-neural-fechar {
-    margin-top: 25px;
     width: 100%;
     padding: 12px;
-    background: transparent;
+    margin-top: 15px;
+    background: #111;
     border: 1px solid #333;
-    color: #888;
+    color: #fff;
     border-radius: 8px;
     cursor: pointer;
+    font-family: 'Orbitron';
+    font-size: 0.7rem;
     transition: 0.3s;
 }
 
-.btn-neural-fechar:hover { border-color: var(--neon-blue); color: #fff; }
+.btn-neural-fechar:hover { border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
 
-@keyframes popUp { to { transform: scale(1); } }
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 768px) {
+    .header-content { padding: 0 10px; }
+    .site-logo-img { height: 20px; } /* Ainda menor no celular */
+    .logo { font-size: 0.9rem; }
+    
+    .h2h-controls-complex { flex-direction: column; }
+    .vs-badge { margin: 5px 0; }
+    
+    .modal-time-content { width: 95%; padding: 20px; }
+}
