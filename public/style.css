@@ -46,3 +46,40 @@ header {
     max-width: 1000px;
     margin: 20px auto;
     padding: 0 15
+/* Ajuste global para imagens de times */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Tamanho fixo para escudos na Arena H2H */
+.gladiator-card img {
+    width: 150px !important; /* Tamanho controlado */
+    height: 150px !important;
+    object-fit: contain;
+    margin: 10px 0;
+}
+
+/* Ajuste para os cards de jogos ao vivo (onde está o erro da foto) */
+.hero-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    align-items: start;
+}
+
+.team-v img {
+    width: 60px !important; /* Evita que o ícone ocupe a tela toda */
+    height: 60px !important;
+    object-fit: contain;
+}
+
+/* Garante que o container H2H não espalhe */
+.h2h-arena {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap; /* Para não quebrar em telas menores */
+    gap: 20px;
+}
