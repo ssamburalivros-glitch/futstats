@@ -19,24 +19,26 @@ body {
     color: var(--text-main);
     font-family: 'Rajdhani', sans-serif;
     overflow-x: hidden;
-    line-height: 1.5;
 }
 
-/* --- HEADER E LOGO (TAMANHO AJUSTADO) --- */
+/* --- HEADER E LOGO (FIXED SIZE) --- */
 header {
-    padding: 12px 20px; /* Reduzido de 20px para 12px para ficar mais slim */
+    padding: 10px 20px;
     border-bottom: 1px solid #1a1a1a;
     background: rgba(0,0,0,0.9);
     position: sticky;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(10px);
+    height: 60px;
+    display: flex;
+    align-items: center;
 }
 
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -47,87 +49,86 @@ header {
     gap: 10px;
 }
 
+/* Força o logo.png a ser pequeno */
 .site-logo-img {
-    height: 24px; /* TAMANHO REDUZIDO: de 32px para 24px */
-    width: auto;
-    filter: drop-shadow(0 0 5px var(--neon-blue));
+    height: 24px !important; 
+    width: auto !important;
     object-fit: contain;
+    filter: drop-shadow(0 0 5px var(--neon-blue));
 }
 
 .logo {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.2rem; /* Texto levemente menor para acompanhar o ícone */
-    letter-spacing: 1.5px;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
 }
 
 .neon-blue { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
 
-/* --- LIVE FEEDS (SCROLL HORIZONTAL MELHORADO) --- */
+/* --- LIVE FEEDS (CARDS COMPACTOS) --- */
 .hero-grid {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     overflow-x: auto;
-    padding: 20px 5px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--neon-blue) transparent;
-    -webkit-overflow-scrolling: touch;
+    padding: 15px 5px;
+    scrollbar-width: none; /* Esconde scroll no Firefox */
 }
 
-.hero-grid::-webkit-scrollbar { height: 4px; display: block !important; }
-.hero-grid::-webkit-scrollbar-track { background: #000; }
-.hero-grid::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
+.hero-grid::-webkit-scrollbar { display: none; } /* Esconde scroll no Chrome */
 
 .card-hero {
-    min-width: 160px;
+    min-width: 140px;
+    max-width: 140px;
     background: var(--glass);
     border: 1px solid #222;
-    padding: 15px;
-    border-radius: 12px;
+    padding: 10px;
+    border-radius: 8px;
     text-align: center;
-    transition: 0.3s;
+    flex-shrink: 0;
 }
 
-.card-hero:hover { border-color: var(--neon-blue); transform: translateY(-3px); }
+.hero-score {
+    font-family: 'Orbitron';
+    font-size: 1rem;
+    margin: 5px 0;
+}
 
-/* --- ARENA H2H E SELETORES --- */
+.team-v {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Força os escudos dos jogos a serem minúsculos */
+.team-v img {
+    width: 18px !important;
+    height: 18px !important;
+    object-fit: contain;
+}
+
+/* --- ARENA H2H --- */
 .h2h-controls-complex {
     display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-}
-
-.control-group {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    gap: 15px;
+    padding: 15px;
 }
 
 .cyber-select {
     background: #000;
     border: 1px solid #333;
     color: #fff;
-    padding: 12px;
-    border-radius: 6px;
+    padding: 8px;
+    border-radius: 4px;
     font-family: 'Rajdhani';
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%234834d4' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
+    width: 100%;
+    font-size: 0.8rem;
 }
-
-.cyber-select:focus { border-color: var(--neon-blue); outline: none; box-shadow: 0 0 10px rgba(72,52,212,0.3); }
 
 /* --- TABELA DE CLASSIFICAÇÃO --- */
 .table-container {
-    overflow-x: auto;
-    margin-top: 20px;
-    background: var(--glass);
-    border-radius: 15px;
+    margin-top: 15px;
+    background: rgba(255,255,255,0.01);
 }
 
 table {
@@ -135,132 +136,41 @@ table {
     border-collapse: collapse;
 }
 
-th { text-align: left; padding: 15px; color: var(--text-dim); font-size: 0.8rem; border-bottom: 1px solid #1a1a1a; }
-td { padding: 15px; border-bottom: 1px solid #0f0f0f; transition: 0.2s; }
+th { color: var(--text-dim); font-size: 0.7rem; padding: 10px; border-bottom: 1px solid #111; text-align: left; }
+td { padding: 10px; border-bottom: 1px solid #0a0a0a; font-size: 0.9rem; }
 
-.row-interativa:hover { background: rgba(72, 52, 212, 0.05); cursor: pointer; }
-
-/* --- MODAL ESTILOSO (GLASSMORPHISM) --- */
-.modal-time-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.92); /* Escurecido para destacar o modal */
-    backdrop-filter: blur(12px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-time-content {
-    background: #0a0a0c;
-    border: 1px solid var(--neon-blue);
-    width: 90%;
-    max-width: 380px;
-    padding: 25px;
-    border-radius: 20px;
-    position: relative;
-    box-shadow: 0 0 40px rgba(72, 52, 212, 0.3);
-}
-
-.modal-time-stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin: 20px 0;
-}
-
-.stat-card {
-    background: #111;
-    padding: 12px;
-    border-radius: 12px;
-    text-align: center;
-    border: 1px solid #1a1a1a;
-}
-
-.stat-card .label { font-size: 0.6rem; color: #666; display: block; text-transform: uppercase; }
-.stat-card .value { font-family: 'Orbitron'; font-size: 1.1rem; color: #fff; }
-
-.forma-flex {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 10px;
-}
-
-.forma-item {
-    font-family: 'Orbitron';
-    font-weight: bold;
-    font-size: 0.8rem;
-    padding: 4px 8px;
-    border-radius: 4px;
-    border: 1px solid transparent;
-}
-
-.btn-neural-fechar {
-    width: 100%;
-    padding: 12px;
-    margin-top: 20px;
-    background: #111;
-    border: 1px solid #333;
-    color: #fff;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 0.75rem;
-    font-family: 'Orbitron';
-    transition: 0.3s;
-}
-
-.btn-neural-fechar:hover { border-color: var(--neon-blue); color: #fff; box-shadow: 0 0 10px var(--neon-blue); }
-
-/* --- RESPONSIVIDADE --- */
-@media (max-width: 768px) {
-    .h2h-controls-complex { flex-direction: column; gap: 10px; }
-    .vs-badge { margin: 10px 0; }
-    .logo { font-size: 1rem; }
-    .site-logo-img { height: 20px; }
-    
-    .modal-time-content {
-        padding: 20px;
-        width: 95%;
-    }
-}
-/* Limita o tamanho de qualquer imagem no cabeçalho */
-.logo-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    height: 40px; /* Trava a altura do header */
-}
-
-.site-logo-img {
-    max-height: 24px !important; /* Força o tamanho pequeno */
-    width: auto;
-    object-fit: contain;
-}
-
-/* Fix para os cards do Ao Vivo não ficarem gigantes ou com erro */
-.card-hero {
-    min-width: 160px;
-    max-width: 160px;
-    height: 110px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 8px;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.team-v img {
-    width: 20px !important; /* Logos das partidas pequenos */
+.team-cell-img {
+    width: 20px !important;
     height: 20px !important;
     object-fit: contain;
 }
 
-.hero-score {
-    font-family: 'Orbitron';
-    font-size: 1.1rem;
-    color: #fff;
+/* --- MODAL ESTILOSO --- */
+.modal-time-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-time-content {
+    background: #0a0a0c;
+    border: 2px solid var(--neon-blue);
+    width: 90%;
+    max-width: 350px;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 768px) {
+    .h2h-controls-complex { flex-direction: column; }
+    header { height: 50px; padding: 5px 15px; }
+    .site-logo-img { height: 18px !important; }
+    .logo { font-size: 1rem; }
 }
