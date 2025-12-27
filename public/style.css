@@ -251,3 +251,57 @@ td {
     
     .site-logo-img { height: 28px !important; }
 }
+
+/* --- ESTATÍSTICAS COMPARATIVAS H2H --- */
+.h2h-stats-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 6px;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    font-family: 'Orbitron';
+}
+
+.stat-val {
+    font-weight: bold;
+    font-family: 'Orbitron';
+}
+
+/* Barra de Probabilidade de Vitória */
+.win-chance-container {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.chance-bar-bg {
+    height: 12px;
+    background: #111;
+    border-radius: 10px;
+    display: flex;
+    overflow: hidden;
+    margin: 10px 0;
+    border: 1px solid #222;
+}
+
+.chance-fill-a { background: var(--neon-blue); width: 50%; transition: 1s ease-in-out; }
+.chance-fill-b { background: var(--neon-purple); width: 50%; transition: 1s ease-in-out; }
+
+.prediction-badge {
+    display: inline-block;
+    padding: 5px 15px;
+    background: rgba(0, 255, 65, 0.1);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-top: 10px;
+}
