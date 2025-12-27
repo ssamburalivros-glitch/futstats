@@ -1,7 +1,7 @@
 // --- CONFIGURAÇÃO DO NÚCLEO ---
 const _supabase = supabase.createClient(
-    "SUA_URL_DO_SUPABASE", 
-    "SUA_CHAVE_ANON_DO_SUPABASE"
+    "https://sihunefyfkecumbiyxva.supabase.co", 
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A"
 );
 
 // --- INICIALIZAÇÃO DO SISTEMA ---
