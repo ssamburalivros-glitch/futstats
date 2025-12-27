@@ -1,58 +1,95 @@
-// Configurações do Supabase
+// CONFIGURAÇÕES SUPABASE
 const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ESCUDO_FALLBACK = 'https://cdn-icons-png.flaticon.com/512/53/53283.png';
+
 let dadosTimesGlobal = [];
 let timeA_Selecionado = null;
 let timeB_Selecionado = null;
 
-// 1. INICIALIZAÇÃO SEGURA
+// 1. INICIALIZAÇÃO DO SISTEMA
 async function init() {
-    console.log("Sistema Neural Iniciado...");
+    console.log("Iniciando Motores Neurais...");
     await carregarIA();
     await carregarAoVivo();
     await buscarDadosTabela();
     configurarFiltrosLiga();
 }
 
-// 2. CARREGAR COMENTÁRIO DA IA (Correção do erro de null)
-async function carregarIA() {
-    try {
-        const { data } = await _supabase.from('site_info').select('comentario_ia').eq('id', 1).single();
-        const iaBox = document.getElementById('ia-box');
-        if (iaBox && data) {
-            iaBox.innerText = data.comentario_ia;
-        }
-    } catch (e) {
-        console.warn("Aguardando carregamento do elemento IA...");
-    }
-}
-
-// 3. BUSCAR DADOS DA TABELA
+// 2. BUSCAR DADOS (TABELA E H2H)
 async function buscarDadosTabela() {
     try {
-        const { data } = await _supabase.from('tabelas_ligas').select('*').order('pontos', { ascending: false });
+        const { data, error } = await _supabase
+            .from('tabelas_ligas')
+            .select('*')
+            .order('pontos', { ascending: false });
+
         if (data) {
             dadosTimesGlobal = data;
             popularSelectsH2H(data);
-            renderizarTabela('BR');
+            renderizarTabela('BR'); // Inicia exibindo Brasil
         }
-    } catch (e) { console.error("Erro ao buscar tabela:", e); }
+    } catch (e) {
+        console.error("Erro na conexão com Supabase:", e);
+    }
 }
 
+// 3. ORGANIZAR SELECTS H2H POR LIGAS (CLASSIFICAÇÃO)
 function popularSelectsH2H(times) {
-    const sA = document.getElementById('time-a');
-    const sB = document.getElementById('time-b');
-    if (!sA || !sB) return;
+    const selects = [document.getElementById('time-a'), document.getElementById('time-b')];
+    const ligasNomes = { 
+        'BR': 'Brasil', 'PL': 'Inglaterra', 'ES': 'Espanha', 
+        'IT': 'Itália', 'DE': 'Alemanha', 'PT': 'Portugal' 
+    };
 
-    const options = times.map(t => `<option value="${t.time}">${t.time}</option>`).join('');
-    sA.innerHTML = '<option value="">Selecione o Time 1</option>' + options;
-    sB.innerHTML = '<option value="">Selecione o Time 2</option>' + options;
+    selects.forEach(sel => {
+        if (!sel) return;
+        
+        let html = '<option value="">Selecione um Time</option>';
+        
+        // Cria grupos por liga para organização
+        Object.keys(ligasNomes).forEach(sigla => {
+            const timesDaLiga = times.filter(t => t.liga === sigla);
+            
+            if (timesDaLiga.length > 0) {
+                html += `<optgroup label="--- ${ligasNomes[sigla]} ---">`;
+                timesDaLiga.forEach(t => {
+                    html += `<option value="${t.time}">${t.time}</option>`;
+                });
+                html += `</optgroup>`;
+            }
+        });
+        
+        sel.innerHTML = html;
+    });
 }
 
-// 4. LÓGICA DO H2H
+// 4. RENDERIZAR TABELA COM NOMES INCORPORADOS
+function renderizarTabela(liga) {
+    const corpo = document.getElementById('tabela-corpo');
+    if (!corpo) return;
+
+    const filtrados = dadosTimesGlobal.filter(t => t.liga === liga);
+
+    corpo.innerHTML = filtrados.map((t, i) => `
+        <tr>
+            <td style="text-align:center; color:#555;">${i + 1}</td>
+            <td>
+                <div class="team-link">
+                    <img src="${t.escudo || ESCUDO_FALLBACK}" alt="logo">
+                    <span class="team-name-text">${t.time}</span>
+                </div>
+            </td>
+            <td style="text-align:center;">${t.jogos}</td>
+            <td style="text-align:center;">${t.sg}</td>
+            <td style="text-align:center; font-weight:bold; color:var(--neon-blue);">${t.pontos}</td>
+        </tr>
+    `).join('');
+}
+
+// 5. LÓGICA DE COMPARAÇÃO H2H
 function atualizarComparativo() {
     const nomeA = document.getElementById('time-a')?.value;
     const nomeB = document.getElementById('time-b')?.value;
@@ -65,13 +102,18 @@ function atualizarComparativo() {
     const display = document.getElementById('h2h-display');
     if (display) display.style.display = 'block';
 
-    // Atualiza Imagens e Nomes com verificação
-    setElText('name-a', timeA_Selecionado.time);
-    setElText('name-b', timeB_Selecionado.time);
-    setElSrc('img-a', timeA_Selecionado.escudo);
-    setElSrc('img-b', timeB_Selecionado.escudo);
+    // Atualiza nomes e imagens (com segurança)
+    const elNameA = document.getElementById('name-a');
+    const elNameB = document.getElementById('name-b');
+    const elImgA = document.getElementById('img-a');
+    const elImgB = document.getElementById('img-b');
 
-    // Power Ranking
+    if (elNameA) elNameA.innerText = timeA_Selecionado.time;
+    if (elNameB) elNameB.innerText = timeB_Selecionado.time;
+    if (elImgA) elImgA.src = timeA_Selecionado.escudo || ESCUDO_FALLBACK;
+    if (elImgB) elImgB.src = timeB_Selecionado.escudo || ESCUDO_FALLBACK;
+
+    // Power Ranking e Barras
     const pA = timeA_Selecionado.power_ranking || 70;
     const pB = timeB_Selecionado.power_ranking || 70;
     
@@ -93,9 +135,9 @@ function renderBarrasStats() {
     if (!container) return;
 
     const stats = [
-        { label: 'PTS', a: timeA_Selecionado.pontos, b: timeB_Selecionado.pontos },
-        { label: 'SG', a: timeA_Selecionado.sg, b: timeB_Selecionado.sg },
-        { label: 'VIT', a: timeA_Selecionado.vitorias, b: timeB_Selecionado.vitorias }
+        { label: 'PONTOS', a: timeA_Selecionado.pontos, b: timeB_Selecionado.pontos },
+        { label: 'SALDO', a: timeA_Selecionado.sg, b: timeB_Selecionado.sg },
+        { label: 'VITORIAS', a: timeA_Selecionado.vitorias || 0, b: timeB_Selecionado.vitorias || 0 }
     ];
 
     container.innerHTML = stats.map(s => {
@@ -113,7 +155,7 @@ function renderBarrasStats() {
     }).join('');
 }
 
-// 5. LOADER NEURAL E ABA DE ESTATÍSTICAS
+// 6. LOADER NEURAL E MODAL DE ESTATÍSTICAS
 async function abrirEstatisticasCompletas() {
     const loader = document.getElementById('neural-loader');
     const modal = document.getElementById('modal-stats');
@@ -124,9 +166,9 @@ async function abrirEstatisticasCompletas() {
     const statusText = document.getElementById('loader-status');
 
     const etapas = [
-        { p: 40, t: "Sincronizando Scrapers...", d: 500 },
-        { p: 80, t: "Processando Power Ranking...", d: 700 },
-        { p: 100, t: "Finalizando Relatório...", d: 400 }
+        { p: 30, t: "Sincronizando Banco de Dados...", d: 600 },
+        { p: 65, t: "Processando Métricas de IA...", d: 800 },
+        { p: 100, t: "Gerando Dashboard Completo...", d: 500 }
     ];
 
     for (let e of etapas) {
@@ -135,24 +177,31 @@ async function abrirEstatisticasCompletas() {
         await new Promise(r => setTimeout(r, e.d));
     }
 
-    gerarConteudoModal();
+    preencherDadosModal();
     loader.style.display = 'none';
     modal.style.display = 'flex';
 }
 
-function gerarConteudoModal() {
+function preencherDadosModal() {
     const target = document.getElementById('conteudo-detalhado');
     if (!target) return;
 
+    const provavelGanhador = timeA_Selecionado.power_ranking > timeB_Selecionado.power_ranking ? timeA_Selecionado.time : timeB_Selecionado.time;
+
     target.innerHTML = `
         <div class="glass-panel">
-            <h4 class="neon-blue">ANÁLISE DE ATAQUE</h4>
-            <p>${timeA_Selecionado.time}: Média ${(timeA_Selecionado.sg / 10).toFixed(2)} p/jogo</p>
-            <p>${timeB_Selecionado.time}: Média ${(timeB_Selecionado.sg / 10).toFixed(2)} p/jogo</p>
+            <h4 style="color:var(--neon-blue); margin-bottom:10px;">📊 EFICIÊNCIA TÉCNICA</h4>
+            <p><strong>${timeA_Selecionado.time}:</strong> ${timeA_Selecionado.power_ranking} PR</p>
+            <p><strong>${timeB_Selecionado.time}:</strong> ${timeB_Selecionado.power_ranking} PR</p>
         </div>
         <div class="glass-panel">
-            <h4 class="neon-purple">PROJEÇÃO FINAL</h4>
-            <p>Favoritismo: ${timeA_Selecionado.power_ranking > timeB_Selecionado.power_ranking ? timeA_Selecionado.time : timeB_Selecionado.time}</p>
+            <h4 style="color:var(--neon-purple); margin-bottom:10px;">🛡️ DEFESA & SALDO</h4>
+            <p>Saldo Total: ${timeA_Selecionado.sg} vs ${timeB_Selecionado.sg}</p>
+            <p>Média de Saldo: ${(timeA_Selecionado.sg / (timeA_Selecionado.jogos || 1)).toFixed(2)} por jogo.</p>
+        </div>
+        <div class="glass-panel">
+            <h4 style="color:#ff4757; margin-bottom:10px;">🧠 VEREDITO IA</h4>
+            <p>Probabilidade favorece o <strong>${provavelGanhador}</strong> baseada na consistência de pontos.</p>
         </div>
     `;
 }
@@ -162,17 +211,7 @@ function fecharModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// 6. FUNÇÕES AUXILIARES
-function setElText(id, text) {
-    const el = document.getElementById(id);
-    if (el) el.innerText = text;
-}
-
-function setElSrc(id, src) {
-    const el = document.getElementById(id);
-    if (el) el.src = src || ESCUDO_FALLBACK;
-}
-
+// 7. FUNÇÕES AUXILIARES E EVENTOS
 function configurarFiltrosLiga() {
     document.querySelectorAll('.league-btn').forEach(btn => {
         btn.onclick = () => {
@@ -183,18 +222,10 @@ function configurarFiltrosLiga() {
     });
 }
 
-function renderizarTabela(liga) {
-    const corpo = document.getElementById('tabela-corpo');
-    if (!corpo) return;
-    const filtrados = dadosTimesGlobal.filter(t => t.liga === liga);
-    corpo.innerHTML = filtrados.map((t, i) => `
-        <tr>
-            <td style="text-align:center">${i+1}</td>
-            <td><div class="team-cell"><img src="${t.escudo || ESCUDO_FALLBACK}"><span>${t.time}</span></div></td>
-            <td style="text-align:center">${t.jogos}</td>
-            <td style="text-align:center; font-weight:bold">${t.pontos}</td>
-        </tr>
-    `).join('');
+async function carregarIA() {
+    const { data } = await _supabase.from('site_info').select('comentario_ia').eq('id', 1).single();
+    const box = document.getElementById('ia-box');
+    if (box && data) box.innerText = data.comentario_ia;
 }
 
 async function carregarAoVivo() {
@@ -203,7 +234,7 @@ async function carregarAoVivo() {
     if (container && data) {
         container.innerHTML = data.map(j => `
             <div class="card-hero">
-                <div style="font-size:0.6rem; color:var(--neon-blue)">● ${j.status}</div>
+                <div style="font-size:0.6rem; color:var(--neon-purple)">● ${j.status}</div>
                 <div style="display:flex; align-items:center; justify-content:space-between">
                     <div class="team-v"><img src="${j.logo_casa || ESCUDO_FALLBACK}"><span>${j.time_casa}</span></div>
                     <div class="hero-score">${j.placar}</div>
@@ -214,7 +245,7 @@ async function carregarAoVivo() {
     }
 }
 
-// EVENT LISTENERS FINAIS
+// INICIALIZAR QUANDO O DOM ESTIVER PRONTO
 document.addEventListener('DOMContentLoaded', () => {
     init();
     document.getElementById('time-a')?.addEventListener('change', atualizarComparativo);
