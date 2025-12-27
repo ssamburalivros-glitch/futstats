@@ -5,21 +5,23 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ESCUDO_FALLBACK = 'https://cdn-icons-png.flaticon.com/512/53/53283.png';
 
-// 1. CARREGAR COMENTÁRIO DA IA
+// Variável global para armazenar os dados dos times (evita múltiplas requisições)
+let dadosTimesGlobal = [];
+
+// 1. CARREGAR COMENTÁRIO DA IA (RESUMO GERAL)
 async function carregarIA() {
-    const boxIA = document.getElementById('ia-box');
     try {
-        const { data, error } = await _supabase
+        const { data } = await _supabase
             .from('site_info')
             .select('comentario_ia')
             .eq('id', 1)
             .single();
 
         if (data && data.comentario_ia) {
-            boxIA.innerText = data.comentario_ia;
+            document.getElementById('ia-box').innerText = data.comentario_ia;
         }
     } catch (e) {
-        console.error("Erro ao buscar IA:", e);
+        console.log("Erro ao carregar IA");
     }
 }
 
@@ -27,89 +29,148 @@ async function carregarIA() {
 async function carregarAoVivo() {
     const container = document.getElementById('lista-ao-vivo');
     try {
-        const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
+        const { data } = await _supabase.from('jogos_ao_vivo').select('*');
         if (data && data.length > 0) {
             container.innerHTML = data.map(j => `
                 <div class="card-hero">
+                    <div class="hero-status-tag">${j.status}</div>
                     <div class="hero-teams">
-                        <div class="hero-team-box">
-                            <img src="${j.logo_casa || ESCUDO_FALLBACK}" class="hero-logo">
-                            <span class="hero-name">${j.time_casa}</span>
+                        <div class="team-v">
+                            <img src="${j.logo_casa || ESCUDO_FALLBACK}">
+                            <span>${j.time_casa}</span>
                         </div>
                         <div class="hero-score">${j.placar}</div>
-                        <div class="hero-team-box">
-                            <img src="${j.logo_fora || ESCUDO_FALLBACK}" class="hero-logo">
-                            <span class="hero-name">${j.time_fora}</span>
+                        <div class="team-v">
+                            <img src="${j.logo_fora || ESCUDO_FALLBACK}">
+                            <span>${j.time_fora}</span>
                         </div>
                     </div>
-                    <div class="hero-status">${j.status}</div>
                 </div>
             `).join('');
         } else {
-            container.innerHTML = '<p style="color: #666; text-align: center; width: 100%;">Nenhum jogo ao vivo no momento.</p>';
+            container.innerHTML = '<p class="no-data">Nenhum jogo em direto agora.</p>';
         }
     } catch (e) { console.error(e); }
 }
 
-// 3. CARREGAR TABELA DE CLASSIFICAÇÃO
-async function carregarTabela(liga) {
-    const corpo = document.getElementById('tabela-corpo');
-    corpo.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Carregando tabela...</td></tr>';
-
+// 3. CARREGAR TABELA E POPULAR H2H
+async function inicializarDados() {
     try {
         const { data } = await _supabase
             .from('tabelas_ligas')
             .select('*')
-            .eq('liga', liga)
             .order('posicao', { ascending: true });
 
         if (data) {
-            corpo.innerHTML = data.map(t => `
-                <tr onclick="mostrarStatsTime('${t.time}', '${t.escudo}', ${t.pontos}, ${t.jogos}, ${t.sg})">
-                    <td class="txt-center">${t.posicao}</td>
-                    <td>
-                        <div class="team-row">
-                            <img src="${t.escudo || ESCUDO_FALLBACK}" class="escudo-tab">
-                            <span>${t.time}</span>
-                        </div>
-                    </td>
-                    <td class="txt-center">${t.jogos}</td>
-                    <td class="txt-center ${t.sg > 0 ? 'green' : (t.sg < 0 ? 'red' : '')}">${t.sg}</td>
-                    <td class="txt-center"><b>${t.pontos}</b></td>
-                </tr>
-            `).join('');
+            dadosTimesGlobal = data;
+            popularSelectsH2H(data);
+            carregarTabela('BR'); // Inicia com Brasil por padrão
         }
     } catch (e) { console.error(e); }
 }
 
-// 4. MODAL DE STATS
-function mostrarStatsTime(nome, escudo, pts, jogos, sg) {
-    const modal = document.getElementById('modal-time');
-    const detalhes = document.getElementById('detalhes-time');
-    const aprov = jogos > 0 ? ((pts / (jogos * 3)) * 100).toFixed(1) : 0;
+function popularSelectsH2H(times) {
+    const selectA = document.getElementById('time-a');
+    const selectB = document.getElementById('time-b');
 
-    detalhes.innerHTML = `
-        <div style="text-align:center; margin-bottom: 20px;">
-            <img src="${escudo || ESCUDO_FALLBACK}" style="width:60px;">
-            <h2 style="margin-top:10px;">${nome}</h2>
-        </div>
-        <div class="stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div class="stat-card"><b>${pts}</b><br>PTS</div>
-            <div class="stat-card"><b>${jogos}</b><br>JOGOS</div>
-            <div class="stat-card"><b>${sg}</b><br>SG</div>
-            <div class="stat-card"><b>${aprov}%</b><br>APROV.</div>
-        </div>
-    `;
-    modal.style.display = "block";
+    // Limpar e preencher
+    const options = times.map(t => `<option value="${t.time}">${t.time} (${t.liga})</option>`).join('');
+    selectA.innerHTML += options;
+    selectB.innerHTML += options;
 }
 
-// INICIALIZAÇÃO
+// 4. LÓGICA DO COMPARATIVO H2H
+function compararGladiadores() {
+    const nomeA = document.getElementById('time-a').value;
+    const nomeB = document.getElementById('time-b').value;
+
+    if (!nomeA || !nomeB) return;
+
+    const timeA = dadosTimesGlobal.find(t => t.time === nomeA);
+    const timeB = dadosTimesGlobal.find(t => t.time === nomeB);
+
+    document.getElementById('h2h-display').style.display = 'block';
+
+    // Update Visual
+    document.getElementById('img-a').src = timeA.escudo || ESCUDO_FALLBACK;
+    document.getElementById('img-b').src = timeB.escudo || ESCUDO_FALLBACK;
+    document.getElementById('name-a').innerText = timeA.time;
+    document.getElementById('name-b').innerText = timeB.time;
+
+    // Power Ranking (Simulado ou do Banco)
+    const powerA = timeA.power_ranking || Math.floor(Math.random() * (99 - 70) + 70);
+    const powerB = timeB.power_ranking || Math.floor(Math.random() * (99 - 70) + 70);
+    
+    document.getElementById('power-a').innerText = powerA;
+    document.getElementById('power-b').innerText = powerB;
+
+    // Gerar Barras de Stats
+    const stats = [
+        { label: 'Pontos', a: timeA.pontos, b: timeB.pontos },
+        { label: 'SG', a: timeA.sg, b: timeB.sg },
+        { label: 'Aproveitamento', a: calcAprov(timeA), b: calcAprov(timeB) }
+    ];
+
+    document.getElementById('stats-rows').innerHTML = stats.map(s => {
+        const total = (Math.abs(s.a) + Math.abs(s.b)) || 1;
+        const percA = (Math.abs(s.a) / total) * 100;
+        return `
+            <div class="stat-item">
+                <div class="stat-info">
+                    <span>${s.a}</span>
+                    <label>${s.label}</label>
+                    <span>${s.b}</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-fill-left" style="width: ${percA}%"></div>
+                    <div class="bar-fill-right" style="width: ${100 - percA}%"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Veredito da IA
+    const veredito = document.getElementById('veredito-texto');
+    if (powerA > powerB + 5) veredito.innerText = `Análise Neural: ${timeA.time} tem vantagem tática superior.`;
+    else if (powerB > powerA + 5) veredito.innerText = `Análise Neural: ${timeB.time} é o favorito estatístico.`;
+    else veredito.innerText = "Análise Neural: Confronto equilibrado. Decisão nos detalhes.";
+}
+
+function calcAprov(t) {
+    if (!t.jogos || t.jogos === 0) return 0;
+    return Math.round((t.pontos / (t.jogos * 3)) * 100);
+}
+
+// 5. FILTRO DA TABELA
+function carregarTabela(liga) {
+    const corpo = document.getElementById('tabela-corpo');
+    const filtrados = dadosTimesGlobal.filter(t => t.liga === liga);
+
+    corpo.innerHTML = filtrados.map(t => `
+        <tr>
+            <td class="txt-center">${t.posicao}</td>
+            <td class="team-cell">
+                <img src="${t.escudo || ESCUDO_FALLBACK}">
+                <span>${t.time}</span>
+            </td>
+            <td class="txt-center">${t.jogos}</td>
+            <td class="txt-center">${t.sg}</td>
+            <td class="txt-center"><strong>${t.pontos}</strong></td>
+        </tr>
+    `).join('');
+}
+
+// EVENT LISTENERS
 document.addEventListener('DOMContentLoaded', () => {
     carregarIA();
     carregarAoVivo();
-    carregarTabela('BR');
+    inicializarDados();
 
-    // Eventos de clique nas ligas (Pills)
+    // Selects H2H
+    document.getElementById('time-a').addEventListener('change', compararGladiadores);
+    document.getElementById('time-b').addEventListener('change', compararGladiadores);
+
+    // Pills de Liga
     document.querySelectorAll('.pill').forEach(btn => {
         btn.onclick = () => {
             document.querySelector('.pill.active').classList.remove('active');
@@ -117,9 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             carregarTabela(btn.dataset.liga);
         };
     });
-
-    // Fechar Modal
-    const modal = document.getElementById('modal-time');
-    document.querySelector('.close-modal').onclick = () => modal.style.display = "none";
-    window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
 });
+
+// Atualização automática a cada 1 minuto para os jogos ao vivo
+setInterval(carregarAoVivo, 60000);
