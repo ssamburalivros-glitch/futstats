@@ -3,33 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Estatísticas em Tempo Real</title>
+    <title>FutStats | Dashboard Evolution</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
     <header>
-        <h1>FUT<span>STATS</span></h1>
+        <div class="header-content">
+            <h1 class="logo">FUT<span class="neon-blue">STATS</span></h1>
+            <div class="live-indicator">
+                <span class="dot"></span> LIVE DATA
+            </div>
+        </div>
     </header>
 
     <main>
-        <div id="ia-container">
-            <div class="ia-header">
-                <span class="ia-icon">🤖</span>
-                <h3>INSIGHTS DO ESPECIALISTA IA</h3>
+        <section id="ia-insights">
+            <div class="ia-card">
+                <div class="ia-header">
+                    <div class="ia-scanner"></div>
+                    <span class="ia-icon">🤖</span>
+                    <h3>IA NEURAL ANALYSIS</h3>
+                </div>
+                <p id="ia-box">Aguardando processamento de dados do servidor...</p>
             </div>
-            <p id="ia-box">Analisando os dados da rodada...</p>
-        </div>
+        </section>
 
         <section id="ao-vivo">
-            <h2>Jogos ao Vivo</h2>
-            <div id="lista-ao-vivo" class="hero-grid"></div>
+            <div class="section-title">
+                <i class="icon-bolt"></i> JOGOS EM ANDAMENTO
+            </div>
+            <div id="lista-ao-vivo" class="hero-grid">
+                </div>
+        </section>
+
+        <section id="h2h-section">
+            <div class="glass-panel">
+                <div class="section-header-centered">
+                    <h2><span class="neon-purple">H2H</span> BATTLE COMPARATOR</h2>
+                    <p>Compare o Power Level e estatísticas reais entre dois times</p>
+                </div>
+
+                <div class="h2h-controls">
+                    <div class="select-wrapper">
+                        <select id="time-a" class="h2h-select">
+                            <option value="">Selecione o Time 1</option>
+                        </select>
+                    </div>
+                    
+                    <div class="vs-divider">
+                        <div class="vs-circle">VS</div>
+                    </div>
+
+                    <div class="select-wrapper">
+                        <select id="time-b" class="h2h-select">
+                            <option value="">Selecione o Time 2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="h2h-display" class="h2h-result-container" style="display: none;">
+                    <div class="h2h-arena">
+                        <div class="team-gladiator left">
+                            <div class="power-rank color-a" id="power-a">--</div>
+                            <div class="gladiator-card">
+                                <img id="img-a" src="" alt="Escudo Time A">
+                                <h3 id="name-a">TIME 1</h3>
+                            </div>
+                        </div>
+
+                        <div class="stats-battlefield">
+                            <div id="stats-rows">
+                                </div>
+                            <div id="ia-veredito" class="ia-mini-box">
+                                <small>VEREDITO DA IA:</small>
+                                <p id="veredito-texto">Selecione os times para calcular favoritismo...</p>
+                            </div>
+                        </div>
+
+                        <div class="team-gladiator right">
+                            <div class="power-rank color-b" id="power-b">--</div>
+                            <div class="gladiator-card">
+                                <img id="img-b" src="" alt="Escudo Time B">
+                                <h3 id="name-b">TIME 2</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section id="classificacao">
             <div class="section-header">
-                <h2>Classificação</h2>
+                <h2>LEAGUE TABLES</h2>
                 <div class="pills-container">
                     <button class="pill active" data-liga="BR">BRA</button>
                     <button class="pill" data-liga="PL">ENG</button>
@@ -40,25 +108,30 @@
                 </div>
             </div>
 
-            <div class="tabela-wrapper">
+            <div class="table-container glass">
                 <table>
                     <thead>
                         <tr>
                             <th class="txt-center">#</th>
-                            <th>Time</th>
-                            <th class="txt-center">J</th>
+                            <th>TEAM</th>
+                            <th class="txt-center">P</th>
                             <th class="txt-center">SG</th>
                             <th class="txt-center">PTS</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-corpo"></tbody>
+                    <tbody id="tabela-corpo">
+                        </tbody>
                 </table>
             </div>
         </section>
     </main>
 
+    <footer>
+        <p>&copy; 2025 FUTSTATS - NEURAL NETWORK EDITION</p>
+    </footer>
+
     <div id="modal-time" class="modal">
-        <div class="modal-content">
+        <div class="modal-content glass">
             <span class="close-modal">&times;</span>
             <div id="detalhes-time"></div>
         </div>
