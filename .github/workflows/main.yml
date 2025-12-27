@@ -2,7 +2,7 @@ name: Atualizar Dados FutStats
 
 on:
   schedule:
-    - cron: '*/2 * * * *' # Roda a cada 2 minutos
+    - cron: '*/10 * * * *' # Roda a cada 10 minutos para o "Ao Vivo"
   workflow_dispatch: 
 
 jobs:
@@ -21,7 +21,6 @@ jobs:
       - name: Instalar Dependências
         run: |
           python -m pip install --upgrade pip
-          # Adicionei explicitamente as bibliotecas que faltavam no comando anterior
           pip install requests supabase groq requests-html beautifulsoup4 fake-useragent lxml_html_clean
           
       - name: 📡 Executar Crawler Ao Vivo
@@ -30,19 +29,14 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python crawler_ao_vivo.py
 
-      - name: 📊 Executar Crawler de Tabelas
-        # Corrigido para rodar no minuto 0 ou 30 de cada hora
-        if: github.event_name == 'workflow_dispatch' || (github.event.schedule == '*/2 * * * *' && (github.event.minute == '0' || github.event.minute == '30'))
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-        run: python crawler.py
-
-      - name: 🤖 Gerar Análise com IA
-        # Simplificado: Roda se for manual OU se o script detectar que deve rodar
-        if: always() 
+      - name: 📊 Executar Crawler de Tabelas e IA (Uma vez por hora)
+        # Esta lógica faz o Crawler de tabelas e a IA rodarem apenas no minuto 0 de cada hora
+        # Ex: 13:00 roda, 13:10 não, 13:20 não...
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.schedule, '0')
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: python analise_ia.py
+        run: |
+          python crawler.py
+          python analise_ia.py
