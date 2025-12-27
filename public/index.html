@@ -9,25 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
-    <div id="neural-loader" class="loader-overlay" style="display: none;">
-        <div class="loader-content">
-            <div class="scanner-line"></div>
-            <h3 class="cyber-title">PROCESSANDO <span class="neon-blue">METADADOS</span></h3>
-            <div class="progress-container">
-                <div id="neural-progress-bar" class="progress-fill"></div>
-            </div>
-            <p id="loader-status">Acessando núcleo neural...</p>
-        </div>
-    </div>
 
     <header>
         <div class="header-content">
             <div class="logo-container">
-                <img src="logo.png" alt="Logo" class="site-logo-img">
+                <img src="logo.png" alt="FS" class="site-logo-img">
                 <h1 class="logo">Fut<span class="neon-blue">Stats</span></h1>
             </div>
             <div class="neural-status">
@@ -50,9 +38,9 @@
         </section>
 
         <section id="ao-vivo">
-            <div class="section-header-flex">
-                <h2 class="cyber-subtitle">● LIVE FEEDS</h2>
-                <span class="scroll-hint">DESLIZE &rarr;</span>
+            <div class="section-header-flex" style="padding: 0 15px;">
+                <h2 class="cyber-subtitle" style="font-size: 0.8rem;">● LIVE FEEDS</h2>
+                <span class="scroll-hint" style="font-size: 0.6rem; color: #444;">DESLIZE &rarr;</span>
             </div>
             <div id="lista-ao-vivo" class="hero-grid">
                 </div>
@@ -61,28 +49,25 @@
         <section id="h2h-section">
             <div class="glass-panel arena-border">
                 <div class="arena-header">
-                    <div class="line"></div>
                     <h2 class="cyber-title">H2H <span class="neon-purple">BATTLE</span></h2>
-                    <div class="line"></div>
                 </div>
 
                 <div class="h2h-controls-complex">
                     <div class="control-group">
                         <label>DESAFIANTE A</label>
                         <select id="liga-a" class="cyber-select">
-                            <option value="">1. Escolha a Liga</option>
-                            <option value="BR">Brasil (Série A)</option>
-                            <option value="PL">Inglaterra (Premier)</option>
-                            <option value="ES">Espanha (La Liga)</option>
-                            <option value="IT">Itália (Serie A)</option>
-                            <option value="DE">Alemanha (Bundesliga)</option>
-                            <option value="FR">França (Ligue 1)</option>
-                            <option value="PT">Portugal (Liga Portugal)</option>
+                            <option value="">Escolha a Liga</option>
+                            <option value="BR">Brasil</option>
+                            <option value="PL">Inglaterra</option>
+                            <option value="ES">Espanha</option>
+                            <option value="IT">Itália</option>
+                            <option value="DE">Alemanha</option>
+                            <option value="FR">França</option>
                             <option value="SA">Arábia Saudita</option>
-                            <option value="NL">Holanda (Eredivisie)</option>
+                            <option value="NL">Holanda</option>
                         </select>
                         <select id="time-a" class="cyber-select" disabled>
-                            <option value="">2. Selecione o Time</option>
+                            <option value="">Selecione o Time</option>
                         </select>
                     </div>
                     
@@ -91,42 +76,34 @@
                     <div class="control-group">
                         <label>DESAFIANTE B</label>
                         <select id="liga-b" class="cyber-select">
-                            <option value="">1. Escolha a Liga</option>
-                            <option value="BR">Brasil (Série A)</option>
-                            <option value="PL">Inglaterra (Premier)</option>
-                            <option value="ES">Espanha (La Liga)</option>
-                            <option value="IT">Itália (Serie A)</option>
-                            <option value="DE">Alemanha (Bundesliga)</option>
-                            <option value="FR">França (Ligue 1)</option>
-                            <option value="PT">Portugal (Liga Portugal)</option>
+                            <option value="">Escolha a Liga</option>
+                            <option value="BR">Brasil</option>
+                            <option value="PL">Inglaterra</option>
+                            <option value="ES">Espanha</option>
+                            <option value="IT">Itália</option>
+                            <option value="DE">Alemanha</option>
+                            <option value="FR">França</option>
                             <option value="SA">Arábia Saudita</option>
-                            <option value="NL">Holanda (Eredivisie)</option>
+                            <option value="NL">Holanda</option>
                         </select>
                         <select id="time-b" class="cyber-select" disabled>
-                            <option value="">2. Selecione o Time</option>
+                            <option value="">Selecione o Time</option>
                         </select>
                     </div>
                 </div>
 
-                <div id="h2h-display" style="display: none;">
-                    <div class="h2h-arena">
+                <div id="h2h-display" style="display: none; padding: 20px;">
+                    <div class="h2h-arena" style="display: flex; justify-content: space-around; align-items: center;">
                         <div class="team-gladiator">
-                            <div class="power-rank color-a" id="power-a">--</div>
-                            <img id="img-a" src="" class="shield-main">
-                            <h3 id="name-a">--</h3>
+                            <div class="power-rank" id="power-a" style="color: var(--neon-blue); font-family: 'Orbitron';">--</div>
+                            <img id="img-a" src="" style="width: 50px; height: 50px; object-fit: contain;">
+                            <h3 id="name-a" style="font-size: 0.8rem;">--</h3>
                         </div>
-
-                        <div class="stats-center">
-                            <div id="stats-rows"></div>
-                            <button class="btn-full-stats" onclick="abrirEstatisticasCompletas(false)">
-                                📊 ANÁLISE DE PROBABILIDADE
-                            </button>
-                        </div>
-
+                        <div class="vs-central">VS</div>
                         <div class="team-gladiator">
-                            <div class="power-rank color-b" id="power-b">--</div>
-                            <img id="img-b" src="" class="shield-main">
-                            <h3 id="name-b">--</h3>
+                            <div class="power-rank" id="power-b" style="color: var(--neon-purple); font-family: 'Orbitron';">--</div>
+                            <img id="img-b" src="" style="width: 50px; height: 50px; object-fit: contain;">
+                            <h3 id="name-b" style="font-size: 0.8rem;">--</h3>
                         </div>
                     </div>
                 </div>
@@ -134,26 +111,24 @@
         </section>
 
         <section id="classificacao">
-            <div class="leagues-wrapper">
-                <h2 class="cyber-subtitle">CLASSIFICAÇÃO GLOBAL</h2>
-                <div class="leagues-container">
-                    <button class="league-btn active" data-liga="BR"><img src="https://flagcdn.com/w20/br.png"> BRA</button>
-                    <button class="league-btn" data-liga="PL"><img src="https://flagcdn.com/w20/gb-eng.png"> ENG</button>
-                    <button class="league-btn" data-liga="ES"><img src="https://flagcdn.com/w20/es.png"> ESP</button>
-                    <button class="league-btn" data-liga="IT"><img src="https://flagcdn.com/w20/it.png"> ITA</button>
-                    <button class="league-btn" data-liga="DE"><img src="https://flagcdn.com/w20/de.png"> GER</button>
-                    <button class="league-btn" data-liga="FR"><img src="https://flagcdn.com/w20/fr.png"> FRA</button>
-                    <button class="league-btn" data-liga="PT"><img src="https://flagcdn.com/w20/pt.png"> POR</button>
-                    <button class="league-btn" data-liga="SA"><img src="https://flagcdn.com/w20/sa.png"> SAU</button>
-                    <button class="league-btn" data-liga="NL"><img src="https://flagcdn.com/w20/nl.png"> NED</button>
+            <div class="leagues-wrapper" style="padding: 15px;">
+                <div class="leagues-container" style="display: flex; gap: 5px; overflow-x: auto; padding-bottom: 10px;">
+                    <button class="league-btn active" data-liga="BR">BR</button>
+                    <button class="league-btn" data-liga="PL">ENG</button>
+                    <button class="league-btn" data-liga="ES">ESP</button>
+                    <button class="league-btn" data-liga="IT">ITA</button>
+                    <button class="league-btn" data-liga="DE">GER</button>
+                    <button class="league-btn" data-liga="FR">FRA</button>
+                    <button class="league-btn" data-liga="SA">SAU</button>
+                    <button class="league-btn" data-liga="NL">NED</button>
                 </div>
             </div>
 
             <div class="glass-panel table-container">
-                <table>
+                <table id="tabela-principal">
                     <thead>
                         <tr>
-                            <th style="width: 40px;">#</th>
+                            <th style="width: 30px;">#</th>
                             <th>TIME</th>
                             <th style="text-align: center;">J</th>
                             <th style="text-align: center;">PTS</th>
@@ -168,47 +143,27 @@
 
     <div id="modal-time" class="modal-time-overlay" style="display: none;">
         <div class="modal-time-content">
-            <span class="close-btn" onclick="fecharModalTime()">&times;</span>
-            
+            <span class="close-btn" onclick="fecharModalTime()" style="cursor: pointer; float: right;">&times;</span>
             <div class="modal-time-header">
-                <div class="escudo-wrapper">
-                    <img id="modal-escudo" src="" alt="Escudo">
-                </div>
-                <h2 id="modal-nome-time">--</h2>
-                <div id="modal-liga-badge" class="badge-liga">LIGA</div>
+                <img id="modal-escudo" src="" style="width: 60px; height: 60px; object-fit: contain;">
+                <h2 id="modal-nome-time" style="font-family: 'Orbitron'; margin: 10px 0;">--</h2>
+                <div id="modal-liga-badge" class="badge-liga" style="font-size: 0.6rem; border: 1px solid #333; display: inline-block; padding: 2px 8px; border-radius: 10px;">LIGA</div>
             </div>
 
             <div class="modal-time-stats-grid">
-                <div class="stat-card">
-                    <span class="label">POSIÇÃO</span>
-                    <span id="modal-pos" class="value">--</span>
-                </div>
-                <div class="stat-card">
-                    <span class="label">PONTOS</span>
-                    <span id="modal-pts" class="value" style="color: var(--neon-blue);">--</span>
-                </div>
-                <div class="stat-card">
-                    <span class="label">JOGOS</span>
-                    <span id="modal-jogos" class="value">--</span>
-                </div>
-                <div class="stat-card">
-                    <span class="label">SALDO GOLS</span>
-                    <span id="modal-sg" class="value">--</span>
-                </div>
+                <div class="stat-card"><span class="label">POS</span><span id="modal-pos" class="value">--</span></div>
+                <div class="stat-card"><span class="label">PTS</span><span id="modal-pts" class="value">--</span></div>
+                <div class="stat-card"><span class="label">JOGOS</span><span id="modal-jogos" class="value">--</span></div>
+                <div class="stat-card"><span class="label">SALDO</span><span id="modal-sg" class="value">--</span></div>
             </div>
 
             <div class="forma-recente-container">
-                <h4 style="font-size: 0.7rem; color: #555; letter-spacing: 1px;">FORMA RECENTE</h4>
                 <div id="modal-forma-list" class="forma-flex"></div>
             </div>
 
-            <button class="btn-neural-fechar" onclick="fecharModalTime()">VOLTAR AO TERMINAL</button>
+            <button class="btn-neural-fechar" onclick="fecharModalTime()">VOLTAR</button>
         </div>
     </div>
-
-    <footer>
-        <p>FUTSTATS TERMINAL // v3.2 // 2025</p>
-    </footer>
 
     <script src="script.js"></script>
 </body>
