@@ -26,7 +26,10 @@
 
     <header>
         <div class="header-content">
-            <h1 class="logo">Fut<span class="neon-blue">Stats</span></h1>
+            <div class="logo-container">
+                <img src="logo.png" alt="Logo" class="site-logo-img">
+                <h1 class="logo">Fut<span class="neon-blue">Stats</span></h1>
+            </div>
             <div class="neural-status">
                 <span class="status-label">LINK ESTÁVEL</span>
                 <span class="pulse-dot"></span> 
@@ -76,6 +79,7 @@
                             <option value="FR">França (Ligue 1)</option>
                             <option value="PT">Portugal (Liga Portugal)</option>
                             <option value="SA">Arábia Saudita</option>
+                            <option value="NL">Holanda (Eredivisie)</option>
                         </select>
                         <select id="time-a" class="cyber-select" disabled>
                             <option value="">2. Selecione o Time</option>
@@ -96,6 +100,7 @@
                             <option value="FR">França (Ligue 1)</option>
                             <option value="PT">Portugal (Liga Portugal)</option>
                             <option value="SA">Arábia Saudita</option>
+                            <option value="NL">Holanda (Eredivisie)</option>
                         </select>
                         <select id="time-b" class="cyber-select" disabled>
                             <option value="">2. Selecione o Time</option>
@@ -140,6 +145,7 @@
                     <button class="league-btn" data-liga="FR"><img src="https://flagcdn.com/w20/fr.png"> FRA</button>
                     <button class="league-btn" data-liga="PT"><img src="https://flagcdn.com/w20/pt.png"> POR</button>
                     <button class="league-btn" data-liga="SA"><img src="https://flagcdn.com/w20/sa.png"> SAU</button>
+                    <button class="league-btn" data-liga="NL"><img src="https://flagcdn.com/w20/nl.png"> NED</button>
                 </div>
             </div>
 
@@ -160,22 +166,48 @@
         </section>
     </main>
 
-    <div id="modal-stats" class="modal-full">
-        <div class="modal-nav">
-            <button onclick="fecharModal()" class="btn-back">← VOLTAR</button>
-            <h2 class="cyber-title">RELATÓRIO <span class="neon-blue">VISUAL</span></h2>
-            <div style="width: 80px;"></div>
-        </div>
-        <div class="modal-body">
-            <div class="chart-container-wrapper">
-                <canvas id="statsChart"></canvas>
+    <div id="modal-time" class="modal-time-overlay" style="display: none;">
+        <div class="modal-time-content">
+            <span class="close-btn" onclick="fecharModalTime()">&times;</span>
+            
+            <div class="modal-time-header">
+                <div class="escudo-wrapper">
+                    <img id="modal-escudo" src="" alt="Escudo">
+                </div>
+                <h2 id="modal-nome-time">--</h2>
+                <div id="modal-liga-badge" class="badge-liga">LIGA</div>
             </div>
-            <div id="conteudo-detalhado" class="grid-detalhes"></div>
+
+            <div class="modal-time-stats-grid">
+                <div class="stat-card">
+                    <span class="label">POSIÇÃO</span>
+                    <span id="modal-pos" class="value">--</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">PONTOS</span>
+                    <span id="modal-pts" class="value" style="color: var(--neon-blue);">--</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">JOGOS</span>
+                    <span id="modal-jogos" class="value">--</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">SALDO GOLS</span>
+                    <span id="modal-sg" class="value">--</span>
+                </div>
+            </div>
+
+            <div class="forma-recente-container">
+                <h4 style="font-size: 0.7rem; color: #555; letter-spacing: 1px;">FORMA RECENTE</h4>
+                <div id="modal-forma-list" class="forma-flex"></div>
+            </div>
+
+            <button class="btn-neural-fechar" onclick="fecharModalTime()">VOLTAR AO TERMINAL</button>
         </div>
     </div>
 
     <footer>
-        <p>FUTSTATS TERMINAL // v3.1 // 2025 // ENCRYPTED CONNECTION</p>
+        <p>FUTSTATS TERMINAL // v3.2 // 2025</p>
     </footer>
 
     <script src="script.js"></script>
