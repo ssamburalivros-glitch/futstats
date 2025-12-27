@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Pro </title>
+    <title>FutStats | Neural Terminal </title>
     
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
             <div class="progress-container">
                 <div id="neural-progress-bar" class="progress-fill"></div>
             </div>
-            <p id="loader-status">Acessando núcleo...</p>
+            <p id="loader-status">Acessando núcleo neural...</p>
         </div>
     </div>
 
@@ -28,6 +28,7 @@
         <div class="header-content">
             <h1 class="logo">Fut<span class="neon-blue">Stats</span></h1>
             <div class="neural-status">
+                <span class="status-label">LINK ESTÁVEL</span>
                 <span class="pulse-dot"></span> 
             </div>
         </div>
@@ -38,17 +39,17 @@
             <div class="ia-card">
                 <div class="ia-scanner"></div>
                 <div class="ia-header">
-                    <span>🤖</span>
-                    <h3>IA NEURAL ANALYSIS</h3>
+                    <span class="ia-icon">⚡</span>
+                    <h3>ANALÍTICO NEURAL llama-3.3</h3>
                 </div>
-                <p id="ia-box">Sincronizando feed de dados...</p>
+                <p id="ia-box">Iniciando protocolo de leitura de dados...</p>
             </div>
         </section>
 
         <section id="ao-vivo">
             <div class="section-header-flex">
-                <h2 class="cyber-subtitle">● AO VIVO</h2>
-                <span class="scroll-hint">ARRASTE &rarr;</span>
+                <h2 class="cyber-subtitle">● LIVE FEEDS</h2>
+                <span class="scroll-hint">DESLIZE &rarr;</span>
             </div>
             <div id="lista-ao-vivo" class="hero-grid">
                 </div>
@@ -63,7 +64,6 @@
                 </div>
 
                 <div class="h2h-controls-complex">
-                    
                     <div class="control-group">
                         <label>DESAFIANTE A</label>
                         <select id="liga-a" class="cyber-select-sm">
@@ -73,10 +73,12 @@
                             <option value="ES">Espanha (La Liga)</option>
                             <option value="IT">Itália (Serie A)</option>
                             <option value="DE">Alemanha (Bundesliga)</option>
-                            <option value="PT">Portugal (Liga Portugal)</option>
+                            <option value="FR">França (Ligue 1)</option>
+                            <option value="PT">Portugal (Primeira)</option>
+                            <option value="SA">Arábia (Pro League)</option>
                         </select>
                         <select id="time-a" class="cyber-select" disabled>
-                            <option value="">2. Aguardando Liga...</option>
+                            <option value="">2. Selecione o Time</option>
                         </select>
                     </div>
                     
@@ -91,10 +93,12 @@
                             <option value="ES">Espanha (La Liga)</option>
                             <option value="IT">Itália (Serie A)</option>
                             <option value="DE">Alemanha (Bundesliga)</option>
-                            <option value="PT">Portugal (Liga Portugal)</option>
+                            <option value="FR">França (Ligue 1)</option>
+                            <option value="PT">Portugal (Primeira)</option>
+                            <option value="SA">Arábia (Pro League)</option>
                         </select>
                         <select id="time-b" class="cyber-select" disabled>
-                            <option value="">2. Aguardando Liga...</option>
+                            <option value="">2. Selecione o Time</option>
                         </select>
                     </div>
                 </div>
@@ -109,8 +113,8 @@
 
                         <div class="stats-center">
                             <div id="stats-rows"></div>
-                            <button class="btn-full-stats" onclick="abrirEstatisticasCompletas()">
-                                📊 ANÁLISE GRÁFICA & DETALHES
+                            <button class="btn-full-stats" onclick="abrirEstatisticasCompletas(false)">
+                                📊 ANÁLISE DE PROBABILIDADE
                             </button>
                         </div>
 
@@ -128,12 +132,15 @@
             <div class="leagues-wrapper">
                 <h2 class="cyber-subtitle">CLASSIFICAÇÃO GLOBAL</h2>
                 <div class="leagues-container">
-                    <button class="league-btn active" data-liga="BR"><img src="https://flagcdn.com/w40/br.png"> BRA</button>
-                    <button class="league-btn" data-liga="PL"><img src="https://flagcdn.com/w40/gb-eng.png"> ENG</button>
-                    <button class="league-btn" data-liga="ES"><img src="https://flagcdn.com/w40/es.png"> ESP</button>
-                    <button class="league-btn" data-liga="IT"><img src="https://flagcdn.com/w40/it.png"> ITA</button>
-                    <button class="league-btn" data-liga="DE"><img src="https://flagcdn.com/w40/de.png"> GER</button>
-                    <button class="league-btn" data-liga="PT"><img src="https://flagcdn.com/w40/pt.png"> POR</button>
+                    <button class="league-btn active" data-liga="BR"><img src="https://flagcdn.com/w20/br.png"> BR</button>
+                    <button class="league-btn" data-liga="PL"><img src="https://flagcdn.com/w20/gb-eng.png"> ENG</button>
+                    <button class="league-btn" data-liga="ES"><img src="https://flagcdn.com/w20/es.png"> ESP</button>
+                    <button class="league-btn" data-liga="IT"><img src="https://flagcdn.com/w20/it.png"> ITA</button>
+                    <button class="league-btn" data-liga="DE"><img src="https://flagcdn.com/w20/de.png"> GER</button>
+                    <button class="league-btn" data-liga="FR"><img src="https://flagcdn.com/w20/fr.png"> FRA</button>
+                    <button class="league-btn" data-liga="PT"><img src="https://flagcdn.com/w20/pt.png"> POR</button>
+                    <button class="league-btn" data-liga="SA"><img src="https://flagcdn.com/w20/sa.png"> SAU</button>
+                    <button class="league-btn" data-liga="NL"><img src="https://flagcdn.com/w20/nl.png"> NED</button>
                 </div>
             </div>
 
@@ -156,21 +163,21 @@
 
     <div id="modal-stats" class="modal-full">
         <div class="modal-nav">
-            <button onclick="fecharModal()" class="btn-back">← VOLTAR</button>
-            <h2 class="cyber-title">DADOS <span class="neon-blue">VISUAIS</span></h2>
-            <div style="width: 80px;"></div>
+            <button onclick="fecharModal()" class="btn-back">← SAIR</button>
+            <h2 class="cyber-title">RELATÓRIO <span class="neon-blue">NEURAL</span></h2>
+            <div style="width: 60px;"></div>
         </div>
         <div class="modal-body">
+            <div id="conteudo-detalhado" class="grid-detalhes"></div>
+            
             <div class="chart-container-wrapper">
                 <canvas id="statsChart"></canvas>
             </div>
-            
-            <div id="conteudo-detalhado" class="grid-detalhes"></div>
         </div>
     </div>
 
     <footer>
-        <p>FUTSTATS TERMINAL // v3.1 // 2025</p>
+        <p>FUTSTATS TERMINAL // v3.1 // 2025 // ENCRYPTED DATA</p>
     </footer>
 
     <script src="script.js"></script>
