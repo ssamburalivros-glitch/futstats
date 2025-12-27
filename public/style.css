@@ -1,24 +1,20 @@
-/* --- 1. CONFIGURAÇÕES GERAIS E VARIÁVEIS --- */
+/* --- 1. CONFIGURAÇÕES BASE --- */
 :root {
     --bg-dark: #0a0a12;
-    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-bg: rgba(255, 255, 255, 0.04);
     --neon-blue: #4834d4;
     --neon-purple: #be2edd;
     --neon-fire: #ff4757;
-    --text-main: #e0e0e0;
+    --text-main: #ecf0f1;
     --font-cyber: 'Orbitron', sans-serif;
     --font-main: 'Rajdhani', sans-serif;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     background-color: var(--bg-dark);
-    background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #0a0a12 100%);
+    background-image: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #05050a 100%);
     color: var(--text-main);
     font-family: var(--font-main);
     overflow-x: hidden;
@@ -28,207 +24,167 @@ main {
     max-width: 1100px;
     margin: 0 auto;
     padding: 20px;
+    display: flex; flex-direction: column; gap: 40px;
+}
+
+/* --- 2. JOGOS AO VIVO (ROLAGEM CORRIGIDA) --- */
+.hero-grid {
     display: flex;
-    flex-direction: column;
-    gap: 35px;
+    flex-wrap: nowrap; /* Impede quebrar linha */
+    overflow-x: auto; /* Força rolagem */
+    gap: 15px;
+    padding: 10px 0 20px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* --- 2. CONTROLE RÍGIDO DE IMAGENS (SOLUÇÃO PARA ESCUDOS GIGANTES) --- */
-img {
-    max-width: 100%;
-    height: auto;
-    object-fit: contain;
+/* Estilo da barra de rolagem */
+.hero-grid::-webkit-scrollbar { height: 6px; }
+.hero-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; }
+.hero-grid::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
+
+.card-hero {
+    flex: 0 0 280px; /* CRÍTICO: Impede o card de encolher */
+    background: var(--glass-bg);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 15px;
 }
 
-/* Escudos na Tabela */
-.team-link img {
-    width: 24px !important;
-    height: 24px !important;
-    flex-shrink: 0;
-}
+.hero-score { font-family: var(--font-cyber); font-size: 1.5rem; color: #fff; }
+.team-v img { width: 40px !important; height: 40px !important; object-fit: contain; }
 
-/* Escudos na Arena H2H */
-.shield-main {
-    width: 85px !important;
-    height: 85px !important;
-    margin: 15px auto;
-    display: block;
-    filter: drop-shadow(0 0 8px rgba(255,255,255,0.1));
-}
+/* --- 3. IMAGENS & ESCUDOS (TRAVADOS) --- */
+img { max-width: 100%; height: auto; display: block; }
+.shield-main { width: 90px !important; height: 90px !important; margin: 10px auto; object-fit: contain; }
+.team-cell-img { width: 28px !important; height: 28px !important; object-fit: contain; }
 
-/* Escudos no Carrossel Ao Vivo */
-.team-v img {
-    width: 40px !important;
-    height: 40px !important;
-    margin-bottom: 5px;
-}
-
-/* --- 3. BOTÕES DE LIGA (ESTILO CYBER) --- */
-.leagues-container {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding: 10px 0;
-    scrollbar-width: none;
-}
-
-.leagues-container::-webkit-scrollbar { display: none; }
-
-.league-btn {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid #333;
-    padding: 12px 18px;
-    border-radius: 8px;
-    color: #888;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: 0.3s;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
-.league-btn img { width: 20px; border-radius: 2px; }
-
-.league-btn.active {
-    border-color: var(--neon-blue);
-    color: #fff;
-    background: rgba(72, 52, 212, 0.15);
-    box-shadow: 0 0 15px rgba(72, 52, 212, 0.3);
-}
-
-/* --- 4. ARENA H2H E SELECTS --- */
-.h2h-controls {
+/* --- 4. H2H AVANÇADO (CASCATA) --- */
+.h2h-controls-complex {
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 20px;
-    margin: 25px 0;
+    align-items: flex-end; /* Alinha na base */
+    gap: 15px;
+    margin: 30px 0;
+    flex-wrap: wrap;
 }
 
-.cyber-select {
-    background: #000;
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-group label {
+    font-size: 0.75rem;
+    color: var(--neon-purple);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.cyber-select, .cyber-select-sm {
+    background: #080808;
     color: #fff;
-    border: 1px solid var(--neon-purple);
-    padding: 12px;
+    border: 1px solid #333;
+    padding: 10px;
     border-radius: 6px;
-    width: 240px;
     font-family: var(--font-main);
     outline: none;
+    transition: 0.3s;
 }
 
-optgroup {
-    background: #111;
-    color: var(--neon-blue);
-    font-style: normal;
-    font-weight: bold;
-}
+.cyber-select-sm { width: 160px; border-color: rgba(72, 52, 212, 0.5); }
+.cyber-select { width: 200px; border-color: rgba(190, 46, 221, 0.5); }
+
+.cyber-select:disabled { opacity: 0.5; cursor: not-allowed; }
+.cyber-select:focus, .cyber-select-sm:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(72,52,212,0.3); }
 
 .vs-badge {
-    background: var(--neon-purple);
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    width: 40px; height: 40px;
     border-radius: 50%;
-    font-family: var(--font-cyber);
-    font-size: 0.7rem;
-    box-shadow: 0 0 15px var(--neon-purple);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-cyber); font-size: 0.8rem;
+    box-shadow: 0 0 15px var(--neon-blue);
+    margin-bottom: 5px; /* Ajuste visual */
 }
 
-/* --- 5. TABELA COM LINKS INCORPORADOS --- */
-.team-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-    color: var(--text-main);
-    transition: 0.2s;
+/* --- 5. TABELA INTERATIVA --- */
+.team-clickable {
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background 0.2s;
 }
+.team-clickable:hover { background: rgba(255,255,255,0.05); }
+.team-clickable span { font-weight: 600; color: #ddd; }
 
-.team-link:hover {
-    color: var(--neon-blue);
-    transform: translateX(5px);
-}
-
-/* --- 6. LOADER NEURAL (ANIMAÇÃO) --- */
-.loader-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(5, 5, 10, 0.98);
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.progress-container {
-    width: 100%;
-    height: 4px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 10px;
-    margin-top: 15px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    width: 0%;
-    height: 100%;
-    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-    box-shadow: 0 0 10px var(--neon-blue);
-    transition: width 0.4s ease;
-}
-
-.scanner-line {
-    width: 60px;
-    height: 2px;
-    background: var(--neon-blue);
-    margin: 0 auto 15px;
-    animation: scanPulse 1.5s infinite;
-}
-
-@keyframes scanPulse {
-    0%, 100% { transform: scaleX(1); opacity: 0.5; }
-    50% { transform: scaleX(3); opacity: 1; }
-}
-
-/* --- 7. ABA FULLSCREEN (MODAL STATS) --- */
+/* --- 6. MODAL & GRÁFICO --- */
 .modal-full {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: var(--bg-dark);
-    z-index: 5000;
-    display: none;
-    flex-direction: column;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #05050a; z-index: 5000;
+    display: none; flex-direction: column;
+    animation: fadeUp 0.3s ease-out;
 }
 
 .modal-nav {
-    padding: 20px;
+    padding: 20px; background: rgba(0,0,0,0.6);
+    display: flex; justify-content: space-between; align-items: center;
     border-bottom: 1px solid #222;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 }
 
-.btn-back {
-    background: #1a1a2e;
-    border: 1px solid #333;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
+.modal-body {
+    padding: 30px; overflow-y: auto; flex-grow: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 30px;
 }
 
-/* --- 8. UTILITÁRIOS --- */
-.glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
+/* Container do Chart.js */
+.chart-container-wrapper {
+    width: 100%; max-width: 800px;
+    height: 350px;
+    background: rgba(255,255,255,0.02);
+    padding: 15px; border-radius: 10px;
     border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 15px;
-    padding: 25px;
 }
 
-.on-fire {
-    color: var(--neon-fire
+.grid-detalhes {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px; width: 100%; max-width: 1000px;
+}
+
+.glass-panel {
+    background: var(--glass-bg); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 20px; border-radius: 12px;
+}
+
+/* --- 7. LOADING OVERLAY --- */
+.loader-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+}
+.progress-container {
+    width: 300px; height: 4px; background: #222;
+    border-radius: 2px; margin-top: 15px; overflow: hidden;
+}
+.progress-fill {
+    width: 0%; height: 100%;
+    background: var(--neon-blue);
+    transition: width 0.3s;
+}
+
+/* Auxiliares */
+.header-content { text-align: center; padding: 30px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.logo { font-size: 2.5rem; letter-spacing: 3px; font-family: var(--font-cyber); }
+.btn-back { background: transparent; border: 1px solid #444; color: #fff; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+.btn-full-stats {
+    width: 100%; padding: 15px; margin-top: 20px;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+    border: none; color: #fff; font-weight: bold; border-radius: 8px; cursor: pointer;
+}
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 768px) { .h2h-controls-complex { flex-direction: column; align-items: center; } .cyber-select-sm, .cyber-select { width: 100%; } }
