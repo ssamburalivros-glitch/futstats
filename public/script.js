@@ -60,23 +60,28 @@ async function carregarAoVivo() {
         }
 
         container.innerHTML = data.map(j => {
-            return `
-                <div class="card-hero">
-                    <div class="hero-teams">
-                        <div class="hero-team-box">
-                            <img src="${j.logo_casa || ESCUDO_PADRAO}" class="hero-logo" onerror="this.src='${ESCUDO_PADRAO}'">
-                            <span class="hero-name">${j.time_casa || 'Mandante'}</span>
-                        </div>
-                        <div class="hero-score">${j.placar || '0 - 0'}</div>
-                        <div class="hero-team-box">
-                            <img src="${j.logo_fora || ESCUDO_PADRAO}" class="hero-logo" onerror="this.src='${ESCUDO_PADRAO}'">
-                            <span class="hero-name">${j.time_fora || 'Visitante'}</span>
-                        </div>
-                    </div>
-                    <div class="hero-status"><span class="live-dot"></span> ${j.status || 'Tempo Real'}</div>
+    return `
+        <div class="card-hero">
+            <div class="hero-teams">
+                <div class="hero-team-box">
+                    <img src="${j.logo_casa || ESCUDO_PADRAO}" class="hero-logo" onerror="this.src='${ESCUDO_PADRAO}'">
+                    <span class="hero-name">${j.time_casa}</span>
                 </div>
-            `;
-        }).join('');
+
+                <div class="hero-score">${j.placar || '0-0'}</div>
+
+                <div class="hero-team-box">
+                    <img src="${j.logo_fora || ESCUDO_PADRAO}" class="hero-logo" onerror="this.src='${ESCUDO_PADRAO}'">
+                    <span class="hero-name">${j.time_fora}</span>
+                </div>
+            </div>
+            
+            <div class="hero-status">
+                <span class="live-dot"></span> ${j.status || 'AO VIVO'}
+            </div>
+        </div>
+    `;
+}).join('');
     } catch (e) {
         console.error("Erro ao vivo:", e);
     }
