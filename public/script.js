@@ -52,45 +52,35 @@ async function carregarAoVivo() {
 
     try {
         const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
-        
         if (error) throw error;
 
         if (!data || data.length === 0) {
-            container.innerHTML = '<p style="color:#888; padding:20px; width:100%; text-align:center;">Aguardando jogos começarem...</p>';
+            container.innerHTML = '<p style="color:#888; padding:20px; width:100%; text-align:center;">Aguardando jogos...</p>';
             return;
         }
 
         container.innerHTML = data.map(j => {
-            // Garante que valores nulos não quebrem o HTML
-            const placar = j.placar || "0 - 0";
-            const timeC = j.time_casa || "Mandante";
-            const timeF = j.time_fora || "Visitante";
-            const status = j.status || "Tempo Real";
-
             return `
                 <div class="card-hero">
                     <div class="hero-teams">
                         <div class="hero-team-box">
                             <img src="${j.logo_casa || ESCUDO_PADRAO}" class="hero-logo" onerror="this.src='${ESCUDO_PADRAO}'">
-                            <span class="hero-name">${timeC}</span>
+                            <span class="hero-name">${j.time_casa || 'Mandante'}</span>
                         </div>
-                        <div class="hero-score">${placar}</div>
+                        <div class="hero-score">${j.placar || '0 - 0'}</div>
                         <div class="hero-team-box">
                             <img src="${j.logo_fora || ESCUDO_PADRAO}" class="hero-logo" onerror="this.src='${ESCUDO_PADRAO}'">
-                            <span class="hero-name">${timeF}</span>
+                            <span class="hero-name">${j.time_fora || 'Visitante'}</span>
                         </div>
                     </div>
-                    <div class="hero-status"><span class="live-dot"></span> ${status}</div>
+                    <div class="hero-status"><span class="live-dot"></span> ${j.status || 'Tempo Real'}</div>
                 </div>
             `;
         }).join('');
-
     } catch (e) {
         console.error("Erro ao vivo:", e);
-        container.innerHTML = '<p style="color:#555; text-align:center; width:100%;">Serviço de placares temporariamente indisponível.</p>';
     }
 }
-
 async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
     if (!corpo) return;
