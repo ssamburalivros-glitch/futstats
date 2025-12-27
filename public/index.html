@@ -3,84 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Dashboard Neural</title>
-    
+    <title>FutStats | Pro Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
-    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
     <header>
-        <div class="header-content">
-            <h1 class="logo">FUT<span class="neon-blue">STATS</span></h1>
-            <p style="font-size: 0.8rem; letter-spacing: 2px; color: var(--neon-blue);">LIVE NEURAL DATA</p>
-        </div>
+        <h1 class="logo">FUT<span class="neon-blue">STATS</span></h1>
     </header>
 
     <main>
-        <section id="ia-insights">
-            <div class="ia-card">
-                <div class="ia-scanner"></div>
-                <div class="ia-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <span style="font-size: 1.5rem;">🤖</span>
-                    <h3 style="font-family: var(--font-cyber); font-size: 0.9rem;">IA NEURAL ANALYSIS</h3>
-                </div>
-                <p id="ia-box" style="font-style: italic; color: #ccc;">Sincronizando com o servidor de dados...</p>
-            </div>
-        </section>
-
         <section id="ao-vivo">
-            <h2 style="font-family: var(--font-cyber); font-size: 1rem; margin-bottom: 15px; color: var(--neon-blue);">● LIVE MATCHES</h2>
-            <div id="lista-ao-vivo" class="hero-grid">
-                </div>
+            <div class="section-header">
+                <h2><span class="dot-live"></span> AO VIVO</h2>
+                <span class="scroll-hint">Deslize →</span>
+            </div>
+            <div id="lista-ao-vivo" class="hero-grid"></div>
         </section>
 
         <section id="h2h-section">
-            <div class="glass-panel">
-                <div style="text-align: center; margin-bottom: 25px;">
-                    <h2 style="font-family: var(--font-cyber);"><span class="neon-purple">H2H</span> BATTLE ARENA</h2>
-                    <p style="font-size: 0.9rem; color: #888;">Compare a força e estatísticas dos times</p>
+            <div class="glass-panel arena-border">
+                <div class="arena-header">
+                    <div class="line"></div>
+                    <h2 class="cyber-title">H2H BATTLE <span class="neon-purple">ARENA</span></h2>
+                    <div class="line"></div>
                 </div>
 
                 <div class="h2h-controls">
-                    <select id="time-a" class="h2h-select">
-                        <option value="">Selecione o Time 1</option>
-                    </select>
-                    
-                    <div class="vs-circle">VS</div>
-
-                    <select id="time-b" class="h2h-select">
-                        <option value="">Selecione o Time 2</option>
-                    </select>
+                    <select id="time-a" class="cyber-select"></select>
+                    <div class="vs-badge">VS</div>
+                    <select id="time-b" class="cyber-select"></select>
                 </div>
 
                 <div id="h2h-display" style="display: none;">
                     <div class="h2h-arena">
                         <div class="team-gladiator">
                             <div class="power-rank color-a" id="power-a">--</div>
-                            <div class="gladiator-card">
-                                <img id="img-a" src="" alt="">
-                                <h3 id="name-a" style="font-family: var(--font-cyber); font-size: 0.9rem; margin-top: 10px;">TIME A</h3>
-                            </div>
+                            <img id="img-a" src="" class="shield-main">
+                            <h3 id="name-a">--</h3>
                         </div>
 
-                        <div class="stats-battlefield">
-                            <div id="stats-rows">
-                                </div>
-                            <div id="ia-veredito" style="margin-top: 20px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 3px solid var(--neon-purple);">
-                                <small style="color: var(--neon-purple); font-weight: bold;">VEREDITO IA:</small>
-                                <p id="veredito-texto" style="font-size: 0.85rem; margin-top: 5px;">Aguardando dados...</p>
-                            </div>
+                        <div class="stats-center">
+                            <div id="stats-rows"></div>
+                            <button class="btn-full-stats" onclick="abrirEstatisticasCompletas()">
+                                <span class="icon">📊</span> ACESSAR ANÁLISE COMPLETA
+                            </button>
                         </div>
 
                         <div class="team-gladiator">
                             <div class="power-rank color-b" id="power-b">--</div>
-                            <div class="gladiator-card">
-                                <img id="img-b" src="" alt="">
-                                <h3 id="name-b" style="font-family: var(--font-cyber); font-size: 0.9rem; margin-top: 10px;">TIME B</h3>
-                            </div>
+                            <img id="img-b" src="" class="shield-main">
+                            <h3 id="name-b">--</h3>
                         </div>
                     </div>
                 </div>
@@ -88,44 +63,45 @@
         </section>
 
         <section id="classificacao">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                <h2 style="font-family: var(--font-cyber); font-size: 1rem;">LEAGUE STANDINGS</h2>
-                <div class="pills-container">
-                    <button class="pill active" data-liga="BR">BRA</button>
-                    <button class="pill" data-liga="PL">ENG</button>
-                    <button class="pill" data-liga="ES">ESP</button>
-                    <button class="pill" data-liga="DE">GER</button>
-                    <button class="pill" data-liga="IT">ITA</button>
-                    <button class="pill" data-liga="PT">POR</button>
-                </div>
+            <div class="leagues-container">
+                <button class="league-btn active" data-liga="BR">
+                    <img src="https://flagcdn.com/w40/br.png"> <span>BRASIL</span>
+                </button>
+                <button class="league-btn" data-liga="PL">
+                    <img src="https://flagcdn.com/w40/gb-eng.png"> <span>INGLATERRA</span>
+                </button>
+                <button class="league-btn" data-liga="ES">
+                    <img src="https://flagcdn.com/w40/es.png"> <span>ESPANHA</span>
+                </button>
+                <button class="league-btn" data-liga="IT">
+                    <img src="https://flagcdn.com/w40/it.png"> <span>ITÁLIA</span>
+                </button>
             </div>
 
-            <div class="glass-panel" style="padding: 10px; overflow-x: auto;">
+            <div class="glass-panel table-wrapper">
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 50px; text-align: center;">#</th>
-                            <th>TEAM</th>
-                            <th style="text-align: center;">J</th>
-                            <th style="text-align: center;">SG</th>
-                            <th style="text-align: center;">PTS</th>
+                            <th>#</th>
+                            <th>TIME</th>
+                            <th>J</th>
+                            <th>PTS</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-corpo">
-                        </tbody>
+                    <tbody id="tabela-corpo"></tbody>
                 </table>
             </div>
         </section>
     </main>
 
-    <footer style="text-align: center; padding: 40px; color: #444; font-size: 0.8rem;">
-        <p>FUTSTATS NEURAL ENGINE &copy; 2025</p>
-    </footer>
-
-    <div id="modal-time" class="modal" style="display:none;">
-        <div class="modal-content glass-panel">
-            <span class="close-modal" style="cursor:pointer; float:right;">&times;</span>
-            <div id="detalhes-time"></div>
+    <div id="modal-stats" class="modal-full">
+        <div class="modal-nav">
+            <button onclick="fecharModal()" class="btn-back">← VOLTAR AO DASHBOARD</button>
+            <h2 class="cyber-title">DETALHAMENTO <span class="neon-blue">NEURAL</span></h2>
+        </div>
+        <div class="modal-body">
+            <div id="conteudo-detalhado" class="grid-detalhes">
+                </div>
         </div>
     </div>
 
