@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Dashboard Evolution</title>
+    <title>FutStats | Dashboard Neural</title>
+    
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -13,81 +15,71 @@
     <header>
         <div class="header-content">
             <h1 class="logo">FUT<span class="neon-blue">STATS</span></h1>
-            <div class="live-indicator">
-                <span class="dot"></span> LIVE DATA
-            </div>
+            <p style="font-size: 0.8rem; letter-spacing: 2px; color: var(--neon-blue);">LIVE NEURAL DATA</p>
         </div>
     </header>
 
     <main>
         <section id="ia-insights">
             <div class="ia-card">
-                <div class="ia-header">
-                    <div class="ia-scanner"></div>
-                    <span class="ia-icon">🤖</span>
-                    <h3>IA NEURAL ANALYSIS</h3>
+                <div class="ia-scanner"></div>
+                <div class="ia-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span style="font-size: 1.5rem;">🤖</span>
+                    <h3 style="font-family: var(--font-cyber); font-size: 0.9rem;">IA NEURAL ANALYSIS</h3>
                 </div>
-                <p id="ia-box">Aguardando processamento de dados do servidor...</p>
+                <p id="ia-box" style="font-style: italic; color: #ccc;">Sincronizando com o servidor de dados...</p>
             </div>
         </section>
 
         <section id="ao-vivo">
-            <div class="section-title">
-                <i class="icon-bolt"></i> JOGOS EM ANDAMENTO
-            </div>
+            <h2 style="font-family: var(--font-cyber); font-size: 1rem; margin-bottom: 15px; color: var(--neon-blue);">● LIVE MATCHES</h2>
             <div id="lista-ao-vivo" class="hero-grid">
                 </div>
         </section>
 
         <section id="h2h-section">
             <div class="glass-panel">
-                <div class="section-header-centered">
-                    <h2><span class="neon-purple">H2H</span> BATTLE COMPARATOR</h2>
-                    <p>Compare o Power Level e estatísticas reais entre dois times</p>
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <h2 style="font-family: var(--font-cyber);"><span class="neon-purple">H2H</span> BATTLE ARENA</h2>
+                    <p style="font-size: 0.9rem; color: #888;">Compare a força e estatísticas dos times</p>
                 </div>
 
                 <div class="h2h-controls">
-                    <div class="select-wrapper">
-                        <select id="time-a" class="h2h-select">
-                            <option value="">Selecione o Time 1</option>
-                        </select>
-                    </div>
+                    <select id="time-a" class="h2h-select">
+                        <option value="">Selecione o Time 1</option>
+                    </select>
                     
-                    <div class="vs-divider">
-                        <div class="vs-circle">VS</div>
-                    </div>
+                    <div class="vs-circle">VS</div>
 
-                    <div class="select-wrapper">
-                        <select id="time-b" class="h2h-select">
-                            <option value="">Selecione o Time 2</option>
-                        </select>
-                    </div>
+                    <select id="time-b" class="h2h-select">
+                        <option value="">Selecione o Time 2</option>
+                    </select>
                 </div>
 
-                <div id="h2h-display" class="h2h-result-container" style="display: none;">
+                <div id="h2h-display" style="display: none;">
                     <div class="h2h-arena">
-                        <div class="team-gladiator left">
+                        <div class="team-gladiator">
                             <div class="power-rank color-a" id="power-a">--</div>
                             <div class="gladiator-card">
-                                <img id="img-a" src="" alt="Escudo Time A">
-                                <h3 id="name-a">TIME 1</h3>
+                                <img id="img-a" src="" alt="">
+                                <h3 id="name-a" style="font-family: var(--font-cyber); font-size: 0.9rem; margin-top: 10px;">TIME A</h3>
                             </div>
                         </div>
 
                         <div class="stats-battlefield">
                             <div id="stats-rows">
                                 </div>
-                            <div id="ia-veredito" class="ia-mini-box">
-                                <small>VEREDITO DA IA:</small>
-                                <p id="veredito-texto">Selecione os times para calcular favoritismo...</p>
+                            <div id="ia-veredito" style="margin-top: 20px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 3px solid var(--neon-purple);">
+                                <small style="color: var(--neon-purple); font-weight: bold;">VEREDITO IA:</small>
+                                <p id="veredito-texto" style="font-size: 0.85rem; margin-top: 5px;">Aguardando dados...</p>
                             </div>
                         </div>
 
-                        <div class="team-gladiator right">
+                        <div class="team-gladiator">
                             <div class="power-rank color-b" id="power-b">--</div>
                             <div class="gladiator-card">
-                                <img id="img-b" src="" alt="Escudo Time B">
-                                <h3 id="name-b">TIME 2</h3>
+                                <img id="img-b" src="" alt="">
+                                <h3 id="name-b" style="font-family: var(--font-cyber); font-size: 0.9rem; margin-top: 10px;">TIME B</h3>
                             </div>
                         </div>
                     </div>
@@ -96,8 +88,8 @@
         </section>
 
         <section id="classificacao">
-            <div class="section-header">
-                <h2>LEAGUE TABLES</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <h2 style="font-family: var(--font-cyber); font-size: 1rem;">LEAGUE STANDINGS</h2>
                 <div class="pills-container">
                     <button class="pill active" data-liga="BR">BRA</button>
                     <button class="pill" data-liga="PL">ENG</button>
@@ -108,15 +100,15 @@
                 </div>
             </div>
 
-            <div class="table-container glass">
+            <div class="glass-panel" style="padding: 10px; overflow-x: auto;">
                 <table>
                     <thead>
                         <tr>
-                            <th class="txt-center">#</th>
+                            <th style="width: 50px; text-align: center;">#</th>
                             <th>TEAM</th>
-                            <th class="txt-center">P</th>
-                            <th class="txt-center">SG</th>
-                            <th class="txt-center">PTS</th>
+                            <th style="text-align: center;">J</th>
+                            <th style="text-align: center;">SG</th>
+                            <th style="text-align: center;">PTS</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-corpo">
@@ -126,13 +118,13 @@
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2025 FUTSTATS - NEURAL NETWORK EDITION</p>
+    <footer style="text-align: center; padding: 40px; color: #444; font-size: 0.8rem;">
+        <p>FUTSTATS NEURAL ENGINE &copy; 2025</p>
     </footer>
 
-    <div id="modal-time" class="modal">
-        <div class="modal-content glass">
-            <span class="close-modal">&times;</span>
+    <div id="modal-time" class="modal" style="display:none;">
+        <div class="modal-content glass-panel">
+            <span class="close-modal" style="cursor:pointer; float:right;">&times;</span>
             <div id="detalhes-time"></div>
         </div>
     </div>
