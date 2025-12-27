@@ -55,36 +55,38 @@ async function carregarAoVivo() {
         const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
         const container = document.getElementById('lista-ao-vivo');
         
-        if (error || !data || data.length === 0) {
-            container.innerHTML = "<p style='color:#444; padding:20px; font-size:0.7rem;'>RADAR BUSCANDO FREQUÊNCIAS...</p>";
+        if (error) {
+            console.error("Erro na consulta Supabase:", error);
+            return;
+        }
+
+        console.log("Dados recebidos do Ao Vivo:", data); // Olhe isso no F12!
+
+        if (!data || data.length === 0) {
+            container.innerHTML = "<p style='color:#444; padding:20px;'>Sem jogos ativos.</p>";
             return;
         }
 
         container.innerHTML = data.map(jogo => {
-            // Proteção contra links quebrados ou undefined
-            const imgC = (jogo.escudo_casa && jogo.escudo_casa.startsWith('http')) ? jogo.escudo_casa : ESCUDO_PADRAO;
-            const imgF = (jogo.escudo_fora && jogo.escudo_fora.startsWith('http')) ? jogo.escudo_fora : ESCUDO_PADRAO;
+            // AJUSTE AQUI: Verifique se os nomes das colunas batem com o seu Supabase
+            const logoCasa = jogo.escudo_casa || jogo.logo_casa || ESCUDO_PADRAO;
+            const logoFora = jogo.escudo_fora || jogo.logo_fora || ESCUDO_PADRAO;
 
             return `
                 <div class="card-hero">
-                    <div style="font-size:0.55rem; color:var(--neon-blue); font-weight:bold; margin-bottom:5px;">
-                        ${jogo.tempo || 'LIVE'}
-                    </div>
+                    <div style="font-size:0.55rem; color:var(--neon-blue); font-weight:bold;">${jogo.tempo || 'LIVE'}</div>
                     <div class="hero-score">${jogo.placar_casa ?? 0} - ${jogo.placar_fora ?? 0}</div>
                     <div class="team-v">
-                        <img src="${imgC}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
-                        <span style="font-size:0.6rem; opacity:0.3;">VS</span>
-                        <img src="${imgF}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
+                        <img src="${logoCasa}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
+                        <span style="opacity:0.2; font-size:0.6rem;">VS</span>
+                        <img src="${logoFora}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
                     </div>
-                    <div style="font-size:0.5rem; color:#666; text-transform:uppercase; white-space:nowrap; overflow:hidden; width:100%;">
-                        ${(jogo.time_casa || '---').substring(0, 10)}
-                    </div>
+                    <div style="font-size:0.5rem; color:#666;">${(jogo.time_casa || '---').substring(0,10)}</div>
                 </div>
             `;
         }).join('');
-    } catch (e) { console.error("Erro Live Feeds"); }
+    } catch (e) { console.error("Erro crítico ao carregar Ao Vivo:", e); }
 }
-
 // --- 3. TABELA DE CLASSIFICAÇÃO (HOME) ---
 async function carregarTabela(siglaLiga) {
     try {
