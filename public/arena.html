@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena H2H | FutStats</title>
+    <title>Arena H2H | FutStats Neural</title>
+    
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -16,21 +18,21 @@
                 <img src="logo.png" alt="FS" class="site-logo-img">
                 <h1 class="logo">Fut<span class="neon-blue">Stats</span></h1>
             </div>
-            <button class="btn-neural-fechar" onclick="window.location.href='index.html'" style="margin:0; padding: 5px 15px;">VOLTAR</button>
+            <button class="league-btn active" onclick="window.location.href='index.html'" style="font-size: 0.6rem;">VOLTAR</button>
         </div>
     </header>
 
-    <main style="padding: 20px;">
+    <main style="padding: 20px; max-width: 800px; margin: 0 auto;">
         <section id="h2h-section">
-            <div class="glass-panel arena-border">
-                <div class="arena-header">
-                    <h2 class="cyber-title">ARENA <span class="neon-purple">H2H</span></h2>
-                    <p style="font-size: 0.7rem; color: #555; text-align: center; margin-bottom: 20px;">SELECIONE OS TIMES PARA COMPARATIVO NEURAL</p>
+            <div class="glass-panel arena-border" style="padding: 20px; border-radius: 20px;">
+                <div class="arena-header" style="text-align: center; margin-bottom: 30px;">
+                    <h2 class="cyber-title" style="letter-spacing: 4px;">ARENA <span class="neon-purple">H2H</span></h2>
+                    <div style="height: 1px; background: linear-gradient(90deg, transparent, var(--neon-purple), transparent); margin-top: 10px;"></div>
                 </div>
 
                 <div class="h2h-controls-complex">
                     <div class="control-group">
-                        <label>DESAFIANTE A</label>
+                        <label style="font-family: 'Orbitron'; font-size: 0.6rem; color: var(--neon-blue);">LADO ALFA</label>
                         <select id="liga-a" class="cyber-select">
                             <option value="">Escolha a Liga</option>
                             <option value="BR">Brasil</option>
@@ -42,7 +44,7 @@
                             <option value="SA">Arábia Saudita</option>
                             <option value="NL">Holanda</option>
                         </select>
-                        <select id="time-a" class="cyber-select" disabled>
+                        <select id="time-a" class="cyber-select" disabled style="margin-top: 10px;">
                             <option value="">Selecione o Time</option>
                         </select>
                     </div>
@@ -50,7 +52,7 @@
                     <div class="vs-badge">VS</div>
 
                     <div class="control-group">
-                        <label>DESAFIANTE B</label>
+                        <label style="font-family: 'Orbitron'; font-size: 0.6rem; color: var(--neon-purple);">LADO BETA</label>
                         <select id="liga-b" class="cyber-select">
                             <option value="">Escolha a Liga</option>
                             <option value="BR">Brasil</option>
@@ -62,33 +64,73 @@
                             <option value="SA">Arábia Saudita</option>
                             <option value="NL">Holanda</option>
                         </select>
-                        <select id="time-b" class="cyber-select" disabled>
+                        <select id="time-b" class="cyber-select" disabled style="margin-top: 10px;">
                             <option value="">Selecione o Time</option>
                         </select>
                     </div>
                 </div>
 
-                <div id="h2h-display" style="display: none; padding: 40px 20px;">
-                    <div class="h2h-arena" style="display: flex; justify-content: space-around; align-items: center; gap: 20px;">
+                <div id="h2h-display" style="display: none; margin-top: 40px; animation: fadeIn 0.5s ease;">
+                    
+                    <div class="h2h-arena" style="display: flex; justify-content: space-around; align-items: center; margin-bottom: 40px;">
                         <div class="team-gladiator" style="text-align: center;">
-                            <div class="power-rank" id="power-a" style="font-size: 2.5rem; color: var(--neon-blue); font-family: 'Orbitron';">--</div>
-                            <img id="img-a" src="" style="width: 80px; height: 80px; object-fit: contain; margin: 15px 0;">
-                            <h3 id="name-a" style="font-size: 1.2rem; text-transform: uppercase;">--</h3>
+                            <img id="img-a" src="" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 0 10px var(--neon-blue));">
+                            <h3 id="name-a" style="font-family: 'Orbitron'; margin-top: 15px; font-size: 1rem;">--</h3>
                         </div>
 
-                        <div class="vs-central" style="font-family: 'Orbitron'; font-size: 1.5rem; opacity: 0.2;">VS</div>
+                        <div class="vs-central" style="font-family: 'Orbitron'; font-size: 1.5rem; opacity: 0.1;">VS</div>
 
                         <div class="team-gladiator" style="text-align: center;">
-                            <div class="power-rank" id="power-b" style="font-size: 2.5rem; color: var(--neon-purple); font-family: 'Orbitron';">--</div>
-                            <img id="img-b" src="" style="width: 80px; height: 80px; object-fit: contain; margin: 15px 0;">
-                            <h3 id="name-b" style="font-size: 1.2rem; text-transform: uppercase;">--</h3>
+                            <img id="img-b" src="" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 0 10px var(--neon-purple));">
+                            <h3 id="name-b" style="font-family: 'Orbitron'; margin-top: 15px; font-size: 1rem;">--</h3>
                         </div>
                     </div>
-                </div>
-            </div>
+
+                    <div class="stats-comparison-box" style="margin-bottom: 30px;">
+                        <div class="h2h-stats-row">
+                            <span id="pos-a" class="stat-val" style="color: var(--neon-blue);">--</span>
+                            <span class="stat-label">Posição</span>
+                            <span id="pos-b" class="stat-val" style="color: var(--neon-purple);">--</span>
+                        </div>
+                        <div class="h2h-stats-row">
+                            <span id="pts-a" class="stat-val">--</span>
+                            <span class="stat-label">Pontos</span>
+                            <span id="pts-b" class="stat-val">--</span>
+                        </div>
+                        <div class="h2h-stats-row">
+                            <span id="sg-a" class="stat-val">--</span>
+                            <span class="stat-label">Saldo Gols</span>
+                            <span id="sg-b" class="stat-val">--</span>
+                        </div>
+                    </div>
+
+                    <div class="win-chance-container">
+                        <span class="stat-label" style="font-size: 0.6rem; letter-spacing: 2px;">PROBABILIDADE DE VITÓRIA</span>
+                        <div class="chance-bar-bg">
+                            <div id="bar-a" class="chance-fill-a"></div>
+                            <div id="bar-b" class="chance-fill-b"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-family: 'Orbitron'; font-size: 0.9rem; margin-top: 5px;">
+                            <span id="perc-a" style="color: var(--neon-blue);">50%</span>
+                            <span id="perc-b" style="color: var(--neon-purple);">50%</span>
+                        </div>
+                        
+                        <div style="margin-top: 25px;">
+                            <div id="prediction-text" class="prediction-badge">PROCESSANDO DADOS...</div>
+                        </div>
+                    </div>
+
+                </div> </div>
         </section>
     </main>
 
     <script src="script.js"></script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </body>
 </html>
