@@ -11,7 +11,7 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 LIGAS = {
     "BR": "bra.1", "PL": "eng.1", "ES": "esp.1",
     "DE": "ger.1", "IT": "ita.1", "PT": "por.1",
-    "FR": "fra.1", "SA": "sau.1", "NL": "ned.1"
+    "FR": "fra.1",  "NL": "ned.1"
 }
 
 def capturar_liga(liga_id, espn_id):
