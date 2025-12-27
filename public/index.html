@@ -33,12 +33,24 @@
                     <span>🤖</span>
                     <h3>IA NEURAL ANALYSIS llama-3.3</h3>
                 </div>
-                <p id="ia-box">Sincronizando feed de dados...</p>
+                <p id="ia-box">Iniciando protocolo de análise...</p>
+            </div>
+        </section>
+
+        <section style="padding: 10px 20px;">
+            <div class="arena-callout" onclick="window.location.href='arena.html'" style="cursor: pointer;">
+                <div class="callout-content">
+                    <span class="icon">⚡</span>
+                    <div>
+                        <h4 style="font-family: 'Orbitron'; font-size: 0.8rem; color: #fff;">ARENA DE BATALHA H2H</h4>
+                        <p style="font-size: 0.6rem; color: var(--neon-purple); font-weight: bold;">COMPARAR TIMES AGORA &rarr;</p>
+                    </div>
+                </div>
             </div>
         </section>
 
         <section id="ao-vivo">
-            <div class="section-header-flex" style="padding: 0 15px;">
+            <div class="section-header-flex" style="padding: 0 20px;">
                 <h2 class="cyber-subtitle" style="font-size: 0.8rem;">● LIVE FEEDS</h2>
                 <span class="scroll-hint" style="font-size: 0.6rem; color: #444;">DESLIZE &rarr;</span>
             </div>
@@ -46,74 +58,10 @@
                 </div>
         </section>
 
-        <section id="h2h-section">
-            <div class="glass-panel arena-border">
-                <div class="arena-header">
-                    <h2 class="cyber-title">H2H <span class="neon-purple">BATTLE</span></h2>
-                </div>
-
-                <div class="h2h-controls-complex">
-                    <div class="control-group">
-                        <label>DESAFIANTE A</label>
-                        <select id="liga-a" class="cyber-select">
-                            <option value="">Escolha a Liga</option>
-                            <option value="BR">Brasil</option>
-                            <option value="PL">Inglaterra</option>
-                            <option value="ES">Espanha</option>
-                            <option value="IT">Itália</option>
-                            <option value="DE">Alemanha</option>
-                            <option value="FR">França</option>
-                            <option value="SA">Arábia Saudita</option>
-                            <option value="NL">Holanda</option>
-                        </select>
-                        <select id="time-a" class="cyber-select" disabled>
-                            <option value="">Selecione o Time</option>
-                        </select>
-                    </div>
-                    
-                    <div class="vs-badge">VS</div>
-
-                    <div class="control-group">
-                        <label>DESAFIANTE B</label>
-                        <select id="liga-b" class="cyber-select">
-                            <option value="">Escolha a Liga</option>
-                            <option value="BR">Brasil</option>
-                            <option value="PL">Inglaterra</option>
-                            <option value="ES">Espanha</option>
-                            <option value="IT">Itália</option>
-                            <option value="DE">Alemanha</option>
-                            <option value="FR">França</option>
-                            <option value="SA">Arábia Saudita</option>
-                            <option value="NL">Holanda</option>
-                        </select>
-                        <select id="time-b" class="cyber-select" disabled>
-                            <option value="">Selecione o Time</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="h2h-display" style="display: none; padding: 20px;">
-                    <div class="h2h-arena" style="display: flex; justify-content: space-around; align-items: center;">
-                        <div class="team-gladiator">
-                            <div class="power-rank" id="power-a" style="color: var(--neon-blue); font-family: 'Orbitron';">--</div>
-                            <img id="img-a" src="" style="width: 50px; height: 50px; object-fit: contain;">
-                            <h3 id="name-a" style="font-size: 0.8rem;">--</h3>
-                        </div>
-                        <div class="vs-central">VS</div>
-                        <div class="team-gladiator">
-                            <div class="power-rank" id="power-b" style="color: var(--neon-purple); font-family: 'Orbitron';">--</div>
-                            <img id="img-b" src="" style="width: 50px; height: 50px; object-fit: contain;">
-                            <h3 id="name-b" style="font-size: 0.8rem;">--</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <section id="classificacao">
-            <div class="leagues-wrapper" style="padding: 15px;">
-                <div class="leagues-container" style="display: flex; gap: 5px; overflow-x: auto; padding-bottom: 10px;">
-                    <button class="league-btn active" data-liga="BR">BR</button>
+            <div class="leagues-wrapper" style="padding: 15px 20px;">
+                <div class="leagues-container" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px;">
+                    <button class="league-btn active" data-liga="BR">BRA</button>
                     <button class="league-btn" data-liga="PL">ENG</button>
                     <button class="league-btn" data-liga="ES">ESP</button>
                     <button class="league-btn" data-liga="IT">ITA</button>
@@ -128,7 +76,7 @@
                 <table id="tabela-principal">
                     <thead>
                         <tr>
-                            <th style="width: 30px;">#</th>
+                            <th style="width: 35px;">#</th>
                             <th>TIME</th>
                             <th style="text-align: center;">J</th>
                             <th style="text-align: center;">PTS</th>
@@ -143,25 +91,26 @@
 
     <div id="modal-time" class="modal-time-overlay" style="display: none;">
         <div class="modal-time-content">
-            <span class="close-btn" onclick="fecharModalTime()" style="cursor: pointer; float: right;">&times;</span>
-            <div class="modal-time-header">
-                <img id="modal-escudo" src="" style="width: 60px; height: 60px; object-fit: contain;">
-                <h2 id="modal-nome-time" style="font-family: 'Orbitron'; margin: 10px 0;">--</h2>
-                <div id="modal-liga-badge" class="badge-liga" style="font-size: 0.6rem; border: 1px solid #333; display: inline-block; padding: 2px 8px; border-radius: 10px;">LIGA</div>
+            <span class="close-btn" onclick="fecharModalTime()" style="cursor: pointer; float: right; font-size: 1.5rem;">&times;</span>
+            
+            <div class="modal-time-header" style="text-align: center;">
+                <img id="modal-escudo" src="" class="escudo-modal" style="width: 60px; height: 60px; object-fit: contain;">
+                <h2 id="modal-nome-time" style="font-family: 'Orbitron'; font-size: 1.2rem; margin: 10px 0;">--</h2>
+                <div id="modal-liga-badge" style="font-size: 0.6rem; color: var(--neon-blue); border: 1px solid #222; display: inline-block; padding: 2px 10px; border-radius: 20px;">LIGA</div>
             </div>
 
-            <div class="modal-time-stats-grid">
-                <div class="stat-card"><span class="label">POS</span><span id="modal-pos" class="value">--</span></div>
-                <div class="stat-card"><span class="label">PTS</span><span id="modal-pts" class="value">--</span></div>
-                <div class="stat-card"><span class="label">JOGOS</span><span id="modal-jogos" class="value">--</span></div>
-                <div class="stat-card"><span class="label">SALDO</span><span id="modal-sg" class="value">--</span></div>
+            <div class="modal-time-stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
+                <div class="stat-card" style="background: #111; padding: 10px; border-radius: 8px;">
+                    <span style="font-size: 0.5rem; color: #555; display: block;">POSIÇÃO</span>
+                    <span id="modal-pos" style="font-family: 'Orbitron';">--</span>
+                </div>
+                <div class="stat-card" style="background: #111; padding: 10px; border-radius: 8px;">
+                    <span style="font-size: 0.5rem; color: #555; display: block;">PONTOS</span>
+                    <span id="modal-pts" style="font-family: 'Orbitron'; color: var(--neon-blue);">--</span>
+                </div>
             </div>
 
-            <div class="forma-recente-container">
-                <div id="modal-forma-list" class="forma-flex"></div>
-            </div>
-
-            <button class="btn-neural-fechar" onclick="fecharModalTime()">VOLTAR</button>
+            <button class="btn-neural-fechar" onclick="fecharModalTime()" style="width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #666; cursor: pointer; border-radius: 8px;">FECHAR</button>
         </div>
     </div>
 
