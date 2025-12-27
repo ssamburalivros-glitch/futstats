@@ -35,33 +35,37 @@ async function carregarAoVivo() {
         const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
         const container = document.getElementById('lista-ao-vivo');
         
-        if (error || !data || data.length === 0) {
-            if (container) container.innerHTML = "<p style='color:#444; padding:20px; font-size:0.7rem;'>SEM JOGOS NO RADAR...</p>";
+        if (error) {
+            console.error("Erro na consulta Supabase:", error);
             return;
         }
 
-        // --- MODO DETETIVE: Vê isto no F12 do navegador ---
-        console.log("LOGOS RECEBIDOS DO BANCO:", data.map(j => ({casa: j.time_casa, logo: j.escudo_casa})));
+        console.log("Dados recebidos do Ao Vivo:", data); // Olhe isso no F12!
+
+        if (!data || data.length === 0) {
+            container.innerHTML = "<p style='color:#444; padding:20px;'>Sem jogos ativos.</p>";
+            return;
+        }
 
         container.innerHTML = data.map(jogo => {
-            // Verifica se o link é válido. Se não for, usa um ícone de futebol genérico
-            const imgC = (jogo.escudo_casa && jogo.escudo_casa.startsWith('http')) ? jogo.escudo_casa : "https://cdn-icons-png.flaticon.com/512/53/53244.png";
-            const imgF = (jogo.escudo_fora && jogo.escudo_fora.startsWith('http')) ? jogo.escudo_fora : "https://cdn-icons-png.flaticon.com/512/53/53244.png";
+            // AJUSTE AQUI: Verifique se os nomes das colunas batem com o seu Supabase
+            const logoCasa = jogo.escudo_casa || jogo.logo_casa || ESCUDO_PADRAO;
+            const logoFora = jogo.escudo_fora || jogo.logo_fora || ESCUDO_PADRAO;
 
             return `
                 <div class="card-hero">
                     <div style="font-size:0.55rem; color:var(--neon-blue); font-weight:bold;">${jogo.tempo || 'LIVE'}</div>
                     <div class="hero-score">${jogo.placar_casa ?? 0} - ${jogo.placar_fora ?? 0}</div>
                     <div class="team-v">
-                        <img src="${imgC}" class="img-mini" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53244.png'">
-                        <span style="opacity:0.2; font-size:0.5rem;">VS</span>
-                        <img src="${imgF}" class="img-mini" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53244.png'">
+                        <img src="${logoCasa}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
+                        <span style="opacity:0.2; font-size:0.6rem;">VS</span>
+                        <img src="${logoFora}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
                     </div>
-                    <div style="font-size:0.5rem; color:#888; text-transform:uppercase;">${(jogo.time_casa || '---').substring(0,10)}</div>
+                    <div style="font-size:0.5rem; color:#666;">${(jogo.time_casa || '---').substring(0,10)}</div>
                 </div>
             `;
         }).join('');
-    } catch (e) { console.error("Erro ao carregar logos:", e); }
+    } catch (e) { console.error("Erro crítico ao carregar Ao Vivo:", e); }
 }
 async function carregarTabela(liga) {
     const { data } = await _supabase.from('tabelas_ligas').select('*').eq('liga', liga).order('posicao');
