@@ -174,3 +174,26 @@ td { padding: 10px; border-bottom: 1px solid #0a0a0a; font-size: 0.9rem; }
     .site-logo-img { height: 18px !important; }
     .logo { font-size: 1rem; }
 }
+/* Estilo para os escudos pequenos do Ao Vivo */
+.img-mini {
+    width: 22px !important;
+    height: 22px !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+    display: inline-block;
+}
+
+.team-v {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+/* Garante que o card não estique se o nome do time for longo */
+.card-hero {
+    overflow: hidden;
+    flex-direction: column;
+    align-items: center;
+}
