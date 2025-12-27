@@ -198,23 +198,37 @@ function processarDuelo() {
 // --- 5. JOGOS AO VIVO ---
 async function carregarAoVivo() {
     try {
-        const { data } = await _supabase.from('jogos_ao_vivo').select('*');
+        const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
         const container = document.getElementById('lista-ao-vivo');
-        if (!data || data.length === 0) {
-            container.innerHTML = "<p style='padding:20px; color:#333; font-size:0.8rem;'>SEM JOGOS NO RADAR NO MOMENTO</p>";
+        
+        if (error || !data || data.length === 0) {
+            container.innerHTML = "<p style='color:#444; padding:20px;'>Nenhum jogo ativo.</p>";
             return;
         }
-        
-        container.innerHTML = data.map(jogo => `
-            <div class="card-hero">
-                <div class="hero-score">${jogo.placar_casa} - ${jogo.placar_fora}</div>
-                <div class="team-v">
-                    <img src="${jogo.escudo_casa || ''}" onerror="this.src='https://via.placeholder.com/20'">
-                    <span>vs</span>
-                    <img src="${jogo.escudo_fora || ''}" onerror="this.src='https://via.placeholder.com/20'">
+
+        container.innerHTML = data.map(jogo => {
+            // Se as colunas no seu banco tiverem nomes diferentes, ajuste aqui:
+            const casa = jogo.time_casa || jogo.equipe_casa || "---";
+            const fora = jogo.time_fora || jogo.equipe_fora || "---";
+            const placarC = jogo.placar_casa ?? 0;
+            const placarF = jogo.placar_fora ?? 0;
+            const imgC = jogo.escudo_casa || '';
+            const imgF = jogo.escudo_fora || '';
+
+            return `
+                <div class="card-hero">
+                    <div style="font-size:0.6rem; color:#666; margin-bottom:5px;">${jogo.tempo || 'AO VIVO'}</div>
+                    <div class="hero-score">${placarC} - ${placarF}</div>
+                    <div class="team-v" style="display:flex; justify-content:center; gap:10px; align-items:center;">
+                        <img src="${imgC}" onerror="this.src='https://via.placeholder.com/20'">
+                        <span style="font-size:0.7rem;">vs</span>
+                        <img src="${imgF}" onerror="this.src='https://via.placeholder.com/20'">
+                    </div>
+                    <div style="font-size:0.5rem; color:#aaa; margin-top:5px; white-space:nowrap; overflow:hidden;">
+                        ${casa} x ${fora}
+                    </div>
                 </div>
-                <div style="font-size:0.6rem; color:var(--neon-blue); margin-top:5px; font-weight:bold;">${jogo.tempo || 'AO VIVO'}</div>
-            </div>
-        `).join('');
-    } catch (e) { console.error("Erro Live:", e); }
+            `;
+        }).join('');
+    } catch (e) { console.error("Erro no Live:", e); }
 }
