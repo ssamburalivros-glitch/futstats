@@ -9,9 +9,17 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# Dicionário atualizado com as novas ligas (FR, SA, NL)
 LIGAS = {
-    "BR": "bra.1", "PL": "eng.1", "ES": "esp.1",
-    "DE": "ger.1", "IT": "ita.1", "PT": "por.1"
+    "BR": "bra.1", 
+    "PL": "eng.1", 
+    "ES": "esp.1",
+    "DE": "ger.1", 
+    "IT": "ita.1", 
+    "PT": "por.1",
+    "FR": "fra.1",    # França - Ligue 1
+    "SA": "sau.1",    # Arábia Saudita - Pro League
+    "NL": "ned.1"     # Holanda - Eredivisie
 }
 
 def pegar_forma_detalhada(espn_id, team_id):
@@ -39,6 +47,8 @@ def capturar_liga(liga_id, espn_id):
     url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/standings"
     try:
         data = requests.get(url, timeout=20).json()
+        # A API da ESPN pode variar a estrutura dependendo da liga, 
+        # essa lógica abaixo cobre a maioria das ligas principais
         entries = data['children'][0]['standings']['entries']
         lista = []
         
@@ -88,13 +98,16 @@ def main():
     for lid, eid in LIGAS.items():
         res = capturar_liga(lid, eid)
         if res: dados_totais.extend(res)
-        time.sleep(1)
+        time.sleep(1) # Delay para evitar bloqueio por excesso de requisições
 
     if dados_totais:
-        # Limpa e insere no Supabase
-        supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
-        supabase.table("tabelas_ligas").insert(dados_totais).execute()
-        print(f"🚀 {len(dados_totais)} times atualizados com sucesso!")
+        # Limpa os dados antigos e insere os novos no Supabase
+        try:
+            supabase.table("tabelas_ligas").delete().neq("liga", "OFF").execute()
+            supabase.table("tabelas_ligas").insert(dados_totais).execute()
+            print(f"🚀 Sucesso! {len(dados_totais)} times de {len(LIGAS)} ligas atualizados!")
+        except Exception as e:
+            print(f"❌ Erro ao subir para o Supabase: {e}")
 
 if __name__ == "__main__":
     main()
