@@ -451,3 +451,25 @@ td {
     text-align: center;
     letter-spacing: 2px;
 }
+/* Garante que os logos tenham tamanho e apareçam */
+.team-v img {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px;
+    min-height: 30px;
+    display: block !important;
+    visibility: visible !important;
+    object-fit: contain;
+    background-color: rgba(255, 255, 255, 0.1); /* Fundo cinza claro para teste */
+    border-radius: 50%;
+    margin: 2px;
+}
+
+/* Container dos logos */
+.team-v {
+    display: flex !important;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    min-height: 35px;
+}
