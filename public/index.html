@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Seus Dados Atualizados </title>
+    <title>FutStats | Seus Dados Atualizados</title>
     
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
@@ -91,13 +91,11 @@
     <div id="modal-time" class="modal-time-overlay" style="display: none;">
         <div class="modal-time-content">
             <span class="close-btn" onclick="fecharModalTime()" style="cursor: pointer; float: right; font-size: 1.5rem;">&times;</span>
-            
             <div class="modal-time-header" style="text-align: center;">
                 <img id="modal-escudo" src="" class="escudo-modal" style="width: 60px; height: 60px; object-fit: contain;">
                 <h2 id="modal-nome-time" style="font-family: 'Orbitron'; font-size: 1.2rem; margin: 10px 0;">--</h2>
                 <div id="modal-liga-badge" style="font-size: 0.6rem; color: var(--neon-blue); border: 1px solid #222; display: inline-block; padding: 2px 10px; border-radius: 20px;">LIGA</div>
             </div>
-
             <div class="modal-time-stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
                 <div class="stat-card" style="background: #111; padding: 10px; border-radius: 8px;">
                     <span style="font-size: 0.5rem; color: #555; display: block;">POSIÇÃO</span>
@@ -108,8 +106,41 @@
                     <span id="modal-pts" style="font-family: 'Orbitron'; color: var(--neon-blue);">--</span>
                 </div>
             </div>
-
             <button class="btn-neural-fechar" onclick="fecharModalTime()" style="width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #666; cursor: pointer; border-radius: 8px;">FECHAR</button>
+        </div>
+    </div>
+
+    <div id="modal-live" class="modal-time-overlay" style="display: none;">
+        <div class="modal-time-content" style="max-width: 500px; border: 1px solid #00d4ff33;">
+            <span class="close-btn" onclick="fecharModalLive()" style="cursor: pointer; float: right; font-size: 1.5rem;">&times;</span>
+            
+            <div style="text-align: center; margin-bottom: 15px;">
+                <h2 id="live-teams" style="font-family: 'Orbitron'; font-size: 1rem; color: #fff;">--</h2>
+                <p id="live-chutes" style="font-size: 0.65rem; color: var(--neon-blue); margin-top: 5px; letter-spacing: 1px;"></p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.55rem; color: #555; margin-bottom: 5px; font-family: 'Orbitron';">
+                    <span>POSSE DE BOLA</span>
+                </div>
+                <div style="display: flex; height: 10px; background: #0a0a0a; border-radius: 5px; overflow: hidden; border: 1px solid #222;">
+                    <div id="live-posse-casa" style="width: 50%; background: var(--neon-blue); transition: width 0.8s ease; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; color: #000; font-weight: bold;"></div>
+                    <div id="live-posse-fora" style="width: 50%; background: #222; transition: width 0.8s ease; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; color: #fff; font-weight: bold;"></div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-top: 1px solid #111; padding-top: 15px;">
+                <div id="list-home-container">
+                    <h4 id="nome-casa-modal" style="font-size: 0.6rem; color: var(--neon-blue); margin-bottom: 10px; font-family: 'Orbitron';">CASA</h4>
+                    <div id="list-home" style="font-size: 0.7rem; color: #888; line-height: 1.8;"></div>
+                </div>
+                <div id="list-away-container" style="text-align: right;">
+                    <h4 id="nome-fora-modal" style="font-size: 0.6rem; color: #ff3b3b; margin-bottom: 10px; font-family: 'Orbitron';">FORA</h4>
+                    <div id="list-away" style="font-size: 0.7rem; color: #888; line-height: 1.8;"></div>
+                </div>
+            </div>
+
+            <button class="btn-neural-fechar" onclick="fecharModalLive()" style="width: 100%; margin-top: 20px; padding: 12px; background: #000; border: 1px solid #222; color: #666; cursor: pointer; border-radius: 8px;">FECHAR</button>
         </div>
     </div>
 
