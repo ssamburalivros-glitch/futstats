@@ -17,13 +17,11 @@ def processar_jogo(id_espn):
     """Puxa estatísticas e escalações da ESPN e salva no Supabase"""
     print(f"🔍 Buscando detalhes para o jogo: {id_espn}")
     
-    # Endpoint de Sumário (Stats + Lineups)
     url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/all/summary?event={id_espn}"
     
     try:
         res = requests.get(url, timeout=15).json()
         
-        # Iniciar dados padrão
         posse_casa, posse_fora = 50, 50
         chutes_casa, chutes_fora = 0, 0
         lineup_casa, lineup_fora = [], []
@@ -33,7 +31,10 @@ def processar_jogo(id_espn):
             teams = res['boxscore']['teams']
             for i, t in enumerate(teams):
                 for stat in t.get('statistics', []):
-                    val = int(stat.get('displayValue', 0))
+                    display_val = stat.get('displayValue', '0')
+                    # Remove símbolos como '%' para converter em número
+                    val = int(''.join(filter(str.isdigit, display_val)) or 0)
+                    
                     if stat['name'] == 'possessionPct':
                         if i == 0: posse_casa = val
                         else: posse_fora = val
@@ -46,7 +47,6 @@ def processar_jogo(id_espn):
             for i, roster in enumerate(res['rosters']):
                 players = []
                 for entry in roster.get('roster', []):
-                    # Pegamos apenas os titulares (starters)
                     if entry.get('name') == 'starters':
                         for athlete in entry.get('athletes', []):
                             players.append(athlete.get('displayName'))
@@ -75,11 +75,24 @@ def main():
     print("📡 Iniciando Crawler de Detalhes...")
     
     try:
-        # Tenta buscar os IDs dos jogos ao vivo. 
-        # Se sua coluna no banco se chamar 'id', mude 'id_espn' para 'id' abaixo.
+        # Busca IDs da tabela jogos_ao_vivo
         res = supabase.table("jogos_ao_vivo").select("id_espn").execute()
         jogos = res.data
 
         if not jogos:
             print("💤 Nenhum jogo ao vivo encontrado para processar detalhes.")
             return
+
+        print(f"📊 Processando {len(jogos)} jogos...")
+        for j in jogos:
+            id_match = j.get('id_espn')
+            if id_match:
+                processar_jogo(id_match)
+                time.sleep(1)
+                
+    except Exception as e:
+        print(f"❌ Erro ao ler tabela jogos_ao_vivo: {e}")
+        print("💡 DICA: Certifique-se de que a coluna 'id_espn' existe.")
+
+if __name__ == "__main__":
+    main()
