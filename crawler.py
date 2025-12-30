@@ -3,10 +3,8 @@ import time
 import requests
 from supabase import create_client
 
-# --- CONFIGURAÇÃO ---
-SUPABASE_URL = "SEU_URL"
-SUPABASE_KEY = "SUA_KEY"
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 LIGAS = {
     "BR": "bra.1", "PL": "eng.1", "ES": "esp.1",
