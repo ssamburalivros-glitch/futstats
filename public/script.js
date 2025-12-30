@@ -64,27 +64,16 @@ async function carregarAoVivo() {
             const casaNome = jogo.time_casa || "Time A";
             const foraNome = jogo.time_fora || "Time B";
             
-            // FUNÇÃO PARA LIMPAR E VALIDAR URL DO ESCUDO
-            const formatarLogo = (url) => {
-                if (!url || url === "" || url === "null") return ESCUDO_PADRAO;
-                // Se o link começar com //, adiciona https:
-                if (url.startsWith('//')) return `https:${url}`;
-                // Se não começar com http, usa o padrão (link quebrado vindo do crawler)
-                if (!url.startsWith('http')) return ESCUDO_PADRAO;
-                // Força HTTPS
-                return url.replace("http://", "https://");
-            };
+            // Ajustado para os novos nomes de coluna: logo_casa e logo_fora
+            const imgC = (jogo.logo_casa && jogo.logo_casa !== "null") ? jogo.logo_casa : ESCUDO_PADRAO;
+            const imgF = (jogo.logo_fora && jogo.logo_fora !== "null") ? jogo.logo_fora : ESCUDO_PADRAO;
 
-            const imgC = formatarLogo(jogo.escudo_casa);
-            const imgF = formatarLogo(jogo.escudo_fora);
-
+            // O ID agora é jogo.id (conforme o novo crawler)
             return `
-                <div class="card-hero" onclick="abrirDetalhesAoVivo('${jogo.id_espn}', '${casaNome}', '${foraNome}')">
-                    <div class="tempo-tag">${jogo.tempo || "LIVE"}</div>
+                <div class="card-hero" onclick="abrirDetalhesAoVivo('${jogo.id}', '${casaNome}', '${foraNome}')">
+                    <div class="tempo-tag">${jogo.status || "LIVE"}</div>
                     <div class="hero-score">
-                        <span>${jogo.placar_casa ?? 0}</span>
-                        <span class="divider">-</span>
-                        <span>${jogo.placar_fora ?? 0}</span>
+                        <span>${jogo.placar || "0 - 0"}</span>
                     </div>
                     <div class="team-v">
                         <img src="${imgC}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'" alt="casa">
@@ -99,39 +88,65 @@ async function carregarAoVivo() {
     }
 }
 
-async function abrirDetalhesAoVivo(idEspn, casa, fora) {
+async function abrirDetalhesAoVivo(idJogo, casa, fora) {
     const modal = document.getElementById('modal-live');
     if (!modal) return;
 
     modal.style.display = 'flex';
     document.getElementById('live-teams').innerText = `${casa} x ${fora}`;
-    document.getElementById('list-home').innerHTML = "Carregando...";
-    document.getElementById('list-away').innerHTML = "";
+    
+    // Reset de carregamento
+    const listHome = document.getElementById('list-home');
+    const listAway = document.getElementById('list-away');
+    listHome.innerHTML = "Carregando detalhes...";
+    listAway.innerHTML = "";
 
     try {
-        const { data, error } = await _supabase.from('detalhes_partida').select('*').eq('jogo_id', idEspn).single();
+        // Busca os detalhes usando o jogo_id
+        const { data, error } = await _supabase
+            .from('detalhes_partida')
+            .select('*')
+            .eq('jogo_id', idJogo)
+            .single();
 
         if (error || !data) {
-            document.getElementById('list-home').innerHTML = "Estatísticas indisponíveis.";
+            listHome.innerHTML = "Estatísticas ainda não disponíveis para este jogo.";
             return;
         }
 
-        document.getElementById('live-posse-casa').style.width = `${data.posse_casa || 50}%`;
-        document.getElementById('live-posse-fora').style.width = `${data.posse_fora || 50}%`;
+        // 1. ATUALIZAR BARRAS DE POSSE E CHUTES
+        // Certifique-se de que esses IDs existam no seu HTML
+        const barraCasa = document.getElementById('live-posse-casa');
+        const barraFora = document.getElementById('live-posse-fora');
+        
+        if (barraCasa && barraFora) {
+            const pCasa = data.posse_casa || 50;
+            const pFora = data.posse_fora || 50;
+            barraCasa.style.width = `${pCasa}%`;
+            barraCasa.innerText = `${pCasa}%`;
+            barraFora.style.width = `${pFora}%`;
+            barraFora.innerText = `${pFora}%`;
+        }
 
-        const listaCasa = Array.isArray(data.escalacao_casa) ? data.escalacao_casa : [];
-        const listaFora = Array.isArray(data.escalacao_fora) ? data.escalacao_fora : [];
+        // Exibir Chutes (se você tiver esses elementos no HTML)
+        const chutesEl = document.getElementById('live-chutes');
+        if (chutesEl) {
+            chutesEl.innerText = `Finalizações: ${data.chutes_casa} - ${data.chutes_fora}`;
+        }
 
-        document.getElementById('list-home').innerHTML = `<strong>${casa}</strong><br>` + listaCasa.join('<br>');
-        document.getElementById('list-away').innerHTML = `<strong>${fora}</strong><br>` + listaFora.join('<br>');
+        // 2. FORMATAR ESCALAÇÕES (Tratando como Array de Objetos)
+        const formatarEscalacao = (lista) => {
+            if (!lista || lista.length === 0) return "Não disponível";
+            return lista.map(p => `<span><strong>${p.p}</strong> - ${p.n}</span>`).join('<br>');
+        };
+
+        listHome.innerHTML = `<h3>${casa}</h3>` + formatarEscalacao(data.escalacao_casa);
+        listAway.innerHTML = `<h3>${fora}</h3>` + formatarEscalacao(data.escalacao_fora);
+
     } catch (e) {
-        console.error(e);
+        console.error("Erro ao abrir modal:", e);
+        listHome.innerHTML = "Erro ao carregar dados.";
     }
-}
-
-function fecharModalLive() {
-    const modal = document.getElementById('modal-live');
-    if (modal) modal.style.display = 'none';
 }
 
 async function carregarTabela(liga) {
