@@ -46,44 +46,49 @@ async function carregarIA() {
     }
 }
 
+// Função para carregar os cards de jogos ao vivo
 async function carregarAoVivo() {
+    const { data } = await _supabase.from('jogos_ao_vivo').select('*');
     const container = document.getElementById('lista-ao-vivo');
-    if (!container) return;
+    if (!container || !data) return;
 
-    try {
-        const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-            container.innerHTML = '<p style="color:#888; padding:20px; width:100%; text-align:center;">Aguardando jogos...</p>';
-            return;
-        }
-
-        container.innerHTML = data.map(j => {
-    return `
-        <div class="card-hero">
-            <div class="hero-teams">
-                <div class="hero-team-box">
-                    <img src="${j.logo_casa || ESCUDO_PADRAO}" class="hero-logo" onerror="this.src='${ESCUDO_PADRAO}'">
-                    <span class="hero-name">${j.time_casa}</span>
-                </div>
-
-                <div class="hero-score">${j.placar || '0-0'}</div>
-
-                <div class="hero-team-box">
-                    <img src="${j.logo_fora || ESCUDO_PADRAO}" class="hero-logo" onerror="this.src='${ESCUDO_PADRAO}'">
-                    <span class="hero-name">${j.time_fora}</span>
-                </div>
-            </div>
-            
-            <div class="hero-status">
-                <span class="live-dot"></span> ${j.status || 'AO VIVO'}
+    container.innerHTML = data.map(jogo => `
+        <div class="card-hero" onclick="abrirDetalhesAoVivo('${jogo.id}', '${jogo.time_casa}', '${jogo.time_fora}')">
+            <div class="tempo-match">${jogo.tempo || 'LIVE'}</div>
+            <div class="hero-score">${jogo.placar_casa} - ${jogo.placar_fora}</div>
+            <div class="team-v">
+                <img src="${jogo.escudo_casa || ESCUDO_PADRAO}" class="img-mini">
+                <img src="${jogo.escudo_fora || ESCUDO_PADRAO}" class="img-mini">
             </div>
         </div>
-    `;
-}).join('');
-    } catch (e) {
-        console.error("Erro ao vivo:", e);
+    `).join('');
+}
+
+// Função para abrir o Modal de Estatísticas
+async function abrirDetalhesAoVivo(jogoId, casa, fora) {
+    const modal = document.getElementById('modal-live');
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    document.getElementById('live-teams').innerText = `${casa} x ${fora}`;
+
+    // Busca as estatísticas que o seu NOVO crawler vai salvar
+    const { data, error } = await _supabase
+        .from('detalhes_partida')
+        .select('*')
+        .eq('jogo_id', jogoId)
+        .single();
+
+    if (data) {
+        // Atualiza as barras de posse de bola
+        document.getElementById('live-posse-casa').style.width = `${data.posse_casa}%`;
+        document.getElementById('live-posse-fora').style.width = `${data.posse_fora}%`;
+        
+        // Atualiza escalações (JSON)
+        document.getElementById('list-home').innerHTML = `<b>${casa}</b><br>` + data.escalacao_casa.join('<br>');
+        document.getElementById('list-away').innerHTML = `<b>${fora}</b><br>` + data.escalacao_fora.join('<br>');
+    } else {
+        document.getElementById('list-home').innerText = "Estatísticas em processamento...";
     }
 }
 async function carregarTabela(liga) {
