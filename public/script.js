@@ -63,31 +63,39 @@ async function carregarAoVivo() {
         container.innerHTML = data.map(jogo => {
             const casaNome = jogo.time_casa || "Time A";
             const foraNome = jogo.time_fora || "Time B";
-            const casaPlacar = jogo.placar_casa ?? 0;
-            const foraPlacar = jogo.placar_fora ?? 0;
-            const tempoPartida = jogo.tempo || "LIVE";
             
-            const imgC = (jogo.escudo_casa && jogo.escudo_casa.includes('http')) ? jogo.escudo_casa : ESCUDO_PADRAO;
-            const imgF = (jogo.escudo_fora && jogo.escudo_fora.includes('http')) ? jogo.escudo_fora : ESCUDO_PADRAO;
+            // FUNÇÃO PARA LIMPAR E VALIDAR URL DO ESCUDO
+            const formatarLogo = (url) => {
+                if (!url || url === "" || url === "null") return ESCUDO_PADRAO;
+                // Se o link começar com //, adiciona https:
+                if (url.startsWith('//')) return `https:${url}`;
+                // Se não começar com http, usa o padrão (link quebrado vindo do crawler)
+                if (!url.startsWith('http')) return ESCUDO_PADRAO;
+                // Força HTTPS
+                return url.replace("http://", "https://");
+            };
+
+            const imgC = formatarLogo(jogo.escudo_casa);
+            const imgF = formatarLogo(jogo.escudo_fora);
 
             return `
                 <div class="card-hero" onclick="abrirDetalhesAoVivo('${jogo.id_espn}', '${casaNome}', '${foraNome}')">
-                    <div class="tempo-tag">${tempoPartida}</div>
+                    <div class="tempo-tag">${jogo.tempo || "LIVE"}</div>
                     <div class="hero-score">
-                        <span>${casaPlacar}</span>
+                        <span>${jogo.placar_casa ?? 0}</span>
                         <span class="divider">-</span>
-                        <span>${foraPlacar}</span>
+                        <span>${jogo.placar_fora ?? 0}</span>
                     </div>
                     <div class="team-v">
-                        <img src="${imgC}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
-                        <img src="${imgF}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'">
+                        <img src="${imgC}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'" alt="casa">
+                        <img src="${imgF}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'" alt="fora">
                     </div>
                     <div class="team-names-mini">${casaNome.substring(0, 10)} vs ${foraNome.substring(0, 10)}</div>
                 </div>
             `;
         }).join('');
     } catch (e) {
-        console.error("Erro ao carregar Live:", e);
+        console.error("Erro ao carregar logos live:", e);
     }
 }
 
