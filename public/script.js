@@ -47,50 +47,106 @@ async function carregarIA() {
 }
 
 // Função para carregar os cards de jogos ao vivo
+// --- CONFIGURAÇÃO ---
+const ESCUDO_PADRAO = "https://cdn-icons-png.flaticon.com/512/53/53244.png";
+
+// --- FUNÇÃO PRINCIPAL: CARREGAR JOGOS AO VIVO ---
 async function carregarAoVivo() {
-    const { data } = await _supabase.from('jogos_ao_vivo').select('*');
-    const container = document.getElementById('lista-ao-vivo');
-    if (!container || !data) return;
+    try {
+        // Buscamos os dados da tabela 'jogos_ao_vivo'
+        const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
+        const container = document.getElementById('lista-ao-vivo');
 
-    container.innerHTML = data.map(jogo => `
-        <div class="card-hero" onclick="abrirDetalhesAoVivo('${jogo.id}', '${jogo.time_casa}', '${jogo.time_fora}')">
-            <div class="tempo-match">${jogo.tempo || 'LIVE'}</div>
-            <div class="hero-score">${jogo.placar_casa} - ${jogo.placar_fora}</div>
-            <div class="team-v">
-                <img src="${jogo.escudo_casa || ESCUDO_PADRAO}" class="img-mini">
-                <img src="${jogo.escudo_fora || ESCUDO_PADRAO}" class="img-mini">
-            </div>
-        </div>
-    `).join('');
-}
+        if (error) throw error;
+        if (!container) return;
 
-// Função para abrir o Modal de Estatísticas
-async function abrirDetalhesAoVivo(jogoId, casa, fora) {
-    const modal = document.getElementById('modal-live');
-    if (!modal) return;
-    
-    modal.style.display = 'flex';
-    document.getElementById('live-teams').innerText = `${casa} x ${fora}`;
+        if (!data || data.length === 0) {
+            container.innerHTML = "<p class='status-msg'>BUSCANDO TRANSMISSÕES...</p>";
+            return;
+        }
 
-    // Busca as estatísticas que o seu NOVO crawler vai salvar
-    const { data, error } = await _supabase
-        .from('detalhes_partida')
-        .select('*')
-        .eq('jogo_id', jogoId)
-        .single();
+        // Mapeamento dos dados para o HTML
+        container.innerHTML = data.map(jogo => {
+            // SEGURANÇA: Se o valor for null/undefined, vira 0 ou texto padrão
+            const casaNome = jogo.time_casa || "Time A";
+            const foraNome = jogo.time_fora || "Time B";
+            const casaPlacar = jogo.placar_casa ?? 0;
+            const foraPlacar = jogo.placar_fora ?? 0;
+            const tempoPartida = jogo.tempo || "LIVE";
+            
+            // Tratamento de imagens
+            const imgC = (jogo.escudo_casa && jogo.escudo_casa.includes('http')) ? jogo.escudo_casa : ESCUDO_PADRAO;
+            const imgF = (jogo.escudo_fora && jogo.escudo_fora.includes('http')) ? jogo.escudo_fora : ESCUDO_PADRAO;
 
-    if (data) {
-        // Atualiza as barras de posse de bola
-        document.getElementById('live-posse-casa').style.width = `${data.posse_casa}%`;
-        document.getElementById('live-posse-fora').style.width = `${data.posse_fora}%`;
-        
-        // Atualiza escalações (JSON)
-        document.getElementById('list-home').innerHTML = `<b>${casa}</b><br>` + data.escalacao_casa.join('<br>');
-        document.getElementById('list-away').innerHTML = `<b>${fora}</b><br>` + data.escalacao_fora.join('<br>');
-    } else {
-        document.getElementById('list-home').innerText = "Estatísticas em processamento...";
+            return `
+                <div class="card-hero" onclick="abrirDetalhesAoVivo('${jogo.id_espn}', '${casaNome}', '${foraNome}')">
+                    <div class="tempo-tag">${tempoPartida}</div>
+                    <div class="hero-score">
+                        <span>${casaPlacar}</span>
+                        <span class="divider">-</span>
+                        <span>${foraPlacar}</span>
+                    </div>
+                    <div class="team-v">
+                        <img src="${imgC}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'" alt="${casaNome}">
+                        <img src="${imgF}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'" alt="${foraNome}">
+                    </div>
+                    <div class="team-names-mini">${casaNome.substring(0, 10)} vs ${foraNome.substring(0, 10)}</div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (e) {
+        console.error("Erro ao renderizar jogos ao vivo:", e);
     }
 }
+
+// --- FUNÇÃO: ABRIR DETALHES (MODAL) ---
+async function abrirDetalhesAoVivo(idEspn, casa, fora) {
+    const modal = document.getElementById('modal-live');
+    if (!modal) return;
+
+    // Mostra o modal imediatamente com um "loading"
+    modal.style.display = 'flex';
+    document.getElementById('live-teams').innerText = `${casa} x ${fora}`;
+    
+    // Limpa dados anteriores
+    document.getElementById('list-home').innerHTML = "Carregando escalação...";
+    document.getElementById('list-away').innerHTML = "";
+
+    try {
+        const { data, error } = await _supabase
+            .from('detalhes_partida')
+            .select('*')
+            .eq('jogo_id', idEspn)
+            .single();
+
+        if (error || !data) {
+            document.getElementById('list-home').innerHTML = "Estatísticas ainda não disponíveis para este jogo.";
+            return;
+        }
+
+        // Atualiza Barras de Posse
+        const posseC = data.posse_casa || 50;
+        const posseF = data.posse_fora || 50;
+        document.getElementById('live-posse-casa').style.width = `${posseC}%`;
+        document.getElementById('live-posse-fora').style.width = `${posseF}%`;
+
+        // Atualiza Escalações (Trabalhando com JSONB)
+        const listaCasa = Array.isArray(data.escalacao_casa) ? data.escalacao_casa : [];
+        const listaFora = Array.isArray(data.escalacao_fora) ? data.escalacao_fora : [];
+
+        document.getElementById('list-home').innerHTML = `<strong>${casa}</strong><br>` + listaCasa.join('<br>');
+        document.getElementById('list-away').innerHTML = `<strong>${fora}</strong><br>` + listaFora.join('<br>');
+
+    } catch (e) {
+        console.error("Erro ao buscar detalhes:", e);
+    }
+}
+
+function fecharModalLive() {
+    document.getElementById('modal-live').style.display = 'none';
+}
+
 async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
     if (!corpo) return;
