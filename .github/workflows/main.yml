@@ -2,7 +2,7 @@ name: Atualizar Dados FutStats
 
 on:
   schedule:
-    - cron: '*/2 * * * *' # Roda a cada 10 minutos para o "Ao Vivo"
+    - cron: '*/2 * * * *' # Roda a cada 2 minutos para manter o tempo real
   workflow_dispatch: 
 
 jobs:
@@ -29,10 +29,16 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python crawler_ao_vivo.py
 
+      - name: 🏃‍♂️ Executar Crawler de Detalhes (Lineups e Stats)
+        # Este roda sempre junto com o ao vivo para atualizar posse de bola e jogadores
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python crawler_details.py
+
       - name: 📊 Executar Crawler de Tabelas e IA (Uma vez por hora)
-        # Esta lógica faz o Crawler de tabelas e a IA rodarem apenas no minuto 0 de cada hora
-        # Ex: 13:00 roda, 13:10 não, 13:20 não...
-        if: github.event_name == 'workflow_dispatch' || contains(github.event.schedule, '0')
+        # Mantém a lógica de rodar apenas no minuto 0 ou manualmente
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 * * * *'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
