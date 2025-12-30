@@ -57,19 +57,24 @@ def processar_jogo(id_espn):
         # C. SALVAR NO SUPABASE
         dados = {
             "jogo_id": str(id_espn),
-            "posse_casa": posse_casa,
-            "posse_fora": posse_fora,
-            "chutes_casa": chutes_casa,
-            "chutes_fora": chutes_fora,
+            "posse_casa": int(posse_casa),
+            "posse_fora": int(posse_fora),
+            "chutes_casa": int(chutes_casa),
+            "chutes_fora": int(chutes_fora),
             "escalacao_casa": lineup_casa,
             "escalacao_fora": lineup_fora
         }
 
-        supabase.table("detalhes_partida").upsert(dados, on_conflict="jogo_id").execute()
-        print(f"✅ Sucesso: Jogo {id_espn} atualizado.")
+        # O segredo está aqui: capturar o retorno do Supabase
+        resultado = supabase.table("detalhes_partida").upsert(dados).execute()
+        
+        if len(resultado.data) > 0:
+            print(f"✅ GRAVADO NO BANCO: Jogo {id_espn}")
+        else:
+            print(f"❌ FALHA SILENCIOSA: O banco aceitou o comando mas não criou a linha para {id_espn}")
 
     except Exception as e:
-        print(f"⚠️ Erro ao processar ID {id_espn}: {e}")
+        print(f"⚠️ ERRO CRÍTICO AO SALVAR: {e}")
 
 def main():
     print("📡 Iniciando Crawler de Detalhes...")
