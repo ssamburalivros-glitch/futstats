@@ -180,21 +180,11 @@ function abrirModalTime(time) {
     const modal = document.getElementById('modal-time');
     if (!modal) return;
 
-    const campos = {
-        'modal-nome-time': time.time,
-        'modal-pos': (time.posicao || '0') + "º",
-        'modal-pts': time.pontos || '0',
-        'modal-v': time.vitorias || '0',
-        'modal-e': time.empates || '0',
-        'modal-d': time.derrotas || '0',
-        'modal-sg': time.sg || '0'
-    };
-
-    for (let id in campos) {
-        const el = document.getElementById(id);
-        if (el) el.innerText = campos[id];
-    }
-
+    // Preenche os dados
+    document.getElementById('modal-nome-time').innerText = time.time;
+    document.getElementById('modal-pos').innerText = (time.posicao || '0') + "º";
+    document.getElementById('modal-pts').innerText = time.pontos || '0';
+    
     const img = document.getElementById('modal-escudo');
     if (img) img.src = time.escudo || ESCUDO_PADRAO;
 
@@ -204,6 +194,62 @@ function abrirModalTime(time) {
 function fecharModalTime() {
     const modal = document.getElementById('modal-time');
     if (modal) modal.style.display = 'none';
+}
+
+// 3. Funções para o Modal Ao Vivo (Crawler ESPN)
+async function abrirDetalhesAoVivo(idJogo, casa, fora) {
+    const modal = document.getElementById('modal-live');
+    if (!modal) return;
+
+    // Mostra o modal e limpa dados antigos
+    modal.style.display = 'flex';
+    document.getElementById('live-teams').innerText = `${casa} x ${fora}`;
+    document.getElementById('list-home').innerHTML = "Buscando escalações...";
+    document.getElementById('list-away').innerHTML = "";
+    document.getElementById('live-chutes').innerText = "";
+
+    try {
+        const { data, error } = await _supabase
+            .from('detalhes_partida')
+            .select('*')
+            .eq('jogo_id', idJogo)
+            .single();
+
+        if (error || !data) {
+            document.getElementById('list-home').innerHTML = "Estatísticas em processamento...";
+            return;
+        }
+
+        // Atualiza Barras de Posse
+        const pCasa = data.posse_casa || 50;
+        const pFora = data.posse_fora || 50;
+        document.getElementById('live-posse-casa').style.width = `${pCasa}%`;
+        document.getElementById('live-posse-casa').innerText = `${pCasa}%`;
+        document.getElementById('live-posse-fora').style.width = `${pFora}%`;
+        document.getElementById('live-posse-fora').innerText = `${pFora}%`;
+
+        // Atualiza Chutes
+        document.getElementById('live-chutes').innerText = `CHUTES: ${data.chutes_casa} - ${data.chutes_fora}`;
+
+        // Formata Escalações (Mapeia o array de objetos 'n' e 'p')
+        const formatar = (lista) => {
+            if (!lista || lista.length === 0) return "Não disponível";
+            return lista.map(p => `<div><strong style="color:var(--neon-blue)">${p.p}</strong> ${p.n}</div>`).join('');
+        };
+
+        document.getElementById('list-home').innerHTML = formatar(data.escalacao_casa);
+        document.getElementById('list-away').innerHTML = formatar(data.escalacao_fora);
+
+    } catch (e) {
+        console.error("Erro ao carregar detalhes:", e);
+    }
+}
+
+function fecharModalLive() {
+    const modal = document.getElementById('modal-live');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // --- ARENA H2H ---
