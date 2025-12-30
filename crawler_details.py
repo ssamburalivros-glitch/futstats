@@ -1,100 +1,95 @@
 import os
-import time
 import requests
 from supabase import create_client
 
-# --- 1. CONFIGURAÇÃO ---
+# --- CONFIGURAÇÃO ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-
-if not SUPABASE_URL or not SUPABASE_KEY:
-    print("❌ ERRO: Variáveis de ambiente não encontradas!")
-    exit(1)
-
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def processar_jogo(id_espn):
-    """Puxa estatísticas e escalações da ESPN e salva no Supabase"""
-    print(f"🔍 Buscando detalhes para o jogo: {id_espn}")
-    
-    url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/all/summary?event={id_espn}"
-    
+def buscar_detalhes_espn(jogo_id):
+    """Busca estatísticas e escalações de um jogo específico na API da ESPN"""
+    url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/all/summary?event={jogo_id}"
     try:
-        res = requests.get(url, timeout=15).json()
-        
-        posse_casa, posse_fora = 50, 50
-        chutes_casa, chutes_fora = 0, 0
-        lineup_casa, lineup_fora = [], []
-
-        # A. EXTRAIR ESTATÍSTICAS
-        if 'boxscore' in res and 'teams' in res['boxscore']:
-            teams = res['boxscore']['teams']
-            for i, t in enumerate(teams):
-                for stat in t.get('statistics', []):
-                    display_val = stat.get('displayValue', '0')
-                    # Remove símbolos como '%' para converter em número
-                    val = int(''.join(filter(str.isdigit, display_val)) or 0)
-                    
-                    if stat['name'] == 'possessionPct':
-                        if i == 0: posse_casa = val
-                        else: posse_fora = val
-                    elif stat['name'] == 'shots':
-                        if i == 0: chutes_casa = val
-                        else: chutes_fora = val
-
-        # B. EXTRAIR ESCALAÇÕES (LINEUPS)
-        if 'rosters' in res:
-            for i, roster in enumerate(res['rosters']):
-                players = []
-                for entry in roster.get('roster', []):
-                    if entry.get('name') == 'starters':
-                        for athlete in entry.get('athletes', []):
-                            players.append(athlete.get('displayName'))
-                
-                if i == 0: lineup_casa = players[:11]
-                else: lineup_fora = players[:11]
-
-        # C. SALVAR NO SUPABASE
-        dados = {
-            "jogo_id": str(id_espn),
-            "posse_casa": int(posse_casa),
-            "posse_fora": int(posse_fora),
-            "chutes_casa": int(chutes_casa),
-            "chutes_fora": int(chutes_fora),
-            "escalacao_casa": lineup_casa,
-            "escalacao_fora": lineup_fora
-        }
-
-        # O segredo está aqui: capturar o retorno do Supabase
-        resultado = supabase.table("detalhes_partida").upsert(dados).execute()
-        
-        if len(resultado.data) > 0:
-            print(f"✅ GRAVADO NO BANCO: Jogo {id_espn}")
-        else:
-            print(f"❌ FALHA SILENCIOSA: O banco aceitou o comando mas não criou a linha para {id_espn}")
-
+        response = requests.get(url, timeout=15)
+        if response.status_code != 200:
+            return None
+        return response.json()
     except Exception as e:
-        print(f"⚠️ ERRO CRÍTICO AO SALVAR: {e}")
+        print(f"⚠️ Erro ao acessar detalhes do jogo {jogo_id}: {e}")
+        return None
 
-def main():
-    print("📡 Iniciando Crawler de Detalhes...")
-    
+def processar_detalhes():
+    # 1. Puxa todos os IDs da tabela 'jogos_ao_vivo' que você acabou de atualizar
     try:
-        # Mudamos de 'id_espn' para 'id' conforme a sua foto do Supabase
-        res = supabase.table("jogos_ao_vivo").select("id").execute()
-        jogos = res.data
-
-        if not jogos:
-            print("💤 Nenhum jogo encontrado na tabela jogos_ao_vivo.")
-            return
-
-        print(f"📊 Processando {len(jogos)} jogos...")
-        for j in jogos:
-            # Pegamos o valor da coluna 'id'
-            id_match = j.get('id')
-            if id_match:
-                processar_jogo(str(id_match)) # Forçamos virar texto
-                time.sleep(1)
-                
+        response = supabase.table("jogos_ao_vivo").select("id").execute()
+        jogos = response.data
     except Exception as e:
-        print(f"❌ Erro ao ler IDs: {e}")
+        print(f"❌ Erro ao ler jogos do Supabase: {e}")
+        return
+
+    if not jogos:
+        print("💤 Nenhum jogo encontrado na tabela ao_vivo para processar detalhes.")
+        return
+
+    print(f"🔍 Encontrados {len(jogos)} jogos. Buscando estatísticas...")
+
+    for j in jogos:
+        jogo_id = j['id']
+        data = buscar_detalhes_espn(jogo_id)
+        
+        if not data:
+            continue
+
+        try:
+            # --- EXTRAÇÃO DE ESTATÍSTICAS ---
+            posse_casa, posse_fora = 50, 50
+            chutes_casa, chutes_fora = 0, 0
+            
+            # Percorre as estatísticas da ESPN
+            boxscore = data.get('boxscore', {})
+            teams_stats = boxscore.get('statistics', [])
+            
+            for stat_group in teams_stats:
+                label = stat_group.get('label')
+                if label == 'Possession':
+                    posse_casa = int(float(stat_group['statistics'][0]['displayValue'].replace('%','')))
+                    posse_fora = int(float(stat_group['statistics'][1]['displayValue'].replace('%','')))
+                elif label == 'Shots':
+                    chutes_casa = int(stat_group['statistics'][0]['displayValue'])
+                    chutes_fora = int(stat_group['statistics'][1]['displayValue'])
+
+            # --- EXTRAÇÃO DE ESCALAÇÕES ---
+            # Pegamos a lista de jogadores (roster) se disponível
+            rosters = boxscore.get('players', [])
+            escalacao_casa = []
+            escalacao_fora = []
+
+            if len(rosters) >= 2:
+                # Time Casa
+                for p in rosters[0].get('statistics', [{}])[0].get('athletes', []):
+                    escalacao_casa.append({"nome": p['athlete']['displayName'], "posicao": p['athlete']['position']['abbreviation']})
+                # Time Fora
+                for p in rosters[1].get('statistics', [{}])[0].get('athletes', []):
+                    escalacao_fora.append({"nome": p['athlete']['displayName'], "posicao": p['athlete']['position']['abbreviation']})
+
+            # --- SALVAR NO SUPABASE ---
+            detalhes = {
+                "jogo_id": jogo_id,
+                "posse_casa": posse_casa,
+                "posse_fora": posse_fora,
+                "chutes_casa": chutes_casa,
+                "chutes_fora": chutes_fora,
+                "escalacao_casa": escalacao_casa, # Salva como JSONB
+                "escalacao_fora": escalacao_fora, # Salva como JSONB
+                "atualizado_em": "now()"
+            }
+
+            supabase.table("detalhes_partida").upsert(detalhes).execute()
+            print(f"✅ Detalhes atualizados: {jogo_id}")
+
+        except Exception as e:
+            print(f"⚠️ Falha ao processar dados do jogo {jogo_id}: {e}")
+
+if __name__ == "__main__":
+    processar_detalhes()
