@@ -8,88 +8,83 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def buscar_detalhes_espn(jogo_id):
-    """Busca estatísticas e escalações de um jogo específico na API da ESPN"""
     url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/all/summary?event={jogo_id}"
     try:
         response = requests.get(url, timeout=15)
-        if response.status_code != 200:
-            return None
-        return response.json()
+        return response.json() if response.status_code == 200 else None
     except Exception as e:
-        print(f"⚠️ Erro ao acessar detalhes do jogo {jogo_id}: {e}")
+        print(f"⚠️ Erro API ESPN {jogo_id}: {e}")
         return None
 
 def processar_detalhes():
-    # 1. Puxa todos os IDs da tabela 'jogos_ao_vivo' que você acabou de atualizar
     try:
         response = supabase.table("jogos_ao_vivo").select("id").execute()
         jogos = response.data
     except Exception as e:
-        print(f"❌ Erro ao ler jogos do Supabase: {e}")
+        print(f"❌ Erro Supabase: {e}")
         return
 
-    if not jogos:
-        print("💤 Nenhum jogo encontrado na tabela ao_vivo para processar detalhes.")
-        return
-
-    print(f"🔍 Encontrados {len(jogos)} jogos. Buscando estatísticas...")
+    if not jogos: return
 
     for j in jogos:
         jogo_id = j['id']
         data = buscar_detalhes_espn(jogo_id)
-        
-        if not data:
-            continue
+        if not data: continue
 
         try:
-            # --- EXTRAÇÃO DE ESTATÍSTICAS ---
-            posse_casa, posse_fora = 50, 50
-            chutes_casa, chutes_fora = 0, 0
-            
-            # Percorre as estatísticas da ESPN
+            # 1. LOCALIZAR O BOXSCORE CORRETO
             boxscore = data.get('boxscore', {})
-            teams_stats = boxscore.get('statistics', [])
+            teams_data = boxscore.get('teams', [])
             
-            for stat_group in teams_stats:
-                label = stat_group.get('label')
-                if label == 'Possession':
-                    posse_casa = int(float(stat_group['statistics'][0]['displayValue'].replace('%','')))
-                    posse_fora = int(float(stat_group['statistics'][1]['displayValue'].replace('%','')))
-                elif label == 'Shots':
-                    chutes_casa = int(stat_group['statistics'][0]['displayValue'])
-                    chutes_fora = int(stat_group['statistics'][1]['displayValue'])
+            # Inicializar valores padrão
+            stats_final = {
+                "casa": {"posse": 50, "chutes": 0},
+                "fora": {"posse": 50, "chutes": 0}
+            }
 
-            # --- EXTRAÇÃO DE ESCALAÇÕES ---
-            # Pegamos a lista de jogadores (roster) se disponível
+            # 2. MAPEAMENTO DINÂMICO DE ESTATÍSTICAS
+            # A ESPN separa por times (Home/Away)
+            for team_idx, team_info in enumerate(teams_data):
+                # Determina se é o time 0 (casa) ou 1 (fora) baseado no JSON
+                posicao = "casa" if team_idx == 0 else "fora"
+                
+                for stat in team_info.get('statistics', []):
+                    # Captura Posse de Bola
+                    if stat['name'] == 'possessionPct':
+                        stats_final[posicao]["posse"] = int(float(stat['displayValue'].replace('%','')))
+                    # Captura Chutes Totais
+                    elif stat['name'] == 'shots':
+                        stats_final[posicao]["chutes"] = int(stat['displayValue'])
+
+            # 3. EXTRAÇÃO DE ESCALAÇÕES (ROSTERS)
+            escalacao_casa, escalacao_fora = [], []
             rosters = boxscore.get('players', [])
-            escalacao_casa = []
-            escalacao_fora = []
-
+            
             if len(rosters) >= 2:
-                # Time Casa
+                # Titulares Time Casa
                 for p in rosters[0].get('statistics', [{}])[0].get('athletes', []):
-                    escalacao_casa.append({"nome": p['athlete']['displayName'], "posicao": p['athlete']['position']['abbreviation']})
-                # Time Fora
+                    escalacao_casa.append({"n": p['athlete']['displayName'], "p": p['athlete']['position']['abbreviation']})
+                # Titulares Time Fora
                 for p in rosters[1].get('statistics', [{}])[0].get('athletes', []):
-                    escalacao_fora.append({"nome": p['athlete']['displayName'], "posicao": p['athlete']['position']['abbreviation']})
+                    escalacao_fora.append({"n": p['athlete']['displayName'], "p": p['athlete']['position']['abbreviation']})
 
-            # --- SALVAR NO SUPABASE ---
+            # 4. UPSERT NO SUPABASE
             detalhes = {
                 "jogo_id": jogo_id,
-                "posse_casa": posse_casa,
-                "posse_fora": posse_fora,
-                "chutes_casa": chutes_casa,
-                "chutes_fora": chutes_fora,
-                "escalacao_casa": escalacao_casa, # Salva como JSONB
-                "escalacao_fora": escalacao_fora, # Salva como JSONB
+                "posse_casa": stats_final["casa"]["posse"],
+                "posse_fora": stats_final["fora"]["posse"],
+                "chutes_casa": stats_final["casa"]["chutes"],
+                "chutes_fora": stats_final["fora"]["chutes"],
+                "escalacao_casa": escalacao_casa,
+                "escalacao_fora": escalacao_fora,
                 "atualizado_em": "now()"
             }
 
             supabase.table("detalhes_partida").upsert(detalhes).execute()
-            print(f"✅ Detalhes atualizados: {jogo_id}")
+            print(f"✅ Dados Reais Sincronizados: {jogo_id}")
 
         except Exception as e:
-            print(f"⚠️ Falha ao processar dados do jogo {jogo_id}: {e}")
+            print(f"⚠️ Falha no processamento técnico do jogo {jogo_id}: {e}")
 
 if __name__ == "__main__":
     processar_detalhes()
