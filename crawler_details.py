@@ -80,24 +80,21 @@ def main():
     print("📡 Iniciando Crawler de Detalhes...")
     
     try:
-        # Busca IDs da tabela jogos_ao_vivo
-        res = supabase.table("jogos_ao_vivo").select("id_espn").execute()
+        # Mudamos de 'id_espn' para 'id' conforme a sua foto do Supabase
+        res = supabase.table("jogos_ao_vivo").select("id").execute()
         jogos = res.data
 
         if not jogos:
-            print("💤 Nenhum jogo ao vivo encontrado para processar detalhes.")
+            print("💤 Nenhum jogo encontrado na tabela jogos_ao_vivo.")
             return
 
         print(f"📊 Processando {len(jogos)} jogos...")
         for j in jogos:
-            id_match = j.get('id_espn')
+            # Pegamos o valor da coluna 'id'
+            id_match = j.get('id')
             if id_match:
-                processar_jogo(id_match)
+                processar_jogo(str(id_match)) # Forçamos virar texto
                 time.sleep(1)
                 
     except Exception as e:
-        print(f"❌ Erro ao ler tabela jogos_ao_vivo: {e}")
-        print("💡 DICA: Certifique-se de que a coluna 'id_espn' existe.")
-
-if __name__ == "__main__":
-    main()
+        print(f"❌ Erro ao ler IDs: {e}")
