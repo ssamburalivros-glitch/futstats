@@ -3,8 +3,22 @@ import time
 import requests
 from supabase import create_client
 
+# --- CONFIGURAÇÃO GLOBAL ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+# Validação crítica antes de iniciar
+if not SUPABASE_URL or not SUPABASE_KEY:
+    print("❌ ERRO: Variáveis de ambiente SUPABASE_URL ou SUPABASE_KEY não configuradas!")
+    exit(1) # Para a execução imediatamente
+
+# Inicializa o cliente globalmente
+try:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    print("🚀 Conexão com Supabase estabelecida.")
+except Exception as e:
+    print(f"❌ Falha ao iniciar cliente Supabase: {e}")
+    exit(1)
 
 LIGAS = {
     "BR": "bra.1", "PL": "eng.1", "ES": "esp.1",
@@ -14,28 +28,24 @@ LIGAS = {
 
 def capturar_liga(liga_id, espn_id):
     print(f"📡 Atualizando {liga_id}...")
-    
-    # URL sem ano definido puxa sempre a temporada ATUAL ativa na ESPN
     url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/standings"
     
     try:
         res = requests.get(url, timeout=15).json()
         
-        # A estrutura da ESPN varia: às vezes está em 'children', às vezes direto em 'standings'
+        # Estrutura flexível para diferentes respostas da API
         if 'children' in res:
             entries = res['children'][0].get('standings', {}).get('entries', [])
         else:
             entries = res.get('standings', {}).get('entries', [])
 
         if not entries:
-            print(f"⚠️ Aviso: Nenhuma entrada encontrada para {liga_id}")
+            print(f"⚠️ Aviso: Dados não encontrados para {liga_id}")
             return
 
         for entry in entries:
             team = entry.get('team', {})
             stats_list = entry.get('stats', [])
-            
-            # Mapeamento dinâmico das estatísticas
             s = {item.get('name'): item.get('value') for item in stats_list}
             
             dados = {
@@ -51,10 +61,7 @@ def capturar_liga(liga_id, espn_id):
                 "pontos": int(s.get('points') or 0)
             }
 
-            # Garante link seguro (HTTPS) para evitar erro de carregamento no site
-            if dados["escudo"] and dados["escudo"].startswith("http:"):
-                dados["escudo"] = dados["escudo"].replace("http:", "https:")
-
+            # AGORA O OBJETO 'supabase' É GLOBAL E ESTARÁ DEFINIDO AQUI
             supabase.table("tabelas_ligas").upsert(dados, on_conflict="liga, time").execute()
 
         print(f"✅ {liga_id} sincronizada.")
