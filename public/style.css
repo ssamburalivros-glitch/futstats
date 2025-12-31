@@ -8,7 +8,7 @@
     --silver: #e0e0e0;
     --status-live: #00ff00;
     --font-primary: 'Montserrat', sans-serif;
-    --header-height: 90px;
+    --header-height: 80px;
 }
 
 * {
@@ -24,8 +24,7 @@ body {
     font-family: var(--font-primary);
     overflow-x: hidden;
     line-height: 1.6;
-    /* Espaçamento para o conteúdo não ficar atrás do menu/robô */
-    padding-top: 160px; 
+    padding-top: 150px; /* Ajuste para não cobrir o conteúdo */
 }
 
 h1, h2, h3, h4 {
@@ -40,7 +39,7 @@ a {
     transition: color 0.3s;
 }
 
-/* --- HEADER (LOGO ESQUERDA | ABAS DIREITA) --- */
+/* --- HEADER (LOGO + NAVEGAÇÃO COMPACTA) --- */
 header {
     height: var(--header-height);
     padding: 0 40px;
@@ -86,12 +85,12 @@ header {
 .nav-container {
     display: flex;
     align-items: center;
-    gap: 30px;
+    gap: 25px;
 }
 
 .nav-links {
     display: flex;
-    gap: 25px;
+    gap: 20px;
 }
 
 .nav-links a {
@@ -110,30 +109,23 @@ header {
     background: transparent;
     border: 1px solid #444;
     color: var(--text-main);
-    padding: 8px 20px;
+    padding: 8px 18px;
     font-size: 0.6rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
     text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.btn-download:hover {
-    border-color: var(--text-main);
-    background: #ffffff;
-    color: #000;
 }
 
 /* --- ROBÔ IA (INSIGHTS) --- */
 #ia-insights-container {
     background: #000;
     border-bottom: 1px solid #1a1a1a;
-    padding: 15px 6%;
-    position: fixed; /* Fixo abaixo do header */
+    padding: 12px 6%;
+    position: fixed;
     top: var(--header-height);
     width: 100%;
     z-index: 9999;
+    display: flex !important;
 }
 
 .ia-wrapper {
@@ -142,10 +134,10 @@ header {
     gap: 15px;
     max-width: 1400px;
     margin: 0 auto;
+    width: 100%;
 }
 
 .ia-icon-box {
-    position: relative;
     width: 35px;
     height: 35px;
     background: #0a0a0a;
@@ -157,25 +149,32 @@ header {
     flex-shrink: 0;
 }
 
-.ia-label {
-    font-size: 0.6rem;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
 #ia-output {
     color: #fff;
     font-size: 0.85rem;
     font-weight: 300;
 }
 
-/* --- CARROSSEL --- */
+/* --- CARROSSEL DE NOTÍCIAS --- */
 .hero-carousel {
     position: relative;
     width: 100%;
-    height: 75vh;
+    height: 80vh;
+    overflow: hidden;
     background: #000;
+}
+
+.carousel-slides {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.slide {
+    min-width: 100%;
+    height: 100%;
+    position: relative;
 }
 
 .slide img {
@@ -185,16 +184,37 @@ header {
     filter: brightness(0.5);
 }
 
-/* --- TABELAS E CONTEÚDO --- */
+.slide-overlay {
+    position: absolute;
+    bottom: 15%;
+    left: 8%;
+    max-width: 600px;
+}
+
+.news-title {
+    font-size: 2.5rem;
+    line-height: 1.1;
+    margin-bottom: 15px;
+    color: #fff;
+}
+
+/* --- TABELAS E PÁGINAS --- */
 .page-content {
     padding: 40px 6%;
     max-width: 1400px;
     margin: 0 auto;
 }
 
+.cyber-title {
+    font-size: 1.6rem;
+    margin-bottom: 25px;
+    letter-spacing: 2px;
+}
+
 .glass-panel {
     background: var(--bg-secondary);
-    border: 1px solid #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 4px;
     overflow-x: auto;
 }
 
@@ -203,13 +223,54 @@ table {
     border-collapse: collapse;
 }
 
+th {
+    padding: 15px;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    background: #0a0a0a;
+    text-align: left;
+}
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid #1a1a1a;
+    font-size: 0.9rem;
+}
+
 .team-cell-img, .img-mini {
-    width: 25px !important;
-    height: 25px !important;
+    width: 28px !important;
+    height: 28px !important;
     object-fit: contain;
 }
 
-/* --- AO VIVO GRID --- */
+/* --- ARENA H2H --- */
+.h2h-controls-complex {
+    display: flex;
+    gap: 20px;
+    background: #080808;
+    padding: 25px;
+    border-radius: 4px;
+    margin-bottom: 40px;
+}
+
+.cyber-select {
+    background: #111;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 12px;
+    width: 100%;
+    font-family: var(--font-primary);
+    border-radius: 4px;
+}
+
+.team-gladiator img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+
+/* --- AO VIVO --- */
 .ao-vivo-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -218,16 +279,37 @@ table {
 
 .card-hero {
     background: var(--bg-secondary);
-    padding: 20px;
     border: 1px solid #1a1a1a;
+    padding: 20px;
     border-radius: 4px;
+    position: relative;
 }
 
-/* --- AJUSTES PARA CELULAR (MOBILE) --- */
+.status-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.6rem;
+    color: var(--status-live);
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.live-score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.score-box-live {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+/* --- RESPONSIVIDADE MOBILE --- */
 @media (max-width: 768px) {
     body {
-        padding-top: 180px; /* Espaço maior no mobile */
-        padding-bottom: 80px;
+        padding-top: 140px;
     }
 
     header {
@@ -235,58 +317,39 @@ table {
         padding: 0 15px;
     }
 
-    .header-content {
-        justify-content: center; /* Centraliza a logo no topo */
+    .logo {
+        display: none; /* Esconde texto para caber abas */
     }
 
     .site-logo-img {
-        height: 40px;
+        height: 35px;
     }
 
-    .logo {
-        font-size: 1.1rem;
-    }
-
-    /* Menu Inferior Mobile */
     .nav-container {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 70px;
-        background: #080808;
-        border-top: 1px solid #222;
-        z-index: 10001;
-        justify-content: space-around;
-        padding: 10px;
+        gap: 10px;
     }
 
     .nav-links {
-        width: 100%;
-        justify-content: space-around;
+        gap: 12px;
     }
 
     .nav-links a {
         font-size: 0.6rem;
-        letter-spacing: 0.5px;
-        text-align: center;
     }
 
     .btn-download {
-        display: none; /* Remove botão do topo no mobile */
+        display: none;
     }
 
-    /* Ajuste Robô no Mobile */
     #ia-insights-container {
         top: 70px;
-        padding: 10px 15px;
     }
 
-    #ia-output {
-        font-size: 0.75rem;
+    .news-title {
+        font-size: 1.6rem;
     }
 
-    .hero-carousel {
-        height: 60vh;
+    .h2h-controls-complex {
+        flex-direction: column;
     }
 }
