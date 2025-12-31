@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutStats | Classificação e Tabelas Neutro</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="brand-container">
+                <img src="logos/logo.png" alt="FS" class="site-logo-img">
+                <h1 class="logo">FutStats</h1>
+            </a>
+            <div class="nav-container">
+                <nav class="nav-links">
+                    <a href="classificacao.html">Classificação</a>
+                    <a href="arena.html">Arena H2H</a>
+                    <a href="aovivo.html">Jogos ao Vivo</a>
+                </nav>
+                <button class="btn-download">Baixar APP</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="search-wrapper">
+            <div class="search-container">
+                <span class="search-icon">&#x1F50D;</span> <input type="text" id="search-team" class="search-input" placeholder="Buscar time por nome...">
+            </div>
+        </section>
+
+        <section class="page-content">
+            <h2 class="cyber-title">Tabela Neural</h2>
+
+            <div class="leagues-wrapper" style="margin-bottom: 25px;">
+                <div class="leagues-container">
+                    <button class="league-btn active" data-liga="BR">BRA</button>
+                    <button class="league-btn" data-liga="PL">ENG</button>
+                    <button class="league-btn" data-liga="ES">ESP</button>
+                    <button class="league-btn" data-liga="IT">ITA</button>
+                    <button class="league-btn" data-liga="DE">GER</button>
+                </div>
+            </div>
+
+            <div class="glass-panel table-container">
+                <table id="tabela-principal">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;">#</th>
+                            <th>TIME</th>
+                            <th style="text-align: center; width: 50px;">J</th>
+                            <th style="text-align: center; width: 60px;">PTS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-corpo">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="modal-time" class="modal-time-overlay" style="display: none;">
+        <div class="modal-time-content">
+            <span class="close-btn close-modal-btn" style="cursor: pointer; float: right; font-size: 1.5rem; color: #555;">&times;</span>
+            <div class="modal-time-header" style="text-align: center; margin-top: 20px;">
+                <img id="modal-escudo" src="" class="escudo-modal" style="width: 70px; height: 70px; object-fit: contain;">
+                <h2 id="modal-nome-time" style="font-size: 1.3rem; margin: 15px 0; color: #fff;">--</h2>
+                <div id="modal-liga-badge" style="font-size: 0.6rem; color: var(--text-dim); border: 1px solid #2c2c2c; display: inline-block; padding: 4px 15px; text-transform: uppercase;">LIGA</div>
+            </div>
+            <div class="modal-time-stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 30px 0;">
+                <div class="stat-card" style="padding: 15px;">
+                    <span style="font-size: 0.55rem; color: var(--text-dim); display: block; text-transform: uppercase;">POSIÇÃO</span>
+                    <span id="modal-pos" style="font-size: 1.2rem; font-weight: bold; color: #fff;">--</span>
+                </div>
+                <div class="stat-card" style="padding: 15px;">
+                    <span style="font-size: 0.55rem; color: var(--text-dim); display: block; text-transform: uppercase;">PONTOS</span>
+                    <span id="modal-pts" style="font-size: 1.2rem; font-weight: bold; color: #fff;">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
