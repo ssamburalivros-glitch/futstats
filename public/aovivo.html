@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutStats | Jogos Ao Vivo Organizado</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="brand-container">
+                <img src="logos/logo.png" alt="FS" class="site-logo-img">
+                <h1 class="logo">FutStats</h1>
+            </a>
+            <div class="nav-container">
+                <nav class="nav-links">
+                    <a href="classificacao.html">Classificação</a>
+                    <a href="arena.html">Arena H2H</a>
+                    <a href="aovivo.html">Jogos ao Vivo</a>
+                </nav>
+                <button class="btn-download">Baixar APP</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <h2 class="cyber-title">Live Feeds</h2>
+
+        <div id="lista-ao-vivo" class="ao-vivo-grid">
+            </div>
+    </main>
+
+    <div id="modal-live" class="modal-time-overlay" style="display: none;">
+        <div class="modal-time-content" style="max-width: 500px;">
+            <span class="close-btn close-modal-live" style="cursor: pointer; float: right; font-size: 1.5rem; color: #555;">&times;</span>
+            
+            <div style="text-align: center; margin-bottom: 20px; margin-top: 15px;">
+                <h2 id="live-teams" style="font-size: 1rem; color: #fff; text-transform: uppercase; letter-spacing: 1px;">--</h2>
+                <p id="live-chutes" style="font-size: 0.6rem; color: var(--text-dim); margin-top: 8px;"></p>
+            </div>
+
+            <div style="margin-bottom: 25px; background: #0a0a0a; padding: 15px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.5rem; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+                    <span>Time Casa</span>
+                    <span>Posse de Bola</span>
+                    <span>Time Fora</span>
+                </div>
+                <div style="display: flex; height: 6px; background: #1a1a1a; border-radius: 3px; overflow: hidden;">
+                    <div id="live-posse-casa" style="width: 50%; background: #fff; transition: width 0.8s ease;"></div>
+                    <div id="live-posse-fora" style="width: 50%; background: #444; transition: width 0.8s ease;"></div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
+                <h4 id="nome-casa-modal" style="font-size: 0.65rem; color: var(--text-dim);">CASA</h4>
+                <h4 id="nome-fora-modal" style="font-size: 0.65rem; color: var(--text-dim);">FORA</h4>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
