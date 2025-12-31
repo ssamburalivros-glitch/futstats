@@ -24,7 +24,7 @@ def gerar_analise_ia():
             contexto = "Rodada atual: " + ", ".join(lista_jogos)
 
         # 2. Prompt Otimizado
-        prompt_system = "Você é o núcleo neural do FutStats. Analise os dados e dê um insight curto (180 chars) e cyberpunk."
+        prompt_system = "Você é o núcleo neural do FutStats. Analise os dados e dê um insight curto (180 chars), técnico e sofisticado, no estilo engenharia de elite."
 
         # 3. Chamada com Modelo Novo (CORRIGIDO)
         chat_completion = client.chat.completions.create(
