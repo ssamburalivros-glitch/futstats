@@ -385,18 +385,6 @@ td {
     background: #161616;
 }
 
-/* Ícone de Lupa via CSS (se você não tiver um <img> ou <i> no HTML) */
-.search-container::before {
-    content: '🔍';
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.9rem;
-    opacity: 0.5;
-    pointer-events: none;
-}
-
 /* --- ESTILO DA ESCOLHA DE LIGAS (BOTÕES) --- */
 .leagues-container {
     display: flex;
