@@ -3,146 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Seus Dados Atualizados</title>
+    <title>FutStats | Inteligência Neural no Futebol | Home</title>
     
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body id="home-page">
 
     <header>
         <div class="header-content">
-            <div class="logo-container">
-                <img src="logo.png" alt="FS" class="site-logo-img">
-                <h1 class="logo">Fut<span class="neon-blue">Stats</span></h1>
-            </div>
-            <div class="neural-status">
-                <span class="status-label"></span>
-                <span class="pulse-dot"></span> 
+            <a href="index.html" class="brand-container">
+                <img src="logos/logo.png" alt="FS" class="site-logo-img">
+                <h1 class="logo">FutStats</h1>
+            </a>
+            <div class="nav-container">
+                <nav class="nav-links">
+                    <a href="classificacao.html">Classificação</a>
+                    <a href="arena.html">Arena H2H</a>
+                    <a href="aovivo.html">Jogos ao Vivo</a>
+                </nav>
+                <button class="btn-download" onclick="window.open('seusite.com/futstats.apk')">Baixar APP</button>
             </div>
         </div>
     </header>
 
+    <section id="ia-insights-container">
+        <div class="ia-wrapper">
+            <div class="ia-icon-box">
+                <span class="ia-status-pulse"></span>
+                <span class="ia-robot-icon">🤖</span>
+            </div>
+            <div class="ia-text-content">
+                <span class="ia-label">FutStats Neural Insight:</span>
+                <p id="ia-output">Sincronizando com o núcleo neural (Groq/Llama 3.3)...</p>
+            </div>
+        </div>
+    </section>
+
     <main>
-        <section id="ia-insights">
-            <div class="ia-card">
-                <div class="ia-scanner"></div>
-                <div class="ia-header">
-                    <span>🤖</span>
-                    <h3>Dicas Inteligencia Artificial</h3>
+        <section class="hero-carousel">
+            <div class="carousel-slides">
                 </div>
-                <p id="ia-box">Iniciando protocolo de análise...</p>
-            </div>
-        </section>
-
-        <section style="padding: 10px 20px;">
-            <div class="arena-callout" onclick="window.location.href='arena.html'" style="cursor: pointer;">
-                <div class="callout-content">
-                    <span class="icon">⚡</span>
-                    <div>
-                        <h4 style="font-family: 'Orbitron'; font-size: 0.8rem; color: #fff;">ARENA DE BATALHA H2H</h4>
-                        <p style="font-size: 0.6rem; color: var(--neon-purple); font-weight: bold;">COMPARAR TIMES AGORA &rarr;</p>
+            
+            <div class="carousel-controls">
+                <button class="control-btn" id="prev-slide">&lt;</button>
+                <div class="carousel-dots">
                     </div>
-                </div>
+                <button class="control-btn" id="next-slide">&gt;</button>
             </div>
         </section>
 
-        <section id="ao-vivo">
-            <div class="section-header-flex" style="padding: 0 20px;">
-                <h2 class="cyber-subtitle" style="font-size: 0.8rem;">● LIVE FEEDS</h2>
-                <span class="scroll-hint" style="font-size: 0.6rem; color: #444;">DESLIZE &rarr;</span>
-            </div>
-            <div id="lista-ao-vivo" class="hero-grid">
-                </div>
-        </section>
-
-        <section id="classificacao">
-            <div class="leagues-wrapper" style="padding: 15px 20px;">
-                <div class="leagues-container" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px;">
-                    <button class="league-btn active" data-liga="BR">BRA</button>
-                    <button class="league-btn" data-liga="PL">ENG</button>
-                    <button class="league-btn" data-liga="ES">ESP</button>
-                    <button class="league-btn" data-liga="IT">ITA</button>
-                    <button class="league-btn" data-liga="DE">GER</button>
-                    <button class="league-btn" data-liga="FR">FRA</button>
-                    <button class="league-btn" data-liga="NL">NED</button>
-                </div>
-            </div>
-
-            <div class="glass-panel table-container">
-                <table id="tabela-principal">
-                    <thead>
-                        <tr>
-                            <th style="width: 35px;">#</th>
-                            <th>TIME</th>
-                            <th style="text-align: center;">J</th>
-                            <th style="text-align: center;">PTS</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-corpo">
-                        </tbody>
-                </table>
-            </div>
+        <section id="news-details-panel">
+            <h3 id="details-title">Título da Notícia</h3>
+            <p id="details-content">Selecione uma notícia para ver os detalhes da análise.</p>
         </section>
     </main>
 
-    <div id="modal-time" class="modal-time-overlay" style="display: none;">
-        <div class="modal-time-content">
-            <span class="close-btn" onclick="fecharModalTime()" style="cursor: pointer; float: right; font-size: 1.5rem;">&times;</span>
-            <div class="modal-time-header" style="text-align: center;">
-                <img id="modal-escudo" src="" class="escudo-modal" style="width: 60px; height: 60px; object-fit: contain;">
-                <h2 id="modal-nome-time" style="font-family: 'Orbitron'; font-size: 1.2rem; margin: 10px 0;">--</h2>
-                <div id="modal-liga-badge" style="font-size: 0.6rem; color: var(--neon-blue); border: 1px solid #222; display: inline-block; padding: 2px 10px; border-radius: 20px;">LIGA</div>
+    <footer style="background: #000; border-top: 1px solid #1a1a1a; padding: 60px 6%; margin-top: 50px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px;">
+            <div>
+                <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px;">FUTSTATS</h4>
+                <p style="color: #666; font-size: 0.7rem; line-height: 2;">A vanguarda da análise de futebol. Tecnologia neural aplicada ao desempenho esportivo para entusiastas e profissionais.</p>
             </div>
-            <div class="modal-time-stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
-                <div class="stat-card" style="background: #111; padding: 10px; border-radius: 8px;">
-                    <span style="font-size: 0.5rem; color: #555; display: block;">POSIÇÃO</span>
-                    <span id="modal-pos" style="font-family: 'Orbitron';">--</span>
-                </div>
-                <div class="stat-card" style="background: #111; padding: 10px; border-radius: 8px;">
-                    <span style="font-size: 0.5rem; color: #555; display: block;">PONTOS</span>
-                    <span id="modal-pts" style="font-family: 'Orbitron'; color: var(--neon-blue);">--</span>
-                </div>
+            <div>
+                <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px;">NAVEGAÇÃO</h4>
+                <ul style="list-style: none; font-size: 0.7rem; color: #a0a0a0; line-height: 2.5;">
+                    <li><a href="classificacao.html" style="color: inherit; text-decoration: none;">Tabelas Oficiais</a></li>
+                    <li><a href="arena.html" style="color: inherit; text-decoration: none;">Comparador H2H</a></li>
+                    <li><a href="aovivo.html" style="color: inherit; text-decoration: none;">Central Ao Vivo</a></li>
+                </ul>
             </div>
-            <button class="btn-neural-fechar" onclick="fecharModalTime()" style="width: 100%; padding: 12px; background: #000; border: 1px solid #222; color: #666; cursor: pointer; border-radius: 8px;">FECHAR</button>
+            <div>
+                <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px;">SUPORTE</h4>
+                <ul style="list-style: none; font-size: 0.7rem; color: #a0a0a0; line-height: 2.5;">
+                    <li><a href="#" style="color: inherit; text-decoration: none;">Privacidade</a></li>
+                    <li><a href="#" style="color: inherit; text-decoration: none;">Termos de Uso</a></li>
+                    <li><a href="#" style="color: inherit; text-decoration: none;">Contato</a></li>
+                </ul>
+            </div>
         </div>
-    </div>
-
-    <div id="modal-live" class="modal-time-overlay" style="display: none;">
-        <div class="modal-time-content" style="max-width: 500px; border: 1px solid #00d4ff33;">
-            <span class="close-btn" onclick="fecharModalLive()" style="cursor: pointer; float: right; font-size: 1.5rem;">&times;</span>
-            
-            <div style="text-align: center; margin-bottom: 15px;">
-                <h2 id="live-teams" style="font-family: 'Orbitron'; font-size: 1rem; color: #fff;">--</h2>
-                <p id="live-chutes" style="font-size: 0.65rem; color: var(--neon-blue); margin-top: 5px; letter-spacing: 1px;"></p>
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.55rem; color: #555; margin-bottom: 5px; font-family: 'Orbitron';">
-                    <span>POSSE DE BOLA</span>
-                </div>
-                <div style="display: flex; height: 10px; background: #0a0a0a; border-radius: 5px; overflow: hidden; border: 1px solid #222;">
-                    <div id="live-posse-casa" style="width: 50%; background: var(--neon-blue); transition: width 0.8s ease; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; color: #000; font-weight: bold;"></div>
-                    <div id="live-posse-fora" style="width: 50%; background: #222; transition: width 0.8s ease; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; color: #fff; font-weight: bold;"></div>
-                </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-top: 1px solid #111; padding-top: 15px;">
-                <div id="list-home-container">
-                    <h4 id="nome-casa-modal" style="font-size: 0.6rem; color: var(--neon-blue); margin-bottom: 10px; font-family: 'Orbitron';">CASA</h4>
-                    <div id="list-home" style="font-size: 0.7rem; color: #888; line-height: 1.8;"></div>
-                </div>
-                <div id="list-away-container" style="text-align: right;">
-                    <h4 id="nome-fora-modal" style="font-size: 0.6rem; color: #ff3b3b; margin-bottom: 10px; font-family: 'Orbitron';">FORA</h4>
-                    <div id="list-away" style="font-size: 0.7rem; color: #888; line-height: 1.8;"></div>
-                </div>
-            </div>
-
-            <button class="btn-neural-fechar" onclick="fecharModalLive()" style="width: 100%; margin-top: 20px; padding: 12px; background: #000; border: 1px solid #222; color: #666; cursor: pointer; border-radius: 8px;">FECHAR</button>
+        <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #111; text-align: center; color: #444; font-size: 0.6rem; letter-spacing: 1px;">
+            © 2025 FUTSTATS NEURAL TECHNOLOGY. TODOS OS DIREITOS RESERVADOS.
         </div>
-    </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>
