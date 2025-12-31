@@ -23,10 +23,10 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Rodar Crawler Ao Vivo
-        # AQUI ESTÁ A CORREÇÃO: Injetando as secrets no ambiente do script
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python crawler_ao_vivo.py
 
       - name: Salvar Dados
@@ -52,10 +52,11 @@ jobs:
       - name: Instalar Dependências
         run: pip install -r requirements.txt
 
-      - name: Rodar Crawlers de Detalhes e Formas
+      - name: Rodar Crawlers e IA
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           python crawler.py
           python crawler_details.py
