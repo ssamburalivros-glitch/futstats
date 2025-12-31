@@ -804,7 +804,7 @@ main {
 /* --- CORREÇÃO DE POSICIONAMENTO --- */
 
 header {
-    height: 90px; /* Definimos uma altura fixa para o menu */
+    height: 70px; /* Definimos uma altura fixa para o menu */
     display: flex;
     align-items: center;
 }
