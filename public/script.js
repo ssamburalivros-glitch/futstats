@@ -35,6 +35,7 @@ const noticiasCarrossel = [
 
 // --- INICIALIZAÇÃO SEGURA ---
 document.addEventListener('DOMContentLoaded', () => {
+	carregarIA();
     // Identifica em qual página estamos
     const ehHome = document.getElementById('home-page');
     const ehClassificacao = document.getElementById('tabela-corpo');
@@ -84,11 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function carregarIA() {
-    const output = document.getElementById('ia-output');
+    const output = document.getElementById('ia-output'); // Ajustado para o novo ID do HTML
     if (!output) return;
 
     try {
-        // Busca o comentário gerado pelo seu script Python (id: 1)
         const { data, error } = await _supabase
             .from('site_info')
             .select('comentario_ia')
@@ -98,18 +98,14 @@ async function carregarIA() {
         if (error) throw error;
 
         if (data && data.comentario_ia) {
-            output.style.opacity = 0;
-            setTimeout(() => {
-                output.innerText = data.comentario_ia;
-                output.style.opacity = 1;
-            }, 500);
+            output.innerText = data.comentario_ia;
+            console.log("IA carregada com sucesso");
         }
-    } catch (e) {
+    } catch (e) { 
         console.error("Erro ao carregar IA:", e);
         output.innerText = "IA: Sincronizando dados neurais...";
     }
 }
-
 // Faz a IA se atualizar sozinha a cada 60 segundos
 setInterval(carregarIA, 60000);
 
