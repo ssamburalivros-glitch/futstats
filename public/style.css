@@ -51,16 +51,18 @@ header {
 
 .header-content {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start; /* Alinha tudo começando da esquerda */
     align-items: center;
     max-width: 1800px;
     margin: 0 auto;
+  
 }
 
 .brand-container {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-right: 1000px; /* Cria um espaço entre o logo e o início do menu */
 }
 
 .site-logo-img {
@@ -798,4 +800,62 @@ td {
 /* Ajuste no Main para não encavalar */
 main {
     padding-top: 0px !important; 
+}
+/* --- CORREÇÃO DE POSICIONAMENTO --- */
+
+header {
+    height: 90px; /* Definimos uma altura fixa para o menu */
+    display: flex;
+    align-items: center;
+}
+
+#ia-insights-container {
+    margin-top: 90px; /* ISSO empurra tudo para baixo do menu fixed */
+    background: #000;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 15px 6%;
+    display: flex !important;
+    position: relative;
+    z-index: 99;
+    width: 100%;
+}
+
+/* Garante que o conteúdo das outras páginas (Tabela, Arena) também não suba */
+main, .page-content {
+    padding-top: 20px; 
+}
+
+/* Ajuste do Robô IA para Estilo Premium */
+.ia-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.ia-icon-box {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ia-label {
+    font-size: 0.6rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+#ia-output {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin: 0;
 }
