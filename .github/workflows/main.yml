@@ -1,45 +1,68 @@
-name: Crawler Ao Vivo e Resumo Periodico
+name: Monitoramento FutStats
 
 on:
   schedule:
-    # Cron 1: "Ao vivo" (O GitHub limita o mínimo a cada 5-10 min na prática)
-    - cron: '*/5 * * * *' 
-    # Cron 2: A cada 6 horas (Exatamente às 00h, 06h, 12h e 18h)
+    # Ao vivo: Tenta rodar a cada 2-5 minutos (limite do GitHub)
+    - cron: '*/5 * * * *'
+    # Completo: A cada 6 horas
     - cron: '0 */6 * * *'
-  workflow_dispatch: # Permite rodar manualmente pelo painel do GitHub
+  workflow_dispatch:
 
 jobs:
-  # --- JOB DO CRAWLER (AO VIVO) ---
-  crawler_ao_vivo:
-    # Só executa se for o cron de 5 min ou disparo manual
+  # --- CRAWLER AO VIVO ---
+  ao_vivo:
     if: github.event.schedule == '*/5 * * * *' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do Código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configurar Ambiente (Ex: Python)
+      - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Instalar Dependencias
+      - name: Instalar Dependências
         run: pip install -r requirements.txt
 
-      - name: Executar Crawler
-        run: python crawler.py --mode live
+      - name: Rodar Crawler Ao Vivo
+        run: python crawler_ao_vivo.py
 
-  # --- JOB DO RESTO (A CADA 6 HORAS) ---
-  processamento_6h:
-    # Só executa se for o cron de 6 horas ou disparo manual
+      - name: Salvar Dados
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add games.json
+          git commit -m "Update: Dados ao vivo" || echo "Sem mudanças"
+          git push
+
+  # --- DEMAIS CRAWLERS (6 HORAS) ---
+  processamento_geral:
     if: github.event.schedule == '0 */6 * * *' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do Código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Executar Processamento Pesado
-        run: |
-          echo "Iniciando limpeza e análise de dados das últimas 6 horas..."
-          python main.py --mode full
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
+      - name: Instalar Dependências
+        run: pip install -r requirements.txt
+
+      - name: Rodar Crawlers de Detalhes e Formas
+        run: |
+          python crawler.py
+          python crawler_details.py
+          python crawler_forma.py
+          python analise_ia.py
+
+      - name: Salvar Tudo
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update: Processamento 6h completo" || echo "Sem mudanças"
+          git push
