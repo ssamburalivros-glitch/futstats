@@ -1,4 +1,4 @@
-name: Monitoramento FutStats
+Name: Monitoramento FutStats
 
 on:
   schedule:
@@ -20,21 +20,25 @@ jobs:
           python-version: '3.10'
 
       - name: Instalar Dependências
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install supabase beautifulsoup4 requests # Garante as novas libs do Paulistão
 
-      - name: Rodar Crawler Ao Vivo
+      - name: Rodar Crawlers Rápidos
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: python crawler_ao_vivo.py
+        run: |
+          python crawler_ao_vivo.py
+          python crawler_paulistao.py
 
       - name: Salvar Dados
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add games.json
-          git commit -m "Update: Dados ao vivo" || echo "Sem mudanças"
+          git add games.json paulistao_data.json || echo "Arquivo não encontrado"
+          git commit -m "Update: Dados ao vivo e Paulistão" || echo "Sem mudanças"
           git push
 
   processamento_geral:
@@ -50,7 +54,9 @@ jobs:
           python-version: '3.10'
 
       - name: Instalar Dependências
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install supabase beautifulsoup4 requests
 
       - name: Rodar Crawlers e IA
         env:
@@ -69,5 +75,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Update: Processamento 6h completo" || echo "Sem mudanças"
+          git commit -m "Update: Processamento 6h completo (incluindo Paulistão)" || echo "Sem mudanças"
           git push
