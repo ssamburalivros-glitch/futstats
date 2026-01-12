@@ -1,4 +1,4 @@
-Monitoramento FutStats
+name: Monitoramento FutStats
 
 on:
   schedule:
