@@ -1,80 +1,112 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 from supabase import create_client
-import os
+import datetime
 
-# --- CONFIGURAÇÕES DO SUPABASE ---
-# Se estiver no GitHub Actions, use segredos. Se for local, substitua as strings.
-SUPABASE_URL = "SUA_URL_DO_SUPABASE"
-SUPABASE_KEY = "SUA_CHAVE_ANON_OU_SERVICE_ROLE"
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+# --- CONFIGURAÇÃO DE CONEXÃO (GITHUB SECRETS) ---
+# O script busca automaticamente as chaves configuradas no GitHub Settings > Secrets
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
+def iniciar_supabase():
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        print("❌ ERRO: SUPABASE_URL ou SUPABASE_KEY não encontrados.")
+        print("Certifique-se de configurar as 'Secrets' no seu repositório GitHub.")
+        return None
+    return create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# URL da ESPN para o Campeonato Paulista
 URL_ESPN = "https://www.espn.com.br/futebol/competicao/_/id/87/campeonato-paulista"
-headers = {"User-Agent": "Mozilla/5.0"}
-
-def limpar_tabelas():
-    # Limpa os dados antigos para inserir os novos (Refresh total)
-    supabase.table("paulistao_classificacao").delete().neq("grupo", "vazio").execute()
-    supabase.table("paulistao_jogos").delete().neq("time_casa", "vazio").execute()
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+}
 
 def crawler():
-    print("🚀 Iniciando Crawler Paulistão 2026...")
-    response = requests.get(URL_ESPN, headers=headers)
-    soup = BeautifulSoup(response.content, 'html.parser')
+    supabase = iniciar_supabase()
+    if not supabase:
+        return
 
-    # 1. Extrair Classificação
-    tabelas = soup.find_all("table", class_="Table")
-    letras = ['A', 'B', 'C', 'D']
+    print(f"🕒 Início do Crawler: {datetime.datetime.now().strftime('%H:%M:%S')}")
     
-    classificacao_data = []
-    for i, tabela in enumerate(tabelas[:4]):
-        rows = tabela.find_all("tr")[1:]
-        for row in rows:
-            cols = row.find_all("td")
-            if len(cols) < 2: continue
-            
-            nome = row.find("span", class_="TeamLink__Name").text.strip()
-            logo = row.find("img")["src"] if row.find("img") else ""
-            pts = cols[-1].text.strip()
-            jgs = cols[2].text.strip()
-            
-            classificacao_data.append({
-                "grupo": f"Grupo {letras[i]}",
-                "time_nome": nome,
-                "time_logo": logo,
-                "pontos": int(pts) if pts.isdigit() else 0,
-                "jogos": int(jgs) if jgs.isdigit() else 0
-            })
+    try:
+        response = requests.get(URL_ESPN, headers=HEADERS, timeout=30)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-    # 2. Extrair Jogos
-    jogos_data = []
-    cards = soup.find_all("section", class_="Scoreboard")
-    for card in cards:
-        try:
-            casa = card.find("div", class_="ScoreboardScoreCell__Item--home")
-            fora = card.find("div", class_="ScoreboardScoreCell__Item--away")
+        # --- 1. EXTRAÇÃO DA CLASSIFICAÇÃO (GRUPOS) ---
+        print("🔍 Coletando tabelas de classificação...")
+        tabelas = soup.find_all("table", class_="Table")
+        letras_grupos = ['A', 'B', 'C', 'D']
+        classificacao_payload = []
+
+        for i, tabela in enumerate(tabelas[:4]):
+            if i >= len(letras_grupos): break
+            rows = tabela.find_all("tr")[1:] # Ignora o header
             
-            status = card.find("div", class_="Scoreboard__Status").text.strip()
-            is_live = "AO VIVO" in status.upper() or ":" not in status # Lógica simples para live
+            for row in rows:
+                cols = row.find_all("td")
+                if len(cols) < 2: continue
+                
+                try:
+                    nome_time = row.find("span", class_="TeamLink__Name").text.strip()
+                    logo_time = row.find("img")["src"] if row.find("img") else ""
+                    # Posições comuns na ESPN: J (índice 2), PTS (último índice)
+                    jogos = cols[2].text.strip()
+                    pontos = cols[-1].text.strip()
 
-            jogos_data.append({
-                "time_casa": casa.find("div", class_="ScoreboardScoreCell__Name").text.strip(),
-                "time_fora": fora.find("div", class_="ScoreboardScoreCell__Name").text.strip(),
-                "logo_casa": casa.find("img")["src"] if casa.find("img") else "",
-                "logo_fora": fora.find("img")["src"] if fora.find("img") else "",
-                "status_ou_horario": status,
-                "is_live": is_live
-            })
-        except: continue
+                    classificacao_payload.append({
+                        "grupo": f"Grupo {letras_grupos[i]}",
+                        "time_nome": nome_time,
+                        "time_logo": logo_time,
+                        "pontos": int(pontos) if pontos.isdigit() else 0,
+                        "jogos": int(jogos) if jogos.isdigit() else 0
+                    })
+                except Exception as e:
+                    print(f"⚠️ Erro ao processar linha de time: {e}")
 
-    # 3. Enviar para o Supabase
-    limpar_tabelas()
-    if classificacao_data:
-        supabase.table("paulistao_classificacao").insert(classificacao_data).execute()
-    if jogos_data:
-        supabase.table("paulistao_jogos").insert(jogos_data).execute()
-    
-    print(f"✅ Sucesso! {len(classificacao_data)} times e {len(jogos_data)} jogos atualizados.")
+        # --- 2. EXTRAÇÃO DOS JOGOS ---
+        print("🔍 Coletando agenda de jogos...")
+        jogos_payload = []
+        cards_jogos = soup.find_all("section", class_="Scoreboard")
+
+        for card in cards_jogos:
+            try:
+                casa = card.find("div", class_="ScoreboardScoreCell__Item--home")
+                fora = card.find("div", class_="ScoreboardScoreCell__Item--away")
+                status = card.find("div", class_="Scoreboard__Status").text.strip()
+                
+                # Verifica se é Live (se houver placar ou tempo rolando)
+                is_live = "AO VIVO" in status.upper() or "'" in status
+
+                jogos_payload.append({
+                    "time_casa": casa.find("div", class_="ScoreboardScoreCell__Name").text.strip(),
+                    "time_fora": fora.find("div", class_="ScoreboardScoreCell__Name").text.strip(),
+                    "logo_casa": casa.find("img")["src"] if casa.find("img") else "",
+                    "logo_fora": fora.find("img")["src"] if fora.find("img") else "",
+                    "status_ou_horario": status,
+                    "is_live": is_live
+                })
+            except Exception as e:
+                continue
+
+        # --- 3. ATUALIZAÇÃO NO SUPABASE (DELETE + INSERT) ---
+        print("📤 Enviando dados para o Supabase...")
+        
+        # Limpa as tabelas antes de inserir os novos dados (Refresh total)
+        supabase.table("paulistao_classificacao").delete().neq("time_nome", "null").execute()
+        supabase.table("paulistao_jogos").delete().neq("time_casa", "null").execute()
+
+        if classificacao_payload:
+            supabase.table("paulistao_classificacao").insert(classificacao_payload).execute()
+        
+        if jogos_payload:
+            supabase.table("paulistao_jogos").insert(jogos_payload).execute()
+
+        print(f"✅ Sucesso! {len(classificacao_payload)} times e {len(jogos_payload)} jogos atualizados.")
+
+    except Exception as e:
+        print(f"❌ Erro crítico no Crawler: {e}")
 
 if __name__ == "__main__":
     crawler()
