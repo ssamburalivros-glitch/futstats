@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Inteligência Neural no Futebol | Home</title>
-    
+    <title>FutStats | Inteligência Neural no Futebol</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
-<body id="home-page">
+<body>
 
 <header>
     <div class="header-content">
@@ -20,9 +18,9 @@
 
         <div class="nav-container">
             <nav class="nav-links">
-                <a href="#classificacao" class="active">CLASSIFICAÇÃO</a> 
-                <a href="#arena">ARENA H2H</a> 
-                <a href="#aovivo">JOGOS AO VIVO</a> 
+                <a href="classificacao.html">CLASSIFICAÇÃO</a> 
+                <a href="arena.html">ARENA H2H</a> 
+                <a href="aovivo.html">JOGOS AO VIVO</a> 
                 <a href="paulistao.html" class="nav-item-paulistao">PAULISTÃO 2026</a>
             </nav>
             <button class="btn-download">BAIXAR APP</button>
@@ -30,80 +28,34 @@
     </div>
 </header>
 
-<section id="ia-insights-container">
-    <div class="ia-wrapper">
-        <div class="ia-icon-box">
-            <span class="ia-status-pulse"></span>
-            <span class="ia-robot-icon">🤖</span>
-        </div>
-        <div class="ia-text-content">
-            <span class="ia-label">FutStats Neural Insight:</span>
-            <p id="ia-output">Carregando análise...</p>
-        </div>
-    </div>
-</section>
-
 <main>
+    <section id="ia-insights-container">
+        <div class="ia-wrapper">
+            <div class="ia-icon-box">
+                <span class="ia-status-pulse"></span>
+                <span class="ia-robot-icon">🤖</span>
+            </div>
+            <div class="ia-text-content">
+                <span class="ia-label">FutStats Neural Insight:</span>
+                <p id="ia-output">Analisando tendências do mercado...</p>
+            </div>
+        </div>
+    </section>
+
     <section class="hero-carousel">
-        <div class="carousel-slides"></div>
+        <div class="carousel-slides">
+            </div>
         <div class="carousel-controls">
             <button class="control-btn" id="prev-slide">&lt;</button>
             <div class="carousel-dots"></div>
             <button class="control-btn" id="next-slide">&gt;</button>
         </div>
     </section>
-
-    <section id="classificacao" class="page-section">
-        <div class="section-header">
-            <h2 class="cyber-title">TABELA NEURAL</h2>
-        </div>
-        <div id="neural-table-container">
-            </div>
-    </section>
-
-    <section id="arena" class="page-section" style="padding-top: 100px;">
-        <h2 class="cyber-title">ARENA H2H</h2>
-        <div id="arena-content">
-            </div>
-    </section>
-
-    <section id="aovivo" class="page-section" style="padding-top: 100px;">
-        <h2 class="cyber-title">JOGOS AO VIVO</h2>
-        <div id="live-games-container">
-            </div>
-    </section>
-
-    <section id="news-details-panel" style="display: none;">
-        <h3 id="details-title">Título da Notícia</h3>
-        <p id="details-content">Conteúdo detalhado.</p>
-    </section>
 </main>
 
 <footer style="background: #000; border-top: 1px solid #1a1a1a; padding: 60px 6%; margin-top: 50px;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px;">
-        <div>
-            <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px; font-family: 'Montserrat';">FUTSTATS</h4>
-            <p style="color: #666; font-size: 0.7rem; line-height: 2;">A vanguarda da análise de futebol. Tecnologia neural aplicada ao desempenho esportivo para entusiastas e profissionais.</p>
-        </div>
-        <div>
-            <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px; font-family: 'Montserrat';">NAVEGAÇÃO</h4>
-            <ul style="list-style: none; font-size: 0.7rem; color: #a0a0a0; line-height: 2.5;">
-                <li><a href="#classificacao" style="text-decoration: none; color: inherit;">Tabelas Oficiais</a></li>
-                <li><a href="#arena" style="text-decoration: none; color: inherit;">Comparador H2H</a></li>
-                <li><a href="#aovivo" style="text-decoration: none; color: inherit;">Central Ao Vivo</a></li>
-            </ul>
-        </div>
-        <div>
-            <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px; font-family: 'Montserrat';">SUPORTE</h4>
-            <ul style="list-style: none; font-size: 0.7rem; color: #a0a0a0; line-height: 2.5;">
-                <li><a href="#" style="text-decoration: none; color: inherit;">Privacidade</a></li>
-                <li><a href="#" style="text-decoration: none; color: inherit;">Termos de Uso</a></li>
-                <li><a href="#" style="text-decoration: none; color: inherit;">Contato</a></li>
-            </ul>
-        </div>
-    </div>
-    <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #111; text-align: center; color: #444; font-size: 0.6rem; letter-spacing: 1px;">
-        © 2026 FUTSTATS NEURAL TECHNOLOGY. TODOS OS DIREITOS RESERVADOS.
+    <div style="text-align: center; color: #444; font-size: 0.6rem; letter-spacing: 1px;">
+        © 2026 FUTSTATS NEURAL TECHNOLOGY.
     </div>
 </footer>
 
