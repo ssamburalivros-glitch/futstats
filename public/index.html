@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Inteligência Neural</title>
+    <title>FutStats | Inteligência Neural no Futebol</title>
+    
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body id="home-page">
 
 <header>
     <div class="header-content">
         <a href="index.html" class="brand-container">
             <span class="logo">FUTSTATS</span> 
         </a>
+
         <div class="nav-container">
             <nav class="nav-links">
                 <a href="classificacao.html">CLASSIFICAÇÃO</a> 
@@ -27,38 +30,57 @@
     </div>
 </header>
 
-<main>
-    <section id="ia-insights-container">
-        <div class="ia-wrapper">
-            <div class="ia-icon-box">
-                <span class="ia-status-pulse"></span>
-                <span class="ia-robot-icon">🤖</span>
-            </div>
-            <div class="ia-text-content">
-                <span class="ia-label">FutStats Neural Insight:</span>
-                <p id="ia-output">Carregando análise neural...</p>
-            </div>
+<section id="ia-insights-container">
+    <div class="ia-wrapper">
+        <div class="ia-icon-box">
+            <span class="ia-status-pulse"></span>
+            <span class="ia-robot-icon">🤖</span>
         </div>
-    </section>
+        <div class="ia-text-content">
+            <span class="ia-label">FutStats Neural Insight:</span>
+            <p id="ia-output">Carregando análise...</p>
+        </div>
+    </div>
+</section>
 
+<main>
     <section class="hero-carousel">
         <div class="carousel-slides" id="carousel-slides">
-            <div class="slide active">
-                <img src="img/banner1.jpg" alt="FutStats">
-                <div class="slide-content">
-                    <h2>O FUTURO DO FUTEBOL É ORIENTADO POR DADOS</h2>
-                    <p>Utilize inteligência neural para suas análises.</p>
-                </div>
             </div>
-        </div>
         
         <div class="carousel-controls">
             <button class="control-btn" id="prev-slide">&lt;</button>
-            <div class="carousel-dots" id="carousel-dots"></div>
+            <div class="carousel-dots" id="carousel-dots">
+                </div>
             <button class="control-btn" id="next-slide">&gt;</button>
         </div>
     </section>
+
+    <section id="news-details-panel" style="display: none;">
+        <h3 id="details-title">Título</h3>
+        <p id="details-content">Conteúdo</p>
+    </section>
 </main>
+
+<footer style="background: #000; border-top: 1px solid #1a1a1a; padding: 60px 6%; margin-top: 50px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px;">
+        <div>
+            <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px; font-family: 'Montserrat';">FUTSTATS</h4>
+            <p style="color: #666; font-size: 0.7rem; line-height: 2;">A vanguarda da análise de futebol. Tecnologia neural aplicada ao desempenho esportivo.</p>
+        </div>
+        <div>
+            <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px; font-family: 'Montserrat';">NAVEGAÇÃO</h4>
+            <ul style="list-style: none; font-size: 0.7rem; color: #a0a0a0; line-height: 2.5;">
+                <li><a href="classificacao.html" style="text-decoration: none; color: inherit;">Tabelas Oficiais</a></li>
+                <li><a href="arena.html" style="text-decoration: none; color: inherit;">Comparador H2H</a></li>
+                <li><a href="aovivo.html" style="text-decoration: none; color: inherit;">Central Ao Vivo</a></li>
+            </ul>
+        </div>
+    </div>
+    <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #111; text-align: center; color: #444; font-size: 0.6rem; letter-spacing: 1px;">
+        © 2026 FUTSTATS NEURAL TECHNOLOGY.
+    </div>
+</footer>
 
 <script src="script.js"></script>
 </body>
