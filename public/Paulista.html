@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutStats - Paulistão 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="brand-container">
+                <span class="logo">FUTSTATS</span> 
+            </a>
+
+            <div class="nav-container">
+                <nav class="nav-links">
+                    <a href="index.html">Classificação</a>
+                    <a href="index.html">Arena H2H</a>
+                    <a href="index.html">Jogos Ao Vivo</a>
+                    <a href="paulistao.html" class="active">Paulistão 2026</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-content">
+        
+        <div class="paulista-header">
+            <h1 class="cyber-title">Campeonato Paulista <span style="color: #00ff00;">2026</span></h1>
+            <p style="color: #a0a0a0; font-size: 0.85rem;">Dados integrados via Supabase Cloud.</p>
+        </div>
+
+        <h2 style="font-size: 1.1rem; margin-bottom: 25px; color: #fff; border-left: 3px solid #00ff00; padding-left: 10px;">Fase de Grupos</h2>
+        <div class="groups-grid" id="groups-container">
+            <p style="color: #444;">Conectando ao banco de dados...</p>
+        </div>
+
+        <h2 style="font-size: 1.1rem; margin-bottom: 25px; color: #fff; margin-top: 60px; border-left: 3px solid #00ff00; padding-left: 10px;">Arena de Jogos</h2>
+        <div class="paulista-matches-grid" id="matches-container">
+            </div>
+
+    </div>
+
+    <script>
+        // CONFIGURAÇÕES SUPABASE
+        const SB_URL = "SUA_URL_DO_SUPABASE";
+        const SB_KEY = "SUA_CHAVE_ANON";
+
+        async function carregarPaulistao() {
+            try {
+                // 1. PUXAR DADOS DO SUPABASE (Classificação)
+                const resClas = await fetch(`${SB_URL}/rest/v1/paulistao_classificacao?select=*&order=pontos.desc`, {
+                    headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+                });
+                const dadosClas = await resClas.json();
+
+                // 2. PUXAR DADOS DO SUPABASE (Jogos)
+                const resJogos = await fetch(`${SB_URL}/rest/v1/paulistao_jogos?select=*&order=updated_at.desc`, {
+                    headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+                });
+                const dadosJogos = await resJogos.json();
+
+                // ORGANIZAR POR GRUPOS
+                const gruposAgrupados = {};
+                dadosClas.forEach(item => {
+                    if (!gruposAgrupados[item.grupo]) {
+                        gruposAgrupados[item.grupo] = { title: item.grupo, teams: [] };
+                    }
+                    gruposAgrupados[item.grupo].teams.push(item);
+                });
+
+                // RENDERIZAR GRUPOS
+                const groupsContainer = document.getElementById('groups-container');
+                groupsContainer.innerHTML = '';
+                
+                Object.values(gruposAgrupados).sort((a,b) => a.title.localeCompare(b.title)).forEach(grupo => {
+                    let linhas = '';
+                    grupo.teams.forEach((time, idx) => {
+                        const cor = idx < 2 ? 'style="color:#00ff00"' : '';
+                        linhas += `
+                            <tr>
+                                <td ${cor}>${idx + 1}º</td>
+                                <td>
+                                    <div class="team-flex">
+                                        <img src="${time.time_logo}" onerror="this.src='https://via.placeholder.com/20'">
+                                        <span ${cor}>${time.time_nome}</span>
+                                    </div>
+                                </td>
+                                <td class="pts-high">${time.pontos}</td>
+                                <td>${time.jogos}</td>
+                            </tr>
+                        `;
+                    });
+
+                    groupsContainer.innerHTML += `
+                        <div class="group-card">
+                            <div class="group-header"><span>${grupo.title}</span><span>PTS</span></div>
+                            <table class="group-table">
+                                <thead><tr><th>#</th><th>Time</th><th>PTS</th><th>J</th></tr></thead>
+                                <tbody>${linhas}</tbody>
+                            </table>
+                        </div>
+                    `;
+                });
+
+                // RENDERIZAR JOGOS
+                const matchesContainer = document.getElementById('matches-container');
+                matchesContainer.innerHTML = '';
+
+                dadosJogos.forEach(jogo => {
+                    const isLive = jogo.is_live;
+                    const statusClass = isLive ? 'status-live' : 'status-future';
+                    const statusText = isLive ? '• AO VIVO' : jogo.status_ou_horario;
+
+                    matchesContainer.innerHTML += `
+                        <div class="match-row-card">
+                            <div class="team-match-info">
+                                <img src="${jogo.logo_casa}">
+                                <span>${jogo.time_casa}</span>
+                            </div>
+                            <div style="text-align: center; min-width: 90px;">
+                                <div class="${statusClass}">${statusText}</div>
+                                ${!isLive ? '<div class="match-vs">VS</div>' : ''}
+                            </div>
+                            <div class="team-match-info right">
+                                <span>${jogo.time_fora}</span>
+                                <img src="${jogo.logo_fora}">
+                            </div>
+                        </div>
+                    `;
+                });
+
+            } catch (e) {
+                console.error("Erro:", e);
+                document.getElementById('groups-container').innerHTML = "<p>Erro ao conectar com Supabase.</p>";
+            }
+        }
+
+        carregarPaulistao();
+    </script>
+</body>
+</html>
