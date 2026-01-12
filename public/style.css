@@ -500,4 +500,69 @@ td {
         font-size: 1rem;
     }
 }
+/* BOTÃO FLUTUANTE PAULISTÃO */
+.paulistao-shortcut {
+    position: fixed;
+    bottom: 30px;
+    left: 30px; /* Ou 'right: 30px' se preferir do outro lado */
+    z-index: 9999;
+}
+
+.btn-paulistao {
+    background: #00ff00; /* Verde neon para destacar */
+    color: #000;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 20px rgba(0, 255, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-paulistao:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 255, 0, 0.4);
+    background: #fff;
+}
+
+/* Animação de Pulso (Bolinha que pisca) */
+.pulse-icon {
+    width: 8px;
+    height: 8px;
+    background: #000;
+    border-radius: 50%;
+    position: relative;
+}
+
+.pulse-icon::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    border-radius: 50%;
+    animation: pulse-animation 1.5s infinite;
+}
+
+@keyframes pulse-animation {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(3); opacity: 0; }
+}
+
+/* Esconder ou ajustar no Mobile para não tampar conteúdo importante */
+@media (max-width: 768px) {
+    .paulistao-shortcut {
+        bottom: 20px;
+        left: 20px;
+    }
+    .btn-paulistao {
+        padding: 10px 15px;
+        font-size: 0.6rem;
+    }
+}
 
