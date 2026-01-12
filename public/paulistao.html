@@ -3,9 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats - Paulistão 2026</title>
+    <title>Paulistão 2026 | FutStats Neural</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* --- ESTILOS ESPECÍFICOS DO PAULISTÃO (MANTENDO O TEMA DARK) --- */
+        body {
+            background-color: #050505; /* Fundo quase preto */
+            color: #f0f0f0;
+        }
+
+        .paulistao-hero {
+            padding: 120px 20px 40px; /* Espaço para o menu fixo */
+            text-align: center;
+            background: linear-gradient(to bottom, #000000, #111111);
+            border-bottom: 1px solid #222;
+        }
+
+        .paulistao-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+
+        .highlight-green {
+            color: #00ff00; /* O verde neon da identidade visual */
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .container-dados {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Loading Animation */
+        #loading-status {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #666;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Grid dos Grupos */
+        .grupos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsivo */
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .grupo-card {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .grupo-header {
+            background: #1a1a1a;
+            padding: 15px;
+            font-weight: 700;
+            border-bottom: 1px solid #333;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .grupo-header::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+        }
+
+        /* Tabela Estilizada */
+        .tabela-paulista {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .tabela-paulista th {
+            text-align: left;
+            padding: 10px;
+            color: #888;
+            font-weight: 600;
+            border-bottom: 1px solid #222;
+            font-size: 0.7rem;
+        }
+
+        .tabela-paulista td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .col-time {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .col-pts {
+            color: #fff;
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        .col-jogos {
+            text-align: center;
+            color: #666;
+        }
+
+        /* Seção de Jogos */
+        .jogos-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            border-left: 4px solid #00ff00;
+            padding-left: 15px;
+        }
+
+        .jogos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .jogo-card {
+            background: #111;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .time-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            width: 30%;
+            text-align: center;
+        }
+
+        .time-info img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .time-info span {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .placar-info {
+            width: 40%;
+            text-align: center;
+        }
+
+        .vs {
+            font-size: 0.8rem;
+            color: #444;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #222;
+            color: #888;
+        }
+
+        .status-badge.live {
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+    </style>
 </head>
 <body>
 
@@ -14,132 +212,134 @@
             <a href="index.html" class="brand-container">
                 <span class="logo">FUTSTATS</span> 
             </a>
-
             <div class="nav-container">
                 <nav class="nav-links">
-                    <a href="index.html">Classificação</a>
-                    <a href="index.html">Arena H2H</a>
-                    <a href="index.html">Jogos Ao Vivo</a>
-                    <a href="paulistao.html" class="active">Paulistão 2026</a>
+                    <a href="classificacao.html">CLASSIFICAÇÃO</a> 
+                    <a href="arena.html">ARENA H2H</a> 
+                    <a href="aovivo.html">JOGOS AO VIVO</a> 
+                    <a href="paulistao.html" class="active nav-item-paulistao">PAULISTÃO 2026</a>
                 </nav>
             </div>
         </div>
     </header>
 
-    <div class="page-content">
-        
-        <div class="paulista-header">
-            <h1 class="cyber-title">Campeonato Paulista <span style="color: #00ff00;">2026</span></h1>
-            <p style="color: #a0a0a0; font-size: 0.85rem;">Dados integrados via Supabase Cloud.</p>
-        </div>
+    <main>
+        <section class="paulistao-hero">
+            <h1 class="paulistao-title">PAULISTÃO <span class="highlight-green">2026</span></h1>
+            <p style="color: #888; font-size: 0.9rem;">DADOS OFICIAIS SINCRONIZADOS VIA REDE NEURAL</p>
+        </section>
 
-        <h2 style="font-size: 1.1rem; margin-bottom: 25px; color: #fff; border-left: 3px solid #00ff00; padding-left: 10px;">Fase de Grupos</h2>
-        <div class="groups-grid" id="groups-container">
-            <p style="color: #444;">Conectando ao banco de dados...</p>
-        </div>
-
-        <h2 style="font-size: 1.1rem; margin-bottom: 25px; color: #fff; margin-top: 60px; border-left: 3px solid #00ff00; padding-left: 10px;">Arena de Jogos</h2>
-        <div class="paulista-matches-grid" id="matches-container">
+        <div class="container-dados">
+            
+            <div id="loading-status">
+                <p>🔄 Conectando ao Banco de Dados Neural...</p>
             </div>
 
-    </div>
+            <section id="conteudo-principal" style="display: none;">
+                <h2 style="margin-bottom: 20px; font-size: 1.5rem;">CLASSIFICAÇÃO POR GRUPOS</h2>
+                
+                <div id="tabela-grupos" class="grupos-grid">
+                    </div>
+
+                <div class="jogos-section">
+                    <h2>JOGOS DA RODADA</h2>
+                    <div id="lista-jogos" class="jogos-grid">
+                        <p style="color: #666; font-style: italic;">Aguardando definição da rodada...</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer style="background: #000; border-top: 1px solid #1a1a1a; padding: 60px 6%; margin-top: 50px;">
+        <div style="text-align: center; color: #444; font-size: 0.6rem; letter-spacing: 1px;">
+            © 2026 FUTSTATS NEURAL TECHNOLOGY.
+        </div>
+    </footer>
 
     <script>
-        // CONFIGURAÇÕES SUPABASE
-        const SB_URL = sb_publishable_hI8W20OATSblRa883gZl9Q_mQdi2MbI;
-        const SB_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A;
+        // --- 1. CONFIGURAÇÃO (COLOQUE SUAS CHAVES AQUI) ---
+        // Se você não colocar a URL e a KEY corretas, vai ficar carregando para sempre.
+        const SUPABASE_URL = 'sb_publishable_hI8W20OATSblRa883gZl9Q_mQdi2MbI'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A';
+        
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function carregarPaulistao() {
+        async function carregarDados() {
             try {
-                // 1. PUXAR DADOS DO SUPABASE (Classificação)
-                const resClas = await fetch(`${SB_URL}/rest/v1/paulistao_classificacao?select=*&order=pontos.desc`, {
-                    headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
-                });
-                const dadosClas = await resClas.json();
+                // Busca tabela de classificação
+                const { data: classificacao, error: errClass } = await _supabase
+                    .from('paulistao_classificacao')
+                    .select('*')
+                    .order('pontos', { ascending: false }); // Ordena por pontos
 
-                // 2. PUXAR DADOS DO SUPABASE (Jogos)
-                const resJogos = await fetch(`${SB_URL}/rest/v1/paulistao_jogos?select=*&order=updated_at.desc`, {
-                    headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
-                });
-                const dadosJogos = await resJogos.json();
+                if (errClass) throw errClass;
 
-                // ORGANIZAR POR GRUPOS
-                const gruposAgrupados = {};
-                dadosClas.forEach(item => {
-                    if (!gruposAgrupados[item.grupo]) {
-                        gruposAgrupados[item.grupo] = { title: item.grupo, teams: [] };
-                    }
-                    gruposAgrupados[item.grupo].teams.push(item);
-                });
+                // Esconde loading e mostra conteúdo
+                document.getElementById('loading-status').style.display = 'none';
+                document.getElementById('conteudo-principal').style.display = 'block';
 
-                // RENDERIZAR GRUPOS
-                const groupsContainer = document.getElementById('groups-container');
-                groupsContainer.innerHTML = '';
-                
-                Object.values(gruposAgrupados).sort((a,b) => a.title.localeCompare(b.title)).forEach(grupo => {
-                    let linhas = '';
-                    grupo.teams.forEach((time, idx) => {
-                        const cor = idx < 2 ? 'style="color:#00ff00"' : '';
-                        linhas += `
-                            <tr>
-                                <td ${cor}>${idx + 1}º</td>
-                                <td>
-                                    <div class="team-flex">
-                                        <img src="${time.time_logo}" onerror="this.src='https://via.placeholder.com/20'">
-                                        <span ${cor}>${time.time_nome}</span>
-                                    </div>
-                                </td>
-                                <td class="pts-high">${time.pontos}</td>
-                                <td>${time.jogos}</td>
-                            </tr>
-                        `;
-                    });
+                renderizarTabelas(classificacao);
 
-                    groupsContainer.innerHTML += `
-                        <div class="group-card">
-                            <div class="group-header"><span>${grupo.title}</span><span>PTS</span></div>
-                            <table class="group-table">
-                                <thead><tr><th>#</th><th>Time</th><th>PTS</th><th>J</th></tr></thead>
-                                <tbody>${linhas}</tbody>
-                            </table>
-                        </div>
-                    `;
-                });
-
-                // RENDERIZAR JOGOS
-                const matchesContainer = document.getElementById('matches-container');
-                matchesContainer.innerHTML = '';
-
-                dadosJogos.forEach(jogo => {
-                    const isLive = jogo.is_live;
-                    const statusClass = isLive ? 'status-live' : 'status-future';
-                    const statusText = isLive ? '• AO VIVO' : jogo.status_ou_horario;
-
-                    matchesContainer.innerHTML += `
-                        <div class="match-row-card">
-                            <div class="team-match-info">
-                                <img src="${jogo.logo_casa}">
-                                <span>${jogo.time_casa}</span>
-                            </div>
-                            <div style="text-align: center; min-width: 90px;">
-                                <div class="${statusClass}">${statusText}</div>
-                                ${!isLive ? '<div class="match-vs">VS</div>' : ''}
-                            </div>
-                            <div class="team-match-info right">
-                                <span>${jogo.time_fora}</span>
-                                <img src="${jogo.logo_fora}">
-                            </div>
-                        </div>
-                    `;
-                });
-
-            } catch (e) {
-                console.error("Erro:", e);
-                document.getElementById('groups-container').innerHTML = "<p>Erro ao conectar com Supabase.</p>";
+            } catch (error) {
+                console.error("Erro Fatal:", error);
+                document.getElementById('loading-status').innerHTML = 
+                    `<p style="color: #ff4444;">❌ Erro ao carregar dados. Verifique a conexão API.</p>`;
             }
         }
 
-        carregarPaulistao();
+        function renderizarTabelas(dados) {
+            const container = document.getElementById('tabela-grupos');
+            const grupos = ['Grupo A', 'Grupo B', 'Grupo C', 'Grupo D'];
+            let html = '';
+
+            grupos.forEach(grupo => {
+                // Filtra os times deste grupo
+                const timesDoGrupo = dados.filter(item => item.grupo && item.grupo.toUpperCase() === grupo.toUpperCase());
+
+                // Cria o card do grupo
+                html += `
+                <div class="grupo-card">
+                    <div class="grupo-header">${grupo}</div>
+                    <table class="tabela-paulista">
+                        <thead>
+                            <tr>
+                                <th style="padding-left: 15px;">TIME</th>
+                                <th style="text-align: center;">J</th>
+                                <th style="text-align: center; color: #fff;">PTS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                if (timesDoGrupo.length === 0) {
+                    html += `<tr><td colspan="3" style="text-align:center; color:#444; padding:20px;">Aguardando dados...</td></tr>`;
+                } else {
+                    timesDoGrupo.forEach(time => {
+                        html += `
+                        <tr>
+                            <td>
+                                <div class="col-time">
+                                    <img src="${time.time_logo}" alt="logo" width="24" height="24" onerror="this.style.display='none'">
+                                    <span>${time.time_nome}</span>
+                                </div>
+                            </td>
+                            <td class="col-jogos">${time.jogos}</td>
+                            <td class="col-pts">${time.pontos}</td>
+                        </tr>
+                        `;
+                    });
+                }
+
+                html += `</tbody></table></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Inicia
+        carregarDados();
     </script>
 </body>
 </html>
