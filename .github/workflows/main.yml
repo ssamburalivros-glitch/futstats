@@ -62,6 +62,7 @@ jobs:
           python crawler_details.py
           python crawler_forma.py
           python analise_ia.py
+          python crawler_paulistao.py
 
       - name: Salvar Tudo
         run: |
