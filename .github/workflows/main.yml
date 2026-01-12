@@ -2,8 +2,8 @@ name: Monitoramento FutStats
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
-    - cron: '0 */6 * * *'
+    - cron: '*/5 * * * *'  # Rápido: Ao Vivo
+    - cron: '0 */6 * * *'  # Lento: Calendário, Classificação e IA
   workflow_dispatch:
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add games.json paulistao_data.json || echo "Arquivos json não encontrados"
           git commit -m "Update: Dados ao vivo e Paulistao" || echo "Sem mudanças para commitar"
-          git push
+          git push || echo "Erro ao dar push ou nada para subir"
 
   processamento_geral:
     if: github.event.schedule == '0 */6 * * *' || github.event_name == 'workflow_dispatch'
@@ -54,10 +54,11 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Instalar Dependências
+      - name: Instalar Dependências e Playwright
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 supabase
+          pip install requests beautifulsoup4 supabase playwright
+          playwright install chromium # Necessário para o crawler de calendário clicar no site
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Rodar Crawlers e IA
@@ -71,11 +72,12 @@ jobs:
           python crawler_forma.py
           python analise_ia.py
           python crawler_paulistao.py
+          python crawler_calendario.py # NOVO: Roda o calendário robusto aqui
 
       - name: Salvar Tudo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Update: Processamento 6h completo" || echo "Sem mudanças para commitar"
-          git push
+          git commit -m "Update: Processamento 6h completo com Calendário" || echo "Sem mudanças para commitar"
+          git push || echo "Erro ao dar push ou nada para subir"
