@@ -283,43 +283,54 @@ function renderJogos(dados) {
     let html = '';
     let dataAtual = '';
 
-    // Função para formatar o nome do time para o padrão da URL do site de logos
+    // Imagem simbólica (escudo genérico de futebol)
+    const LOGO_RESERVA = "https://cdn-icons-png.flaticon.com/512/53/53283.png"; 
+
     const formatarNomeLogo = (nome) => {
+        if(!nome) return "";
         return nome.toLowerCase()
             .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove acentos
-            .replace(/\s+/g, '-') // troca espaço por hífen
-            .replace(/[^a-z0-9-]/g, ''); // remove caracteres especiais
+            .replace(/\s+/g, '-') 
+            .replace(/[^a-z0-9-]/g, '');
     };
 
     dados.forEach(j => {
         if (j.data_jogo !== dataAtual) {
             dataAtual = j.data_jogo;
-            html += `<div class="data-divider" style="color:#00ff00; font-weight:bold; margin:15px 0; border-bottom: 1px solid #222;">📅 ${dataAtual}</div>`;
+            html += `<div class="data-divider" style="color:#00ff00; font-weight:bold; margin:20px 0 10px 0; border-bottom: 1px solid #222; font-size: 14px;">📅 ${dataAtual}</div>`;
         }
 
-        // Tenta buscar no logodetimes.com (ex: santos, palmeiras, corinthians, sao-paulo)
         const slugCasa = formatarNomeLogo(j.time_casa);
         const slugFora = formatarNomeLogo(j.time_fora);
         
+        // Tentativa de link principal
         const logoCasa = `https://logodetimes.com/times/${slugCasa}/logo-${slugCasa}-256.png`;
         const logoFora = `https://logodetimes.com/times/${slugFora}/logo-${slugFora}-256.png`;
 
         html += `
-        <div class="card-jogo" style="background:#111; border:1px solid #222; border-radius:8px; padding:12px; margin-bottom:12px;">
+        <div class="card-jogo" style="background:#0a0a0a; border:1px solid #1a1a1a; border-radius:10px; padding:15px; margin-bottom:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="text-align:center; width:42%;">
-                    <img src="${logoCasa}" width="35" height="35" style="object-fit:contain;" 
-                         onerror="this.src='https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png'">
-                    <div style="font-size:12px; color:white; margin-top:5px; font-weight:500;">${j.time_casa}</div>
-                </div>
-                
-                <div style="font-weight:bold; color:#444; font-size:14px;">VS</div>
                 
                 <div style="text-align:center; width:42%;">
-                    <img src="${logoFora}" width="35" height="35" style="object-fit:contain;"
-                         onerror="this.src='https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png'">
-                    <div style="font-size:12px; color:white; margin-top:5px; font-weight:500;">${j.time_fora}</div>
+                    <div style="height:45px; display:flex; align-items:center; justify-content:center;">
+                        <img src="${logoCasa}" 
+                             style="max-width:40px; max-height:40px; object-fit:contain;" 
+                             onerror="this.onerror=null; this.src='${LOGO_RESERVA}';">
+                    </div>
+                    <div style="font-size:12px; color:#fff; margin-top:8px; font-weight:600; text-transform:uppercase;">${j.time_casa}</div>
                 </div>
+                
+                <div style="font-weight:900; color:#333; font-size:16px; letter-spacing:-1px;">VS</div>
+                
+                <div style="text-align:center; width:42%;">
+                    <div style="height:45px; display:flex; align-items:center; justify-content:center;">
+                        <img src="${logoFora}" 
+                             style="max-width:40px; max-height:40px; object-fit:contain;"
+                             onerror="this.onerror=null; this.src='${LOGO_RESERVA}';">
+                    </div>
+                    <div style="font-size:12px; color:#fff; margin-top:8px; font-weight:600; text-transform:uppercase;">${j.time_fora}</div>
+                </div>
+
             </div>
         </div>`;
     });
