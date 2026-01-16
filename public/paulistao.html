@@ -251,23 +251,35 @@
     }
 
     function renderClassif(dados) {
-        const tabela = document.getElementById('lista-classificacao');
-        if (!tabela) return;
+    const tabela = document.getElementById('lista-classificacao');
+    if (!tabela || !dados) return;
 
-        tabela.innerHTML = dados.map((time, i) => `
+    // Ordena por pontos (descendente) e depois por jogos (ascendente)
+    const dadosOrdenados = dados.sort((a, b) => {
+        if (b.pontos !== a.pontos) return b.pontos - a.pontos;
+        return a.jogos - b.jogos;
+    });
+
+    tabela.innerHTML = dadosOrdenados.map((time, i) => {
+        // Verifica se o logo é um placeholder transparente (base64 comum em crawlers que falham no logo)
+        const temLogoReal = time.time_logo && !time.time_logo.includes('base64');
+        const logoUrl = temLogoReal ? time.time_logo : `https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png`;
+
+        return `
             <tr>
-                <td style="color: #444;">${i+1}</td>
+                <td style="color: #666; font-weight: 600;">${i + 1}º</td>
                 <td>
                     <div class="time-info">
-                        <img src="${time.time_logo || ''}" onerror="this.src='https://via.placeholder.com/25'">
-                        <span>${time.time_nome}</span>
+                        <img src="${logoUrl}" width="25" height="25" onerror="this.src='https://via.placeholder.com/25?text=?'">
+                        <span style="font-weight: 600;">${time.time_nome}</span>
                     </div>
                 </td>
-                <td>${time.jogos}</td>
-                <td class="pts-bold">${time.pontos}</td>
+                <td style="color: #888;">${time.jogos}</td>
+                <td class="pts-bold" style="color: #00ff00; font-weight: 800;">${time.pontos}</td>
             </tr>
-        `).join('');
-    }
+        `;
+    }).join('');
+}
 
     function renderJogos(dados) {
         const container = document.getElementById('container-jogos');
