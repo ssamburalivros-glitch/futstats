@@ -35,83 +35,91 @@
             <div class="glass-panel arena-border">
                 <div class="arena-header" style="text-align: center; margin-bottom: 35px;">
                     <h2 class="cyber-title">Arena de Batalha</h2>
+                    <p style="color: #888; font-size: 0.8rem;">Compare estatísticas em tempo real</p>
                 </div>
 
-             <div class="h2h-controls-complex">
-    <div class="control-group">
-        <label style="font-size: 0.6rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Desafiante A</label>
-        <select id="liga-a" class="cyber-select">
-            <option value="">Escolha a Liga</option>
-            <option value="BR">Brasileirão (Série A)</option>
-            <option value="PL">Premier League (Inglaterra)</option>
-            <option value="ES">La Liga (Espanha)</option>
-            <option value="IT">Serie A (Itália)</option>
-            <option value="DE">Bundesliga (Alemanha)</option>
-            <option value="FR">Ligue 1 (França)</option>
-            <option value="PT">Liga Portugal</option>
-            </select>
-        <select id="time-a" class="cyber-select" disabled>
-            <option value="">Selecione o Time</option>
-        </select>
-    </div>
-    
-    <div class="vs-badge">VS</div>
+                <div class="h2h-controls-complex">
+                    <div class="control-group">
+                        <label style="font-size: 0.6rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Desafiante A</label>
+                        <select id="liga-a" class="cyber-select">
+                            <option value="">Escolha a Liga</option>
+                            <option value="SP">Paulistão 2026 (SP)</option>
+                            <option value="BR">Brasileirão (Série A)</option>
+                            <option value="PL">Premier League (Inglaterra)</option>
+                            <option value="ES">La Liga (Espanha)</option>
+                            <option value="IT">Serie A (Itália)</option>
+                            <option value="DE">Bundesliga (Alemanha)</option>
+                            <option value="FR">Ligue 1 (França)</option>
+                            <option value="PT">Liga Portugal</option>
+                        </select>
+                        <select id="time-a" class="cyber-select" disabled>
+                            <option value="">Selecione o Time</option>
+                        </select>
+                    </div>
+                    
+                    <div class="vs-badge">VS</div>
 
-    <div class="control-group">
-        <label style="font-size: 0.6rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Desafiante B</label>
-        <select id="liga-b" class="cyber-select">
-            <option value="">Escolha a Liga</option>
-            <option value="BR">Brasileirão (Série A)</option>
-            <option value="PL">Premier League (Inglaterra)</option>
-            <option value="ES">La Liga (Espanha)</option>
-            <option value="IT">Serie A (Itália)</option>
-            <option value="DE">Bundesliga (Alemanha)</option>
-            <option value="FR">Ligue 1 (França)</option>
-            <option value="PT">Liga Portugal</option>
-        </select>
-        <select id="time-b" class="cyber-select" disabled>
-            <option value="">Selecione o Time</option>
-        </select>
-    </div>
-</div>
+                    <div class="control-group">
+                        <label style="font-size: 0.6rem; color: #666; text-transform: uppercase; letter-spacing: 1px;">Desafiante B</label>
+                        <select id="liga-b" class="cyber-select">
+                            <option value="">Escolha a Liga</option>
+                            <option value="SP">Paulistão 2026 (SP)</option>
+                            <option value="BR">Brasileirão (Série A)</option>
+                            <option value="PL">Premier League (Inglaterra)</option>
+                            <option value="ES">La Liga (Espanha)</option>
+                            <option value="IT">Serie A (Itália)</option>
+                            <option value="DE">Bundesliga (Alemanha)</option>
+                            <option value="FR">Ligue 1 (França)</option>
+                            <option value="PT">Liga Portugal</option>
+                        </select>
+                        <select id="time-b" class="cyber-select" disabled>
+                            <option value="">Selecione o Time</option>
+                        </select>
+                    </div>
+                </div>
 
                 <div id="h2h-display" style="display: none; margin-top: 40px;">
                     <div class="h2h-arena" style="display: flex; justify-content: space-around; align-items: center; margin-bottom: 40px;">
                         <div class="team-gladiator" style="text-align: center;">
-                            <img id="img-a" src="" alt="Time A">
+                            <div class="img-wrapper" style="height: 100px; display: flex; align-items: center;">
+                                <img id="img-a" src="" alt="Time A" style="max-height: 80px; width: auto;">
+                            </div>
                             <h3 id="name-a" style="margin-top: 15px; font-size: 0.9rem; color: #fff;">--</h3>
                         </div>
-                        <div style="font-size: 1.2rem; color: #444; font-weight: 600;">vs</div>
+                        <div class="vs-text" style="font-size: 1.5rem; color: #00ff00; font-weight: 900; font-style: italic;">VS</div>
                         <div class="team-gladiator" style="text-align: center;">
-                            <img id="img-b" src="" alt="Time B">
+                            <div class="img-wrapper" style="height: 100px; display: flex; align-items: center;">
+                                <img id="img-b" src="" alt="Time B" style="max-height: 80px; width: auto;">
+                            </div>
                             <h3 id="name-b" style="margin-top: 15px; font-size: 0.9rem; color: #fff;">--</h3>
                         </div>
                     </div>
 
-                    <div class="stats-comparison-box" style="margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">
-                        <div class="h2h-stats-row" style="display: flex; justify-content: space-between; padding: 10px;">
-                            <span id="pos-a" class="stat-val">--</span>
-                            <span class="stat-label" style="font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase;">Posição</span>
-                            <span id="pos-b" class="stat-val">--</span>
+                    <div class="stats-comparison-box" style="margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 15px;">
+                        <div class="h2h-stats-row" style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222;">
+                            <span id="pos-a" class="stat-val" style="font-weight: bold; color: #fff;">--</span>
+                            <span class="stat-label" style="font-size: 0.7rem; color: #666; text-transform: uppercase;">Posição</span>
+                            <span id="pos-b" class="stat-val" style="font-weight: bold; color: #fff;">--</span>
                         </div>
-                        <div class="h2h-stats-row" style="display: flex; justify-content: space-between; padding: 10px;">
-                            <span id="pts-a" class="stat-val">--</span>
-                            <span class="stat-label" style="font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase;">Pontos</span>
-                            <span id="pts-b" class="stat-val">--</span>
+                        <div class="h2h-stats-row" style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222;">
+                            <span id="pts-a" class="stat-val" style="font-weight: bold; color: #00ff00;">--</span>
+                            <span class="stat-label" style="font-size: 0.7rem; color: #666; text-transform: uppercase;">Pontos</span>
+                            <span id="pts-b" class="stat-val" style="font-weight: bold; color: #00ff00;">--</span>
                         </div>
-                        <div class="h2h-stats-row" style="display: flex; justify-content: space-between; padding: 10px;">
-                            <span id="sg-a" class="stat-val">--</span>
-                            <span class="stat-label" style="font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase;">Saldo Gols</span>
-                            <span id="sg-b" class="stat-val">--</span>
+                        <div class="h2h-stats-row" style="display: flex; justify-content: space-between; padding: 12px;">
+                            <span id="jogos-a" class="stat-val" style="font-weight: bold; color: #fff;">--</span>
+                            <span class="stat-label" style="font-size: 0.7rem; color: #666; text-transform: uppercase;">Jogos</span>
+                            <span id="jogos-b" class="stat-val" style="font-weight: bold; color: #fff;">--</span>
                         </div>
                     </div>
 
                     <div class="win-chance-container" style="text-align: center; max-width: 600px; margin: 0 auto;">
-                        <div class="chance-bar-bg">
-                            <div id="bar-a" class="chance-fill-a"></div>
-                            <div id="bar-b" class="chance-fill-b"></div>
+                        <label style="font-size: 0.6rem; color: #888; text-transform: uppercase; margin-bottom: 10px; display: block;">Chances de Vitória</label>
+                        <div class="chance-bar-bg" style="height: 12px; background: #222; border-radius: 6px; overflow: hidden; display: flex;">
+                            <div id="bar-a" style="width: 50%; background: #00ff00; transition: width 0.5s;"></div>
+                            <div id="bar-b" style="width: 50%; background: #004400; transition: width 0.5s;"></div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 5px; color: var(--silver); font-weight: 600;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 5px; color: #fff; font-weight: 600;">
                             <span id="perc-a">50%</span>
                             <span id="perc-b">50%</span>
                         </div>
@@ -121,6 +129,40 @@
         </section>
     </main>
 
-    <script src="script.js"></script>
+    <script>
+        // Use os dados do seu banco do Supabase
+        const supabaseUrl = "SEU_URL";
+        const supabaseKey = "SUA_KEY";
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        const ligas = {
+            "SP": "paulistao_classificacao", // Tabela do Paulistão
+            "BR": "classificacao_brasileirao" // Exemplo de outra tabela
+        };
+
+        async function carregarTimes(selectLiga, selectTime) {
+            const liga = selectLiga.value;
+            if (!liga) return;
+
+            const tabela = ligas[liga] || 'paulistao_classificacao';
+            
+            const { data, error } = await _supabase
+                .from(tabela)
+                .select('time_nome')
+                .order('time_nome');
+
+            if (data) {
+                selectTime.innerHTML = '<option value="">Selecione o Time</option>' + 
+                    data.map(t => `<option value="${t.time_nome}">${t.time_nome}</option>`).join('');
+                selectTime.disabled = false;
+            }
+        }
+
+        document.getElementById('liga-a').addEventListener('change', () => carregarTimes(document.getElementById('liga-a'), document.getElementById('time-a')));
+        document.getElementById('liga-b').addEventListener('change', () => carregarTimes(document.getElementById('liga-b'), document.getElementById('time-b')));
+
+        // A lógica de busca das estatísticas deve ser implementada no seu script.js 
+        // filtrando pela tabela correta baseada no value 'SP'
+    </script>
 </body>
 </html>
