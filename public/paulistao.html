@@ -254,22 +254,24 @@
     const tabela = document.getElementById('lista-classificacao');
     if (!tabela) return;
 
-    // Ordenação
-    const ordenados = dados.sort((a, b) => b.pontos - a.pontos);
+    // FILTRO: Remove times sem nome ou com nomes inválidos
+    const dadosLimpos = dados.filter(time => time.time_nome && time.time_nome.trim() !== "");
+
+    // ORDENAÇÃO: Garante que os pontos mandem na ordem
+    const ordenados = dadosLimpos.sort((a, b) => b.pontos - a.pontos);
 
     tabela.innerHTML = ordenados.map((time, i) => `
         <tr>
-            <td style="color: #666;">${i + 1}</td>
+            <td style="color: #666; font-weight: bold;">${i + 1}º</td>
             <td>
                 <div class="time-info" style="display: flex; align-items: center; gap: 10px;">
-                    <img src="${time.time_logo}" width="22" height="22" 
-                         onerror="this.src='https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png'"
-                         style="object-fit: contain;">
-                    <span style="font-weight: 600; font-size: 0.9rem;">${time.time_nome}</span>
+                    <img src="${time.time_logo}" width="25" height="25" 
+                         onerror="this.src='https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png'">
+                    <span style="font-weight: 600;">${time.time_nome.trim()}</span>
                 </div>
             </td>
-            <td>${time.jogos}</td>
-            <td class="pts-bold" style="color: #00ff00;">${time.pontos}</td>
+            <td style="text-align: center;">${time.jogos}</td>
+            <td class="pts-bold" style="color: #00ff00; text-align: center;">${time.pontos}</td>
         </tr>
     `).join('');
 }
@@ -278,36 +280,42 @@ function renderJogos(dados) {
     const container = document.getElementById('container-jogos');
     if (!container) return;
 
+    // FILTRO: Remove jogos onde um dos times está sem nome
+    const jogosValidos = dados.filter(j => 
+        j.time_casa && j.time_casa.trim() !== "" && 
+        j.time_fora && j.time_fora.trim() !== ""
+    );
+
     let html = '';
     let dataAtual = '';
 
-    dados.forEach(j => {
-        // Se a data mudar ou for a primeira, coloca o divisor
-        // Se o crawler mandou "Calendário...", trocamos para algo legível
-        let dataExibicao = j.data_jogo.includes("Calendário") ? "PRÓXIMOS JOGOS" : j.data_jogo;
+    jogosValidos.forEach(j => {
+        // CORREÇÃO DE DATA: Se a data vier como "Calendário...", exibir data fixa ou formatada
+        let dataTexto = j.data_jogo;
+        if (dataTexto.includes("Calendário")) dataTexto = "PRÓXIMOS JOGOS";
 
-        if (dataExibicao !== dataAtual) {
-            dataAtual = dataExibicao;
-            html += `<div class="data-divider" style="margin-top: 20px; color: #00ff00; font-weight: bold; border-bottom: 1px solid #222;">📅 ${dataExibicao}</div>`;
+        if (dataTexto !== dataAtual) {
+            dataAtual = dataTexto;
+            html += `<div class="data-divider" style="color: #00ff00; margin: 20px 0 10px 0; font-weight: bold;">📅 ${dataTexto}</div>`;
         }
 
         html += `
-        <div class="card-jogo" style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #222;">
-            <div class="status-hora" style="text-align: center; font-size: 0.7rem; color: #888; margin-bottom: 8px;">${j.status_ou_horario}</div>
-            <div class="confronto" style="display: flex; justify-content: space-between; align-items: center;">
-                <div class="team-box" style="width: 40%; text-align: center;">
-                    <img src="${j.logo_casa}" width="30" height="30" onerror="this.src='https://via.placeholder.com/30'" style="display: block; margin: 0 auto 5px;">
-                    <span style="font-size: 0.75rem;">${j.time_casa}</span>
+        <div class="card-jogo">
+            <div class="status-hora">${j.status_ou_horario}</div>
+            <div class="confronto">
+                <div class="team-box">
+                    <img src="${j.logo_casa}" onerror="this.src='https://via.placeholder.com/30'">
+                    <span>${j.time_casa}</span>
                 </div>
-                <div class="vs-box" style="font-weight: bold; color: #444;">VS</div>
-                <div class="team-box" style="width: 40%; text-align: center;">
-                    <img src="${j.logo_fora}" width="30" height="30" onerror="this.src='https://via.placeholder.com/30'" style="display: block; margin: 0 auto 5px;">
-                    <span style="font-size: 0.75rem;">${j.time_fora}</span>
+                <div class="vs-box">VS</div>
+                <div class="team-box">
+                    <img src="${j.logo_fora}" onerror="this.src='https://via.placeholder.com/30'">
+                    <span>${j.time_fora}</span>
                 </div>
             </div>
         </div>`;
     });
-    container.innerHTML = html;
+    container.innerHTML = html || '<p style="text-align:center;">Nenhum jogo agendado.</p>';
 }
 
 
