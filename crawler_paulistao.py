@@ -21,34 +21,40 @@ def crawler_classificacao():
         soup = BeautifulSoup(response.content, 'html.parser')
 
         # Localiza todas as tabelas de grupos
-        # A ESPN agrupa em 'stack' de tabelas para mobile/desktop
         tabelas_nomes = soup.select('.Table--fixed-left') 
         tabelas_dados = soup.select('.Table__Scroller')
 
         if not tabelas_nomes:
-            print("⚠️ Erro: Estrutura de tabela não encontrada. Verifique se a URL mudou.")
+            print("⚠️ Erro: Estrutura de tabela não encontrada.")
             return
 
         letras = ['A', 'B', 'C', 'D']
         payload = []
 
-        # Itera sobre os 4 grupos do Paulistão
+        # Itera sobre os grupos
         for idx in range(min(len(tabelas_nomes), 4)):
-            rows_nomes = tabelas_nomes[idx].find_all("tr")[1:] # Pula o cabeçalho
+            rows_nomes = tabelas_nomes[idx].find_all("tr")[1:] # Pula cabeçalho
             rows_dados = tabelas_dados[idx].find_all("tr")[1:]
 
             for i in range(len(rows_nomes)):
                 try:
-                    # Captura o nome e logo
+                    # 1. Captura o nome do time
                     nome_container = rows_nomes[i].find("span", class_="hide-mobile")
                     nome = nome_container.text.strip() if nome_container else rows_nomes[i].text.strip()
                     
+                    # 2. Captura o LOGO com correção para imagens dinâmicas
                     img_tag = rows_nomes[i].find("img")
-                    logo = img_tag["src"] if img_tag else ""
+                    logo = ""
+                    if img_tag:
+                        # Tenta pegar o src normal
+                        logo = img_tag.get("src", "")
+                        
+                        # CORREÇÃO CRÍTICA: Se for base64 ou placeholder, busca no data-src
+                        if "data:image" in logo or "transparent" in logo or not logo:
+                            logo = img_tag.get("data-src") or img_tag.get("data-lazy-src") or logo
 
-                    # Captura os dados numéricos
+                    # 3. Captura os dados numéricos (J, PTS)
                     cols = rows_dados[i].find_all("td")
-                    # Na ESPN: 0=J, 1=V, 2=E, 3=D, 4=GP, 5=GC, 6=SG, 7=PTS
                     jogos = cols[0].text.strip()
                     pontos = cols[7].text.strip()
 
@@ -64,12 +70,17 @@ def crawler_classificacao():
 
         if payload:
             print(f"📤 Enviando {len(payload)} times para o Supabase...")
-            # Limpeza rápida e inserção
-            supabase.table("paulistao_classificacao").delete().neq("time_nome", "null").execute()
-            supabase.table("paulistao_classificacao").insert(payload).execute()
-            print("✅ Atualização concluída com sucesso!")
+            
+            # Limpa e insere usando o filtro gt(id, 0) para garantir a limpeza
+            try:
+                # Se sua tabela não tiver 'id', use neq('time_nome', 'null')
+                supabase.table("paulistao_classificacao").delete().neq("time_nome", "null").execute()
+                supabase.table("paulistao_classificacao").insert(payload).execute()
+                print("✅ Atualização de classificação concluída!")
+            except Exception as sb_err:
+                print(f"❌ Erro ao salvar no Supabase: {sb_err}")
         else:
-            print("❌ Falha crítica: Nenhum dado foi processado.")
+            print("❌ Nenhum dado foi processado.")
 
     except Exception as e:
         print(f"❌ Erro na requisição: {e}")
