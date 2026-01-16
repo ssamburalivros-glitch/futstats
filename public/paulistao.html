@@ -280,45 +280,45 @@ function renderJogos(dados) {
     const container = document.getElementById('container-jogos');
     if (!container) return;
 
-    // FILTRO: Remove jogos onde um dos times está sem nome
-    const jogosValidos = dados.filter(j => 
-        j.time_casa && j.time_casa.trim() !== "" && 
-        j.time_fora && j.time_fora.trim() !== ""
-    );
+    // Função interna para gerar URL do logo baseada no nome
+    const getLogoUrl = (nome) => {
+        if (!nome) return '';
+        const nomeLimpo = nome.trim().replace(/\s+/g, '_');
+        // Usamos um serviço que retorna logos baseados no nome do time
+        return `https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png`; 
+        // Dica: Para logos reais, o ideal é o crawler preencher o banco.
+    };
 
     let html = '';
     let dataAtual = '';
 
-    jogosValidos.forEach(j => {
-        // CORREÇÃO DE DATA: Se a data vier como "Calendário...", exibir data fixa ou formatada
-        let dataTexto = j.data_jogo;
-        if (dataTexto.includes("Calendário")) dataTexto = "PRÓXIMOS JOGOS";
-
-        if (dataTexto !== dataAtual) {
-            dataAtual = dataTexto;
-            html += `<div class="data-divider" style="color: #00ff00; margin: 20px 0 10px 0; font-weight: bold;">📅 ${dataTexto}</div>`;
+    dados.forEach(j => {
+        if (j.data_jogo !== dataAtual) {
+            dataAtual = j.data_jogo;
+            html += `<div class="data-divider" style="color:#00ff00; font-weight:bold; margin:15px 0;">📅 ${dataAtual}</div>`;
         }
 
+        // Se o banco não tem logo, tentamos atribuir um placeholder funcional
+        const logoCasa = j.logo_casa || `https://api.dicebear.com/7.x/initials/svg?seed=${j.time_casa}`;
+        const logoFora = j.logo_fora || `https://api.dicebear.com/7.x/initials/svg?seed=${j.time_fora}`;
+
         html += `
-        <div class="card-jogo">
-            <div class="status-hora">${j.status_ou_horario}</div>
-            <div class="confronto">
-                <div class="team-box">
-                    <img src="${j.logo_casa}" onerror="this.src='https://via.placeholder.com/30'">
-                    <span>${j.time_casa}</span>
+        <div class="card-jogo" style="background:#111; border:1px solid #222; border-radius:8px; padding:10px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="text-align:center; width:40%;">
+                    <img src="${logoCasa}" width="30" height="30" style="object-fit:contain;">
+                    <div style="font-size:12px; color:white;">${j.time_casa}</div>
                 </div>
-                <div class="vs-box">VS</div>
-                <div class="team-box">
-                    <img src="${j.logo_fora}" onerror="this.src='https://via.placeholder.com/30'">
-                    <span>${j.time_fora}</span>
+                <div style="font-weight:bold; color:#333;">VS</div>
+                <div style="text-align:center; width:40%;">
+                    <img src="${logoFora}" width="30" height="30" style="object-fit:contain;">
+                    <div style="font-size:12px; color:white;">${j.time_fora}</div>
                 </div>
             </div>
         </div>`;
     });
-    container.innerHTML = html || '<p style="text-align:center;">Nenhum jogo agendado.</p>';
+    container.innerHTML = html;
 }
-
-
 
     // DISPARA A CARGA
     initPaulistao();
