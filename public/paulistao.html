@@ -250,35 +250,64 @@
         }
     }
 
-    function renderClassif(dados) {
+   function renderClassif(dados) {
     const tabela = document.getElementById('lista-classificacao');
-    if (!tabela || !dados) return;
+    if (!tabela) return;
 
-    // Ordena por pontos (descendente) e depois por jogos (ascendente)
-    const dadosOrdenados = dados.sort((a, b) => {
-        if (b.pontos !== a.pontos) return b.pontos - a.pontos;
-        return a.jogos - b.jogos;
+    // Ordenação
+    const ordenados = dados.sort((a, b) => b.pontos - a.pontos);
+
+    tabela.innerHTML = ordenados.map((time, i) => `
+        <tr>
+            <td style="color: #666;">${i + 1}</td>
+            <td>
+                <div class="time-info" style="display: flex; align-items: center; gap: 10px;">
+                    <img src="${time.time_logo}" width="22" height="22" 
+                         onerror="this.src='https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png'"
+                         style="object-fit: contain;">
+                    <span style="font-weight: 600; font-size: 0.9rem;">${time.time_nome}</span>
+                </div>
+            </td>
+            <td>${time.jogos}</td>
+            <td class="pts-bold" style="color: #00ff00;">${time.pontos}</td>
+        </tr>
+    `).join('');
+}
+
+function renderJogos(dados) {
+    const container = document.getElementById('container-jogos');
+    if (!container) return;
+
+    let html = '';
+    let dataAtual = '';
+
+    dados.forEach(j => {
+        // Se a data mudar ou for a primeira, coloca o divisor
+        // Se o crawler mandou "Calendário...", trocamos para algo legível
+        let dataExibicao = j.data_jogo.includes("Calendário") ? "PRÓXIMOS JOGOS" : j.data_jogo;
+
+        if (dataExibicao !== dataAtual) {
+            dataAtual = dataExibicao;
+            html += `<div class="data-divider" style="margin-top: 20px; color: #00ff00; font-weight: bold; border-bottom: 1px solid #222;">📅 ${dataExibicao}</div>`;
+        }
+
+        html += `
+        <div class="card-jogo" style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #222;">
+            <div class="status-hora" style="text-align: center; font-size: 0.7rem; color: #888; margin-bottom: 8px;">${j.status_ou_horario}</div>
+            <div class="confronto" style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="team-box" style="width: 40%; text-align: center;">
+                    <img src="${j.logo_casa}" width="30" height="30" onerror="this.src='https://via.placeholder.com/30'" style="display: block; margin: 0 auto 5px;">
+                    <span style="font-size: 0.75rem;">${j.time_casa}</span>
+                </div>
+                <div class="vs-box" style="font-weight: bold; color: #444;">VS</div>
+                <div class="team-box" style="width: 40%; text-align: center;">
+                    <img src="${j.logo_fora}" width="30" height="30" onerror="this.src='https://via.placeholder.com/30'" style="display: block; margin: 0 auto 5px;">
+                    <span style="font-size: 0.75rem;">${j.time_fora}</span>
+                </div>
+            </div>
+        </div>`;
     });
-
-    tabela.innerHTML = dadosOrdenados.map((time, i) => {
-        // Verifica se o logo é um placeholder transparente (base64 comum em crawlers que falham no logo)
-        const temLogoReal = time.time_logo && !time.time_logo.includes('base64');
-        const logoUrl = temLogoReal ? time.time_logo : `https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png`;
-
-        return `
-            <tr>
-                <td style="color: #666; font-weight: 600;">${i + 1}º</td>
-                <td>
-                    <div class="time-info">
-                        <img src="${logoUrl}" width="25" height="25" onerror="this.src='https://via.placeholder.com/25?text=?'">
-                        <span style="font-weight: 600;">${time.time_nome}</span>
-                    </div>
-                </td>
-                <td style="color: #888;">${time.jogos}</td>
-                <td class="pts-bold" style="color: #00ff00; font-weight: 800;">${time.pontos}</td>
-            </tr>
-        `;
-    }).join('');
+    container.innerHTML = html;
 }
 
     function renderJogos(dados) {
