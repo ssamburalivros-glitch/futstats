@@ -310,42 +310,7 @@ function renderJogos(dados) {
     container.innerHTML = html;
 }
 
-    function renderJogos(dados) {
-        const container = document.getElementById('container-jogos');
-        if (!container) return;
 
-        let html = '';
-        let dataAtual = '';
-
-        if (dados.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">Aguardando processamento do Crawler...</p>';
-            return;
-        }
-
-        dados.forEach(j => {
-            if (j.data_jogo && j.data_jogo !== dataAtual) {
-                dataAtual = j.data_jogo;
-                html += `<div class="data-divider">📅 ${dataAtual}</div>`;
-            }
-
-            html += `
-            <div class="card-jogo">
-                <div class="status-hora">${j.status_ou_horario || 'A DEFINIR'}</div>
-                <div class="confronto">
-                    <div class="team-box">
-                        <img src="${j.logo_casa || ''}" onerror="this.src='https://via.placeholder.com/35'">
-                        <span>${j.time_casa}</span>
-                    </div>
-                    <div class="vs-box">VS</div>
-                    <div class="team-box">
-                        <img src="${j.logo_fora || ''}" onerror="this.src='https://via.placeholder.com/35'">
-                        <span>${j.time_fora}</span>
-                    </div>
-                </div>
-            </div>`;
-        });
-        container.innerHTML = html;
-    }
 
     // DISPARA A CARGA
     initPaulistao();
