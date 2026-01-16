@@ -280,39 +280,45 @@ function renderJogos(dados) {
     const container = document.getElementById('container-jogos');
     if (!container) return;
 
-    // Função interna para gerar URL do logo baseada no nome
-    const getLogoUrl = (nome) => {
-        if (!nome) return '';
-        const nomeLimpo = nome.trim().replace(/\s+/g, '_');
-        // Usamos um serviço que retorna logos baseados no nome do time
-        return `https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png`; 
-        // Dica: Para logos reais, o ideal é o crawler preencher o banco.
-    };
-
     let html = '';
     let dataAtual = '';
+
+    // Função para formatar o nome do time para o padrão da URL do site de logos
+    const formatarNomeLogo = (nome) => {
+        return nome.toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove acentos
+            .replace(/\s+/g, '-') // troca espaço por hífen
+            .replace(/[^a-z0-9-]/g, ''); // remove caracteres especiais
+    };
 
     dados.forEach(j => {
         if (j.data_jogo !== dataAtual) {
             dataAtual = j.data_jogo;
-            html += `<div class="data-divider" style="color:#00ff00; font-weight:bold; margin:15px 0;">📅 ${dataAtual}</div>`;
+            html += `<div class="data-divider" style="color:#00ff00; font-weight:bold; margin:15px 0; border-bottom: 1px solid #222;">📅 ${dataAtual}</div>`;
         }
 
-        // Se o banco não tem logo, tentamos atribuir um placeholder funcional
-        const logoCasa = j.logo_casa || `https://api.dicebear.com/7.x/initials/svg?seed=${j.time_casa}`;
-        const logoFora = j.logo_fora || `https://api.dicebear.com/7.x/initials/svg?seed=${j.time_fora}`;
+        // Tenta buscar no logodetimes.com (ex: santos, palmeiras, corinthians, sao-paulo)
+        const slugCasa = formatarNomeLogo(j.time_casa);
+        const slugFora = formatarNomeLogo(j.time_fora);
+        
+        const logoCasa = `https://logodetimes.com/times/${slugCasa}/logo-${slugCasa}-256.png`;
+        const logoFora = `https://logodetimes.com/times/${slugFora}/logo-${slugFora}-256.png`;
 
         html += `
-        <div class="card-jogo" style="background:#111; border:1px solid #222; border-radius:8px; padding:10px; margin-bottom:10px;">
+        <div class="card-jogo" style="background:#111; border:1px solid #222; border-radius:8px; padding:12px; margin-bottom:12px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="text-align:center; width:40%;">
-                    <img src="${logoCasa}" width="30" height="30" style="object-fit:contain;">
-                    <div style="font-size:12px; color:white;">${j.time_casa}</div>
+                <div style="text-align:center; width:42%;">
+                    <img src="${logoCasa}" width="35" height="35" style="object-fit:contain;" 
+                         onerror="this.src='https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png'">
+                    <div style="font-size:12px; color:white; margin-top:5px; font-weight:500;">${j.time_casa}</div>
                 </div>
-                <div style="font-weight:bold; color:#333;">VS</div>
-                <div style="text-align:center; width:40%;">
-                    <img src="${logoFora}" width="30" height="30" style="object-fit:contain;">
-                    <div style="font-size:12px; color:white;">${j.time_fora}</div>
+                
+                <div style="font-weight:bold; color:#444; font-size:14px;">VS</div>
+                
+                <div style="text-align:center; width:42%;">
+                    <img src="${logoFora}" width="35" height="35" style="object-fit:contain;"
+                         onerror="this.src='https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png'">
+                    <div style="font-size:12px; color:white; margin-top:5px; font-weight:500;">${j.time_fora}</div>
                 </div>
             </div>
         </div>`;
