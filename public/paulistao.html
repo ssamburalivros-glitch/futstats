@@ -98,7 +98,6 @@
 
         /* ESTILO DOS JOGOS (DIREITA) */
         .data-divider {
-            grid-column: 1/-1;
             color: #00ff00;
             font-size: 0.7rem;
             margin: 20px 0 10px;
@@ -212,79 +211,21 @@
     </main>
 
     <script>
-        // CONFIGURAÇÕES DO SUPABASE (Substitua pelos seus dados reais)
+        // CONFIGURAÇÕES DO SUPABASE
         const SUPABASE_URL = 'https://sihunefyfkecumbiyxva.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A';
         
-        const client = supabase.createClient(SB_URL, SB_KEY);
+        // CORREÇÃO: Usando as variáveis corretas definidas acima
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function initPaulistao() {
             try {
                 // 1. Busca Classificação
-                const { data: classif } = await client
+                const { data: classif, error: errorC } = await client
                     .from('paulistao_classificacao')
                     .select('*')
                     .order('pontos', { ascending: false });
 
+                if (errorC) throw errorC;
+
                 // 2. Busca Calendário de Jogos
-                const { data: jogos } = await client
-                    .from('paulistao_jogos')
-                    .select('*');
-
-                renderClassif(classif);
-                renderJogos(jogos);
-
-            } catch (e) { console.error("Erro na carga:", e); }
-        }
-
-        function renderClassif(dados) {
-            const html = dados.map((time, i) => `
-                <tr>
-                    <td style="color: #444;">${i+1}</td>
-                    <td>
-                        <div class="time-info">
-                            <img src="${time.time_logo}">
-                            <span>${time.time_nome}</span>
-                        </div>
-                    </td>
-                    <td>${time.jogos}</td>
-                    <td class="pts-bold">${time.pontos}</td>
-                </tr>
-            `).join('');
-            document.getElementById('lista-classificacao').innerHTML = html;
-        }
-
-        function renderJogos(dados) {
-            let html = '';
-            let dataAtual = '';
-
-            dados.forEach(j => {
-                // Divisor de Data (Baseado no crawler robusto)
-                if (j.data_jogo !== dataAtual) {
-                    dataAtual = j.data_jogo;
-                    html += `<div class="data-divider">📅 ${dataAtual}</div>`;
-                }
-
-                html += `
-                <div class="card-jogo">
-                    <div class="status-hora">${j.status_ou_horario}</div>
-                    <div class="confronto">
-                        <div class="team-box">
-                            <img src="${j.logo_casa}">
-                            <span>${j.time_casa}</span>
-                        </div>
-                        <div class="vs-box">VS</div>
-                        <div class="team-box">
-                            <img src="${j.logo_fora}">
-                            <span>${j.time_fora}</span>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('container-jogos').innerHTML = html;
-        }
-
-        initPaulistao();
-    </script>
-</body>
-</html>
