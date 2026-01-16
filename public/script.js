@@ -9,7 +9,7 @@ const ESCUDO_PADRAO = "https://cdn-icons-png.flaticon.com/512/53/53244.png";
 const noticiasCarrossel = [
     {
         id: 1,
-        img: 'img/carrossel1.png',
+        img: 'img/carrossel1.webp',
         categoria: 'Inteligência Neural',
         titulo: 'O Futuro do Futebol é Orientado por Dados',
         descricao: 'Nossa rede neural processa mais de 10.000 variáveis por segundo para entregar a você a probabilidade real de vitória. Esqueça o palpite, utilize a ciência ao seu favor nesta rodada.',
@@ -17,7 +17,7 @@ const noticiasCarrossel = [
     },
     {
         id: 2,
-        img: 'img/carrossel2.png',
+        img: 'img/carrossel2.webp',
         categoria: 'Arena H2H',
         titulo: 'Duelos Lendários, Análises Exatas',
         descricao: 'Compare gigantes europeus ou rivais locais com a mesma precisão. A Arena H2H coloca frente a frente os números que definem quem realmente chega como favorito ao apito inicial.',
@@ -25,7 +25,7 @@ const noticiasCarrossel = [
     },
     {
         id: 3,
-        img: 'img/carrossel3.png',
+        img: 'img/carrossel3.webp',
         categoria: 'Ao Vivo',
         titulo: 'Acompanhe o Tempo Real com Estatísticas Refinadas',
         descricao: 'Nossos Live Feeds agora mostram gráficos de pressão e escalações oficiais mais rápido. Não perca nenhum detalhe do jogo.',
