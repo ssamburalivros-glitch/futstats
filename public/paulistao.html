@@ -250,30 +250,46 @@
         }
     }
 
-   function renderClassif(dados) {
+  function renderClassif(dados) {
     const tabela = document.getElementById('lista-classificacao');
     if (!tabela) return;
 
-    // FILTRO: Remove times sem nome ou com nomes inválidos
-    const dadosLimpos = dados.filter(time => time.time_nome && time.time_nome.trim() !== "");
+    // Imagem simbólica reserva
+    const LOGO_RESERVA = "https://cdn-icons-png.flaticon.com/512/53/53283.png"; 
 
-    // ORDENAÇÃO: Garante que os pontos mandem na ordem
-    const ordenados = dadosLimpos.sort((a, b) => b.pontos - a.pontos);
+    const formatarNomeLogo = (nome) => {
+        if(!nome) return "";
+        return nome.toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove acentos
+            .replace(/\s+/g, '-') 
+            .replace(/[^a-z0-9-]/g, '');
+    };
 
-    tabela.innerHTML = ordenados.map((time, i) => `
-        <tr>
-            <td style="color: #666; font-weight: bold;">${i + 1}º</td>
-            <td>
-                <div class="time-info" style="display: flex; align-items: center; gap: 10px;">
-                    <img src="${time.time_logo}" width="25" height="25" 
-                         onerror="this.src='https://ssl.gstatic.com/onebox/media/sports/logos/generic_football.png'">
-                    <span style="font-weight: 600;">${time.time_nome.trim()}</span>
-                </div>
-            </td>
-            <td style="text-align: center;">${time.jogos}</td>
-            <td class="pts-bold" style="color: #00ff00; text-align: center;">${time.pontos}</td>
-        </tr>
-    `).join('');
+    // Ordenação por pontos
+    const ordenados = dados.sort((a, b) => b.pontos - a.pontos);
+
+    tabela.innerHTML = ordenados.map((time, i) => {
+        const slug = formatarNomeLogo(time.time_nome);
+        const logoUrl = `https://logodetimes.com/times/${slug}/logo-${slug}-256.png`;
+
+        return `
+            <tr>
+                <td style="color: #666; font-weight: bold; width: 30px;">${i + 1}º</td>
+                <td>
+                    <div class="time-info" style="display: flex; align-items: center; gap: 10px;">
+                        <img src="${logoUrl}" 
+                             width="25" 
+                             height="25" 
+                             style="object-fit: contain;"
+                             onerror="this.onerror=null; this.src='${LOGO_RESERVA}';">
+                        <span style="font-weight: 600; font-size: 0.9rem; color: #fff;">${time.time_nome}</span>
+                    </div>
+                </td>
+                <td style="text-align: center; color: #ccc;">${time.jogos}</td>
+                <td class="pts-bold" style="color: #00ff00; text-align: center; font-weight: 800;">${time.pontos}</td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function renderJogos(dados) {
