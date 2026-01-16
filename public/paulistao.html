@@ -210,22 +210,102 @@
         </div>
     </main>
 
-    <script>
-        // CONFIGURAÇÕES DO SUPABASE
-        const SUPABASE_URL = 'https://sihunefyfkecumbiyxva.supabase.co'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A';
-        
-        // CORREÇÃO: Usando as variáveis corretas definidas acima
-        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+   <script>
+    // 1. CONFIGURAÇÕES - Nomes corrigidos para bater com a chamada abaixo
+    const SUPABASE_URL = 'https://sihunefyfkecumbiyxva.supabase.co'; 
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A';
+    
+    // 2. INICIALIZAÇÃO - Agora usando os nomes corretos
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function initPaulistao() {
-            try {
-                // 1. Busca Classificação
-                const { data: classif, error: errorC } = await client
-                    .from('paulistao_classificacao')
-                    .select('*')
-                    .order('pontos', { ascending: false });
+    async function initPaulistao() {
+        try {
+            console.log("Conectando ao Supabase...");
 
-                if (errorC) throw errorC;
+            // Busca Classificação
+            const { data: classif, error: errorC } = await client
+                .from('paulistao_classificacao')
+                .select('*')
+                .order('pontos', { ascending: false });
 
-                // 2. Busca Calendário de Jogos
+            if (errorC) throw errorC;
+
+            // Busca Calendário
+            const { data: jogos, error: errorJ } = await client
+                .from('paulistao_jogos')
+                .select('*')
+                .order('id', { ascending: true });
+
+            if (errorJ) throw errorJ;
+
+            console.log("Dados carregados com sucesso!");
+
+            // Renderiza as tabelas
+            renderClassif(classif || []);
+            renderJogos(jogos || []);
+
+        } catch (e) { 
+            console.error("Erro crítico na carga:", e.message);
+            document.getElementById('container-jogos').innerHTML = `<p style="color:red">Erro ao carregar dados: ${e.message}</p>`;
+        }
+    }
+
+    function renderClassif(dados) {
+        const tabela = document.getElementById('lista-classificacao');
+        if (!tabela) return;
+
+        tabela.innerHTML = dados.map((time, i) => `
+            <tr>
+                <td style="color: #444;">${i+1}</td>
+                <td>
+                    <div class="time-info">
+                        <img src="${time.time_logo || ''}" onerror="this.src='https://via.placeholder.com/25'">
+                        <span>${time.time_nome}</span>
+                    </div>
+                </td>
+                <td>${time.jogos}</td>
+                <td class="pts-bold">${time.pontos}</td>
+            </tr>
+        `).join('');
+    }
+
+    function renderJogos(dados) {
+        const container = document.getElementById('container-jogos');
+        if (!container) return;
+
+        let html = '';
+        let dataAtual = '';
+
+        if (dados.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">Aguardando processamento do Crawler...</p>';
+            return;
+        }
+
+        dados.forEach(j => {
+            if (j.data_jogo && j.data_jogo !== dataAtual) {
+                dataAtual = j.data_jogo;
+                html += `<div class="data-divider">📅 ${dataAtual}</div>`;
+            }
+
+            html += `
+            <div class="card-jogo">
+                <div class="status-hora">${j.status_ou_horario || 'A DEFINIR'}</div>
+                <div class="confronto">
+                    <div class="team-box">
+                        <img src="${j.logo_casa || ''}" onerror="this.src='https://via.placeholder.com/35'">
+                        <span>${j.time_casa}</span>
+                    </div>
+                    <div class="vs-box">VS</div>
+                    <div class="team-box">
+                        <img src="${j.logo_fora || ''}" onerror="this.src='https://via.placeholder.com/35'">
+                        <span>${j.time_fora}</span>
+                    </div>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // DISPARA A CARGA
+    initPaulistao();
+</script>
