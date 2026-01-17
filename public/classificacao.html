@@ -3,118 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Classificação e Tabelas</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <title>Classificação de Ligas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+        tr:hover { background: rgba(59, 130, 246, 0.1); transition: 0.2s; }
+    </style>
 </head>
-<body style="background-color: #050505; color: #f0f0f0; font-family: 'Montserrat', sans-serif; margin: 0;">
+<body class="p-4 md:p-8">
 
-    <header>
-        <div class="header-content">
-            <a href="index.html" class="brand-container">
-                <img src="logos/logo.png" alt="FS" class="site-logo-img">
-                <h1 class="logo">FutStats</h1>
-            </a>
-            <div class="nav-container">
-                <nav class="nav-links">
-                    <a href="classificacao.html">Classificação</a>
-                    <a href="arena.html">Arena H2H</a>
-                    <a href="aovivo.html">Jogos ao Vivo</a>
-                    <a href="paulistao.html">Paulistão 2026</a>
-                </nav>
-                <button class="btn-download">Baixar APP</button>
-            </div>
-        </div>
-    </header>
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold mb-2">Tabelas de Classificação</h1>
+            <p class="text-slate-400">Dados atualizados em tempo real via API ESPN</p>
+        </header>
 
-    <main>
-        <section class="search-wrapper">
-            <div class="search-container">
-                <span class="search-icon">&#x1F50D;</span> 
-                <input type="text" id="search-team" class="search-input" placeholder="Buscar time por nome...">
-            </div>
-        </section>
+        <nav id="tabs" class="flex flex-wrap justify-center gap-2 mb-6 border-b border-slate-700 pb-4">
+            <button onclick="carregarLiga('BR')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="BR">🇧🇷 Brasil</button>
+            <button onclick="carregarLiga('PL')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="PL">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
+            <button onclick="carregarLiga('ES')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="ES">🇪🇸 La Liga</button>
+            <button onclick="carregarLiga('IT')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="IT">🇮🇹 Serie A</button>
+            <button onclick="carregarLiga('DE')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="DE">🇩🇪 Bundesliga</button>
+            <button onclick="carregarLiga('FR')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="FR">🇫🇷 Ligue 1</button>
+            <button onclick="carregarLiga('SA')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="SA">🇸🇦 Saudi Pro</button>
+        </nav>
 
-        <section class="page-content">
-            <h2 class="cyber-title">Tabela Neural</h2>
-
-            <div class="leagues-wrapper" style="margin-bottom: 25px;">
-                <div class="leagues-container">
-                    <button class="league-btn active" data-liga="BR">BRA</button>
-                    <button class="league-btn" data-liga="PL">ENG</button>
-                    <button class="league-btn" data-liga="ES">ESP</button>
-                    <button class="league-btn" data-liga="IT">ITA</button>
-                    <button class="league-btn" data-liga="DE">GER</button>
-                    <button class="league-btn" data-liga="PT">POR</button>
-                    <button class="league-btn" data-liga="FR">FRA</button>
-                    <button class="league-btn" data-liga="SA">SAU</button>
-                </div>
-            </div>
-
-            <div class="glass-panel table-container">
-                <table id="tabela-principal-tags">
-                    <thead>
+        <div class="glass rounded-xl overflow-hidden shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-800 text-slate-300 text-sm uppercase">
                         <tr>
-                            <th style="width: 40px;">#</th>
-                            <th>TIME</th>
-                            <th style="text-align: center; width: 40px;">J</th>
-                            <th style="text-align: center; width: 40px;">GP</th> 
-                            <th style="text-align: center; width: 40px;">GC</th> 
-                            <th style="text-align: center; width: 40px;">SG</th> 
-                            <th style="text-align: center; width: 55px;">PTS</th>
+                            <th class="p-4">Pos</th>
+                            <th class="p-4">Clube</th>
+                            <th class="p-4 text-center">P</th>
+                            <th class="p-4 text-center">J</th>
+                            <th class="p-4 text-center">V</th>
+                            <th class="p-4 text-center">E</th>
+                            <th class="p-4 text-center">D</th>
+                            <th class="p-4 text-center hidden md:table-cell">GP</th>
+                            <th class="p-4 text-center hidden md:table-cell">GC</th>
+                            <th class="p-4 text-center">SG</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-corpo">
+                    <tbody id="tabela-corpo" class="text-sm md:text-base">
                         </tbody>
                 </table>
             </div>
-        </section>
-    </main>
-
-    <div id="modal-time" class="modal-time-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; backdrop-filter: blur(10px); align-items: center; justify-content: center;">
-        <div class="modal-time-content" style="background: #0a0a0a; border: 1px solid #222; border-radius: 24px; padding: 30px; max-width: 380px; width: 90%; position: relative;">
-            
-            <span class="close-modal-btn" style="cursor: pointer; position: absolute; right: 20px; top: 15px; font-size: 2rem; color: #666;">&times;</span>
-            
-            <div style="text-align: center; margin-bottom: 20px;">
-                <img id="modal-escudo" src="" style="width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px;">
-                <h2 id="modal-nome-time" style="margin: 0; font-size: 1.5rem; text-transform: uppercase;">--</h2>
-                <span id="modal-liga-badge" style="color: #00ff88; font-size: 0.7rem; letter-spacing: 1px;">LIGA</span>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-                <div style="background: #111; padding: 15px; border-radius: 12px; text-align: center;">
-                    <small style="color: #555; display: block;">POSIÇÃO</small>
-                    <strong id="modal-pos" style="font-size: 1.5rem;">--</strong>
-                </div>
-                <div style="background: #111; padding: 15px; border-radius: 12px; text-align: center;">
-                    <small style="color: #555; display: block;">PONTOS</small>
-                    <strong id="modal-pts" style="font-size: 1.5rem; color: #00ff88;">--</strong>
-                </div>
-            </div>
-
-            <div style="background: #050505; border: 1px solid #111; display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
-                <div>
-                    <small style="color: #444; display: block;">GP</small>
-                    <span id="modal-gp">0</span>
-                </div>
-                <div style="border-left: 1px solid #111; border-right: 1px solid #111;">
-                    <small style="color: #444; display: block;">GC</small>
-                    <span id="modal-gc">0</span>
-                </div>
-                <div>
-                    <small style="color: #444; display: block;">SG</small>
-                    <span id="modal-sg">0</span>
-                </div>
-            </div>
-
-            <div style="text-align: center; font-size: 0.8rem; color: #333;">
-                PARTIDAS: <span id="modal-jogos" style="color: #eee;">0</span>
-            </div>
+            <div id="loading" class="p-10 text-center text-slate-500">Carregando dados...</div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // CONFIGURAÇÕES DO SUPABASE
+        const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co"; 
+        const SUPABASE_KEY = "SUA_ANON_PUBLIC_KEY_AQUI"; // Pegue no painel Settings > API
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function carregarLiga(ligaId) {
+            const corpo = document.getElementById('tabela-corpo');
+            const loader = document.getElementById('loading');
+            
+            // Atualizar visual das abas
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('tab-active', btn.getAttribute('data-liga') === ligaId);
+            });
+
+            corpo.innerHTML = "";
+            loader.style.display = "block";
+
+            try {
+                const { data, error } = await supabase
+                    .from('tabelas_ligas')
+                    .select('*')
+                    .eq('liga', ligaId)
+                    .order('posicao', { ascending: true });
+
+                if (error) throw error;
+
+                loader.style.display = "none";
+                
+                if (data.length === 0) {
+                    corpo.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-slate-500">Nenhum dado encontrado para esta liga.</td></tr>`;
+                    return;
+                }
+
+                data.forEach(clube => {
+                    const row = `
+                        <tr class="border-b border-slate-700/50">
+                            <td class="p-4 font-bold text-slate-400">${clube.posicao}º</td>
+                            <td class="p-4 flex items-center gap-3">
+                                <img src="${clube.escudo}" class="w-8 h-8 object-contain" onerror="this.src='https://via.placeholder.com/32?text=?'">
+                                <span class="font-semibold">${clube.time}</span>
+                            </td>
+                            <td class="p-4 text-center font-bold text-blue-400">${clube.pontos}</td>
+                            <td class="p-4 text-center">${clube.jogos}</td>
+                            <td class="p-4 text-center text-green-500">${clube.vitorias}</td>
+                            <td class="p-4 text-center text-slate-400">${clube.empates}</td>
+                            <td class="p-4 text-center text-red-500">${clube.derrotas}</td>
+                            <td class="p-4 text-center hidden md:table-cell text-slate-400">${clube.gols_pro}</td>
+                            <td class="p-4 text-center hidden md:table-cell text-slate-400">${clube.gols_contra}</td>
+                            <td class="p-4 text-center font-medium ${clube.sg >= 0 ? 'text-green-400' : 'text-red-400'}">${clube.sg}</td>
+                        </tr>
+                    `;
+                    corpo.innerHTML += row;
+                });
+
+            } catch (err) {
+                console.error("Erro:", err);
+                loader.innerText = "Erro ao carregar dados do banco.";
+            }
+        }
+
+        // Inicia carregando a Premier League por padrão
+        window.onload = () => carregarLiga('PL');
+    </script>
 </body>
 </html>
