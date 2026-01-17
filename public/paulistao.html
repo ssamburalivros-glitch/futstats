@@ -25,97 +25,121 @@
             color: var(--text);
             font-family: 'Montserrat', sans-serif;
             margin: 0;
-            padding-bottom: 50px;
+            overflow-x: hidden;
         }
 
-        /* Layout */
+        /* Container Principal com largura máxima controlada */
         .dashboard {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 15px;
+            max-width: 1100px; /* Impede que fique extremamente largo */
+            margin: 40px auto;
+            padding: 0 20px;
             display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 20px;
+            grid-template-columns: 350px 1fr; /* Tabela menor, Jogos maior */
+            gap: 30px;
         }
 
-        .hero { padding: 60px 20px; text-align: center; }
+        .hero { padding: 40px 20px; text-align: center; border-bottom: 1px solid var(--border); }
         
-        /* Tabela */
-        .box { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 12px; padding: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { color: #444; padding: 10px; text-transform: uppercase; font-size: 0.6rem; border-bottom: 1px solid var(--border); }
-        td { padding: 12px 8px; border-bottom: 1px solid #111; text-align: center; }
-        .t-flex { display: flex; align-items: center; gap: 8px; text-align: left; font-weight: bold; }
-        .t-flex img { width: 22px; height: 22px; object-fit: contain; }
+        .box { 
+            background: var(--panel-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            padding: 20px;
+            height: fit-content;
+        }
 
-        /* Carrossel e Cards */
-        .swiper { width: 100%; min-height: 300px; }
-        .data-label { text-align: center; color: #666; font-weight: 800; font-size: 0.7rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
+        /* Estilo da Tabela */
+        table { width: 100%; border-collapse: collapse; }
+        th { color: #444; padding: 10px; text-transform: uppercase; font-size: 0.6rem; text-align: center; border-bottom: 1px solid var(--border); }
+        td { padding: 10px 5px; border-bottom: 1px solid #111; text-align: center; font-size: 0.8rem; }
+        .t-flex { display: flex; align-items: center; gap: 8px; text-align: left; }
+        .t-flex img { width: 20px; height: 20px; object-fit: contain; }
+
+        /* Estilo do Carrossel */
+        .swiper { width: 100%; max-width: 650px; margin: 0 auto; }
+        .data-label { text-align: center; color: #666; font-weight: 800; font-size: 0.75rem; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
         
         .card-jogo {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 15px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
+        /* GRID DO CONFRONTO - Centralização Real */
         .confronto {
             display: grid;
-            grid-template-columns: 1fr 120px 1fr;
+            grid-template-columns: 1fr 100px 1fr; /* Espaço fixo para o placar no meio */
             align-items: center;
-            text-align: center;
+            gap: 10px;
         }
 
-        .team img { width: 40px; height: 40px; margin-bottom: 5px; }
-        .team span { font-size: 0.65rem; font-weight: 700; display: block; }
+        .team { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .team img { width: 45px; height: 45px; margin-bottom: 8px; object-fit: contain; }
+        .team span { 
+            font-size: 0.65rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            text-align: center;
+            line-height: 1.2;
+            height: 30px; /* Espaço fixo para o nome */
+            display: flex;
+            align-items: center;
+        }
 
-        /* Placar Gigante */
+        /* Placar Enquadrado */
         .placar-box {
             background: #161616;
             border: 1px solid #222;
-            border-radius: 8px;
-            height: 50px;
+            border-radius: 6px;
+            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
+            min-width: 80px;
         }
 
         .placar-val {
             font-weight: 900;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             letter-spacing: 2px;
-            white-space: nowrap;
+            color: #fff;
         }
 
-        .vs { color: #333; font-weight: 900; }
+        .vs { color: #333; font-weight: 900; font-size: 0.9rem; }
 
-        @media (max-width: 800px) {
+        /* Paginação */
+        .swiper-pagination-bullet { background: #444; }
+        .swiper-pagination-bullet-active { background: #fff; }
+
+        @media (max-width: 900px) {
             .dashboard { grid-template-columns: 1fr; }
+            .swiper { max-width: 100%; }
         }
     </style>
 </head>
 <body>
 
     <div class="hero">
-        <h1 style="margin:0; font-weight:900;">PAULISTÃO 2026</h1>
+        <h1 style="margin:0; font-weight:900; letter-spacing: -1px;">PAULISTÃO 2026</h1>
+        <p style="font-size: 0.65rem; color: #444; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px;">Resultados e Classificação</p>
     </div>
 
     <div class="dashboard">
         <div class="box">
-            <h2 style="font-size:0.7rem; color:#666; text-transform:uppercase; margin-bottom:15px;">Classificação</h2>
+            <h2 style="font-size:0.7rem; color:#444; text-transform:uppercase; margin:0 0 20px 0;">Classificação Geral</h2>
             <table>
-                <thead><tr><th>#</th><th style="text-align:left">Time</th><th>P</th></tr></thead>
+                <thead><tr><th>#</th><th style="text-align:left">Time</th><th>PTS</th></tr></thead>
                 <tbody id="lista-classificacao"></tbody>
             </table>
         </div>
 
-        <div class="box" style="min-height: 400px;">
-            <h2 style="font-size:0.7rem; color:#666; text-transform:uppercase; margin-bottom:15px;">Calendário</h2>
+        <div class="box">
+            <h2 style="font-size:0.7rem; color:#444; text-transform:uppercase; margin:0 0 20px 0;">Calendário de Rodadas</h2>
             <div class="swiper mySwiper">
-                <div class="swiper-wrapper" id="container-carrossel">
-                    </div>
-                <div class="swiper-pagination"></div>
+                <div class="swiper-wrapper" id="container-carrossel"></div>
+                <div style="margin-top: 20px;" class="swiper-pagination"></div>
             </div>
         </div>
     </div>
@@ -125,24 +149,31 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A';
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const getSlug = (n) => n ? n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : "escudo";
+        // Função de slug melhorada para os logos
+        const getSlug = (n) => {
+            if(!n) return "escudo";
+            let s = n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            if(s.includes("bragantino")) return "red-bull-bragantino";
+            if(s.includes("novorizontino")) return "novorizontino";
+            if(s.includes("noroeste")) return "noroeste";
+            if(s.includes("primavera")) return "primavera";
+            return s.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        };
 
         async function carregarTudo() {
             try {
                 const { data: classif } = await client.from('paulistao_classificacao').select('*').order('pontos', { ascending: false });
                 const { data: jogos } = await client.from('paulistao_jogos').select('*').order('id', { ascending: true });
 
-                // Render Tabela
                 if(classif) {
-                    document.getElementById('lista-classificacao').innerHTML = classif.map((t, i) => `
+                    document.getElementById('lista-classificacao').innerHTML = classif.slice(0, 16).map((t, i) => `
                         <tr>
-                            <td>${i+1}</td>
+                            <td style="color:#333; font-weight:bold">${i+1}</td>
                             <td><div class="t-flex"><img src="https://logodetimes.com/times/${getSlug(t.time_nome)}/logo-${getSlug(t.time_nome)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${t.time_nome}</span></div></td>
                             <td style="color:#fff; font-weight:900;">${t.pontos}</td>
                         </tr>`).join('');
                 }
 
-                // Render Carrossel
                 if(jogos) {
                     const grupos = jogos.reduce((acc, j) => {
                         if (!acc[j.data_jogo]) acc[j.data_jogo] = [];
@@ -175,17 +206,14 @@
                     }
                     document.getElementById('container-carrossel').innerHTML = slides;
 
-                    // Inicia o Swiper APENAS após os dados estarem no HTML
                     new Swiper(".mySwiper", {
-                        spaceBetween: 20,
+                        autoHeight: true,
+                        spaceBetween: 30,
                         pagination: { el: ".swiper-pagination", clickable: true },
                     });
                 }
-            } catch (err) {
-                console.error("Erro ao carregar:", err);
-            }
+            } catch (err) { console.error(err); }
         }
-
         carregarTudo();
     </script>
 </body>
