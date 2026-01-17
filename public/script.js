@@ -80,29 +80,52 @@ function inicializarHome() {
 async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
     if(!corpo) return;
-    corpo.innerHTML = "<tr><td colspan='7' align='center'>Carregando Matrix...</td></tr>";
+    corpo.innerHTML = "<tr><td colspan='7' align='center'>Sincronizando dados...</td></tr>";
 
-    const { data, error } = await _supabase.from('tabelas_ligas').select('*').eq('liga', liga).order('posicao');
-    if (error) return;
+    try {
+        const { data, error } = await _supabase.from('tabelas_ligas').select('*').eq('liga', liga).order('posicao');
+        
+        if (error) throw error;
+        if (!data || data.length === 0) {
+            corpo.innerHTML = "<tr><td colspan='7' align='center'>Nenhum dado encontrado para esta liga.</td></tr>";
+            return;
+        }
 
-    corpo.innerHTML = data.map(item => {
-        const d = JSON.stringify(item).replace(/'/g, "&apos;");
-        return `
-            <tr onclick='abrirModalTime(${d})' style="cursor:pointer;">
-                <td>${item.posicao}º</td>
-                <td><div style="display:flex;align-items:center;gap:10px;">
-                    <img src="${item.escudo || ESCUDO_PADRAO}" width="24" height="24" onerror="this.src='${ESCUDO_PADRAO}'">
-                    <span>${item.time}</span>
-                </div></td>
-                <td align="center">${item.jogos || 0}</td>
-                <td align="center">${item.gols_pro || 0}</td>
-                <td align="center">${item.gols_contra || 0}</td>
-                <td align="center"><strong>${item.sg || 0}</strong></td>
-                <td align="center" style="color:#00ff88;font-weight:bold;">${item.pontos || 0}</td>
-            </tr>`;
-    }).join('');
+        corpo.innerHTML = data.map(item => {
+            // MAPEAMENTO INTELIGENTE: Tenta todas as variações de nomes possíveis
+            const pos = item.posicao || 0;
+            const time = item.time || 'Sem nome';
+            const jogos = item.jogos ?? item.j ?? 0;
+            const gp = item.gols_pro ?? item.gp ?? item.GP ?? 0;
+            const gc = item.gols_contra ?? item.gc ?? item.GC ?? 0;
+            const sg = item.sg ?? item.SG ?? (gp - gc);
+            const pts = item.pontos ?? item.pts ?? item.PTS ?? 0;
+            const escudo = item.escudo || ESCUDO_PADRAO;
+
+            const dadosString = JSON.stringify(item).replace(/'/g, "&apos;");
+
+            return `
+                <tr onclick='abrirModalTime(${dadosString})' style="cursor:pointer;">
+                    <td>${pos}º</td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <img src="${escudo}" width="24" height="24" onerror="this.src='${ESCUDO_PADRAO}'">
+                            <span>${time}</span>
+                        </div>
+                    </td>
+                    <td align="center">${jogos}</td>
+                    <td align="center">${gp}</td>
+                    <td align="center">${gc}</td>
+                    <td align="center"><strong>${sg}</strong></td>
+                    <td align="center" style="color:#00ff88; font-weight:bold;">${pts}</td>
+                </tr>`;
+        }).join('');
+
+    } catch (e) {
+        console.error("Erro ao carregar:", e);
+        corpo.innerHTML = "<tr><td colspan='7' align='center'>Erro de conexão.</td></tr>";
+    }
 }
-
 function abrirModalTime(time) {
     const m = document.getElementById('modal-time');
     if(!m) return;
