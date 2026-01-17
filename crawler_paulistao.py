@@ -1,6 +1,5 @@
 import os
 import requests
-from bs4 import BeautifulSoup
 from supabase import create_client
 
 # Configurações do Supabase
@@ -8,69 +7,52 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# URL estável do GE (Classificação Paulistão)
-URL_CLASS = "https://ge.globo.com/sp/futebol/campeonato-paulista/"
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-}
+# URL da API do Globo Esporte (Fase única Paulista 2026)
+# Este ID é o identificador da competição no sistema da Globo
+URL_API = "https://api.globoesporte.globo.com/tabela/d1a3b471-f923-4469-9f6a-68695d3e090a/fase/fase-unica-paulista-2026/classificacao/"
 
 def crawler_classificacao():
-    print("🚀 Iniciando raspagem detalhada via Globo Esporte...")
+    print("🚀 Acessando API do Globo Esporte...")
     try:
-        response = requests.get(URL_CLASS, headers=HEADERS, timeout=20)
+        # O GE exige um User-Agent para não bloquear a requisição
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        
+        response = requests.get(URL_API, headers=headers, timeout=20)
         response.raise_for_status()
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        # No GE, os nomes ficam em uma tabela e os dados em outra (lado a lado)
-        nomes_times = soup.select('.classificacao__equipe--nome')
-        linhas_dados = soup.select('.classificacao__tabela--linha')
+        dados_ge = response.json()
 
         payload = []
 
-        if not nomes_times:
-            print("⚠️ Erro: Não foi possível encontrar os times na página.")
-            return
+        # Percorre a lista de times retornada pela API
+        for item in dados_ge:
+            nome = item['equipe']['nome_popular']
+            stats = item['stats']
 
-        for i, nome_tag in enumerate(nomes_times):
-            nome = nome_tag.text.strip()
-            
-            # O GE separa os dados em colunas dentro da linha
-            # Ordem padrão: PTS | J | V | E | D | GP | GC | SG | % | Recentes
-            cols = linhas_dados[i].find_all("td")
-            
-            if len(cols) >= 8:
-                pontos      = cols[0].text.strip()
-                jogos       = cols[1].text.strip()
-                vitorias    = cols[2].text.strip()
-                empates     = cols[3].text.strip()
-                derrotas    = cols[4].text.strip()
-                gols_pro    = cols[5].text.strip()
-                gols_contra = cols[6].text.strip()
-                saldo_gols  = cols[7].text.strip()
-
-                payload.append({
-                    "time_nome": nome,
-                    "pontos": int(pontos) if pontos.isdigit() else 0,
-                    "jogos": int(jogos) if jogos.isdigit() else 0,
-                    "vitorias": int(vitorias) if vitorias.isdigit() else 0,
-                    "empates": int(empates) if empates.isdigit() else 0,
-                    "derrotas": int(derrotas) if derrotas.isdigit() else 0,
-                    "gols_pro": int(gols_pro) if gols_pro.isdigit() else 0,
-                    "gols_contra": int(gols_contra) if gols_contra.isdigit() else 0,
-                    "saldo_gols": int(saldo_gols.replace('+', '')) if saldo_gols.replace('-', '').replace('+', '').isdigit() else 0
-                })
+            payload.append({
+                "time_nome": nome,
+                "pontos": int(stats['pontos']),
+                "jogos": int(stats['jogos']),
+                "vitorias": int(stats['vitorias']),
+                "empates": int(stats['empates']),
+                "derrotas": int(stats['derrotas']),
+                "gols_pro": int(stats['gols_pro']),
+                "gols_contra": int(stats['gols_contra']),
+                "saldo_gols": int(stats['saldo_gols'])
+            })
 
         if payload:
             print(f"📤 Atualizando {len(payload)} times no Supabase...")
-            # Limpa e Insere
+            # Limpa a tabela e insere os novos dados
             supabase.table("paulistao_classificacao").delete().neq("time_nome", "null").execute()
             supabase.table("paulistao_classificacao").insert(payload).execute()
-            print("✅ Classificação detalhada atualizada com sucesso via GE!")
+            print("✅ Classificação detalhada atualizada com sucesso via API GE!")
         else:
-            print("❌ Dados não processados.")
+            print("❌ API retornou lista vazia.")
 
     except Exception as e:
-        print(f"❌ Erro na requisição: {e}")
+        print(f"❌ Erro ao processar API: {e}")
 
 if __name__ == "__main__":
     crawler_classificacao()
