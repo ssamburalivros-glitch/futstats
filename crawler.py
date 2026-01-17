@@ -3,19 +3,10 @@ import time
 import requests
 from supabase import create_client
 
-# --- 1. CONFIGURAÇÃO ---
+# --- CONFIGURAÇÃO ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-supabase = None
-
-try:
-    if not SUPABASE_URL or not SUPABASE_KEY:
-        print("❌ ERRO: Variáveis de ambiente não configuradas!")
-    else:
-        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-        print("🚀 Conexão com Supabase estabelecida.")
-except Exception as e:
-    print(f"❌ Falha ao conectar: {e}")
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 LIGAS = {
     "BR": "bra.1", "PL": "eng.1", "ES": "esp.1",
@@ -23,28 +14,31 @@ LIGAS = {
     "FR": "fra.1", "NL": "ned.1", "SA": "sau.1"
 }
 
-# --- 2. FUNÇÃO DE CAPTURA ---
 def capturar_liga(liga_id, espn_id):
-    global supabase
-    if supabase is None: return
-
-    print(f"📡 Atualizando {liga_id}...")
+    print(f"📡 Buscando dados para: {liga_id}...")
     url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/standings"
     
     try:
         res = requests.get(url, timeout=15).json()
         
+        # Tenta encontrar a lista de times na estrutura da ESPN
         if 'children' in res:
             entries = res['children'][0].get('standings', {}).get('entries', [])
         else:
             entries = res.get('standings', {}).get('entries', [])
 
+        if not entries:
+            print(f"❌ Nenhuma entrada encontrada para {liga_id}")
+            return
+
         for entry in entries:
             team = entry.get('team', {})
             stats_list = entry.get('stats', [])
-            # Mapeia os nomes das estatísticas da ESPN para valores
+            
+            # Criamos o dicionário mapeando os nomes das colunas da ESPN
             s = {item.get('name'): item.get('value') for item in stats_list}
             
+            # ATENÇÃO: Verifique se esses nomes (pointsFor, etc) existem na resposta
             dados = {
                 "liga": liga_id,
                 "time": team.get('displayName'),
@@ -60,19 +54,22 @@ def capturar_liga(liga_id, espn_id):
                 "pontos": int(s.get('points') or 0)
             }
 
-            if dados["escudo"] and dados["escudo"].startswith("http:"):
-                dados["escudo"] = dados["escudo"].replace("http:", "https:")
+            # DEBUG: Mostra no log o que está sendo enviado (pode apagar depois)
+            if dados["time"] == "Real Madrid" or dados["time"] == "Flamengo":
+                print(f"DEBUG {dados['time']}: GP={dados['gols_pro']}, GC={dados['gols_contra']}")
 
-            # UPSERT para evitar duplicados
-            supabase.table("tabelas_ligas").upsert(dados, on_conflict="liga, time").execute()
+            # Envio para o Supabase
+            try:
+                supabase.table("tabelas_ligas").upsert(dados, on_conflict="liga, time").execute()
+            except Exception as db_err:
+                print(f"❌ Erro ao inserir no banco: {db_err}")
 
-        print(f"✅ {liga_id} sincronizada.")
+        print(f"✅ {liga_id} sincronizada com sucesso.")
         
     except Exception as e:
-        print(f"❌ Erro em {liga_id}: {e}")
+        print(f"❌ Erro crítico na liga {liga_id}: {e}")
 
 if __name__ == "__main__":
-    if supabase:
-        for liga, code in LIGAS.items():
-            capturar_liga(liga, code)
-            time.sleep(2)
+    for liga, code in LIGAS.items():
+        capturar_liga(liga, code)
+        time.sleep(1) # Delay para evitar bloqueio da API
