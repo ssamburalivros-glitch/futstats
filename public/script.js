@@ -40,9 +40,9 @@ function inicializarHome() {
     // 1. Gerar os Slides do Carrossel (Se estiver vazio no HTML)
     const slidesContainer = document.getElementById('carousel-slides');
     const banners = [
-        { img: 'logos/banner1.jpg', tit: 'ANÁLISE NEURAL', desc: 'Dados processados em tempo real.' },
-        { img: 'logos/banner2.jpg', tit: 'ARENA H2H', desc: 'Compare times com inteligência artificial.' },
-        { img: 'logos/banner3.jpg', tit: 'BRASILEIRÃO 2026', desc: 'Acompanhe a subida dos gigantes.' }
+        { img: 'logos/carrossel1.webp', tit: 'ANÁLISE NEURAL', desc: 'Dados processados em tempo real.' },
+        { img: 'logos/carrossel2.web', tit: 'ARENA H2H', desc: 'Compare times com inteligência artificial.' },
+        { img: 'logos/carrossel3.web', tit: 'BRASILEIRÃO 2026', desc: 'Acompanhe a subida dos gigantes.' }
     ];
 
     slidesContainer.innerHTML = banners.map(b => `
