@@ -2,34 +2,14 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Paulistão 2026 </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Paulistão 2026 | FutStats Pro</title>
     
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-</head>
-<body>
-
-    <header>
-        <div class="header-content">
-            <a href="index.html" class="brand-container">
-                <img src="logos/logo.png" alt="FS" class="site-logo-img">
-                <h1 class="logo">FutStats</h1>
-            </a>
-            <div class="nav-container">
-                <nav class="nav-links">
-                    <a href="classificacao.html">Classificação</a>
-                    <a href="arena.html">Arena H2H</a>
-                    <a href="aovivo.html">Jogos ao Vivo</a>
-                    <a href="paulistao.html">Paulistão 2026</a>
-                </nav>
-                <button class="btn-download">Baixar APP</button>
-            </div>
-        </div>
-    </header>
-
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <style>
         :root {
@@ -248,11 +228,11 @@
                 <img src="https://logodetimes.com/times/${getSlug(t.time_nome)}/logo-${getSlug(t.time_nome)}-256.png" style="width:60px; margin-bottom:10px;">
                 <h3 style="margin:0;">${t.time_nome}</h3>
                 <div class="modal-stats">
-                    <div class="stat-item"><span class="stat-val">${t.pontos}</span><span class="stat-label">Pontos</span></div>
-                    <div class="stat-item"><span class="stat-val">${t.jogos}</span><span class="stat-label">Jogos</span></div>
-                    <div class="stat-item"><span class="stat-val">${t.vitorias}</span><span class="stat-label">Vitórias</span></div>
-                    <div class="stat-item"><span class="stat-val">${t.saldo_gols}</span><span class="stat-label">Saldo de Gols</span></div>
-                    <div class="stat-item" style="grid-column: span 2;"><span class="stat-val" style="font-size:0.9rem">Gols Marcados ${t.gols_pro} / Gols Contra ${t.gols_contra} </span><span class="stat-label"></span></div>
+                    <div class="stat-item"><span class="stat-val">${t.pontos}</span><span class="stat-label">PTS</span></div>
+                    <div class="stat-item"><span class="stat-val">${t.jogos}</span><span class="stat-label">J</span></div>
+                    <div class="stat-item"><span class="stat-val">${t.vitorias}</span><span class="stat-label">V</span></div>
+                    <div class="stat-item"><span class="stat-val">${t.saldo_gols}</span><span class="stat-label">SG</span></div>
+                    <div class="stat-item" style="grid-column: span 2;"><span class="stat-val" style="font-size:0.9rem">${t.gols_pro} GP / ${t.gols_contra} GC</span><span class="stat-label">Gols</span></div>
                 </div>`;
             document.getElementById('teamModal').style.display = "flex";
         }
