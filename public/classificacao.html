@@ -3,124 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classificação de Ligas</title>
+    <title>Arena Tabelas - Classificação</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
-        tr:nth-child(even) { background: rgba(255,255,255,0.02); }
-        tr:hover { background: rgba(59, 130, 246, 0.1); transition: 0.2s; }
+        body { background-color: #050505; color: #eee; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass-card { background: #111; border: 1px solid #222; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .tab-btn { border-bottom: 3px solid transparent; transition: 0.3s; color: #888; }
+        .tab-btn.active { border-bottom: 3px solid #2563eb; color: #fff; font-weight: bold; }
+        tr { border-bottom: 1px solid #1a1a1a; transition: 0.2s; }
+        tr:hover { background: #161616; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-10">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-bold mb-2">Tabelas de Classificação</h1>
-            <p class="text-slate-400">Dados atualizados em tempo real via API ESPN</p>
-        </header>
+    <div class="max-w-5xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-10 text-white tracking-tight">Estatísticas de Futebol</h1>
 
-        <nav id="tabs" class="flex flex-wrap justify-center gap-2 mb-6 border-b border-slate-700 pb-4">
-            <button onclick="carregarLiga('BR')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="BR">🇧🇷 Brasil</button>
-            <button onclick="carregarLiga('PL')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="PL">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
-            <button onclick="carregarLiga('ES')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="ES">🇪🇸 La Liga</button>
-            <button onclick="carregarLiga('IT')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="IT">🇮🇹 Serie A</button>
-            <button onclick="carregarLiga('DE')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="DE">🇩🇪 Bundesliga</button>
-            <button onclick="carregarLiga('FR')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="FR">🇫🇷 Ligue 1</button>
-            <button onclick="carregarLiga('SA')" class="px-4 py-2 rounded-lg hover:bg-slate-800 transition tab-btn" data-liga="SA">🇸🇦 Saudi Pro</button>
+        <nav class="flex overflow-x-auto gap-6 mb-8 border-b border-zinc-800 justify-start md:justify-center scrollbar-hide">
+            <button onclick="carregar('BR', this)" class="tab-btn pb-3 px-2 active">Brasil</button>
+            <button onclick="carregar('PL', this)" class="tab-btn pb-3 px-2">Inglaterra</button>
+            <button onclick="carregar('ES', this)" class="tab-btn pb-3 px-2">Espanha</button>
+            <button onclick="carregar('IT', this)" class="tab-btn pb-3 px-2">Itália</button>
+            <button onclick="carregar('DE', this)" class="tab-btn pb-3 px-2">Alemanha</button>
+            <button onclick="carregar('FR', this)" class="tab-btn pb-3 px-2">França</button>
         </nav>
 
-        <div class="glass rounded-xl overflow-hidden shadow-2xl">
+        <div class="glass-card rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-slate-800 text-slate-300 text-sm uppercase">
+                <table class="w-full text-center">
+                    <thead class="bg-zinc-900 text-zinc-500 text-xs uppercase tracking-widest">
                         <tr>
-                            <th class="p-4">Pos</th>
-                            <th class="p-4">Clube</th>
-                            <th class="p-4 text-center">P</th>
-                            <th class="p-4 text-center">J</th>
-                            <th class="p-4 text-center">V</th>
-                            <th class="p-4 text-center">E</th>
-                            <th class="p-4 text-center">D</th>
-                            <th class="p-4 text-center hidden md:table-cell">GP</th>
-                            <th class="p-4 text-center hidden md:table-cell">GC</th>
-                            <th class="p-4 text-center">SG</th>
+                            <th class="p-4 text-left">Pos</th>
+                            <th class="p-4 text-left">Clube</th>
+                            <th class="p-4">PTS</th>
+                            <th class="p-4">PJ</th>
+                            <th class="p-4">VIT</th>
+                            <th class="p-4">SG</th>
+                            <th class="p-4 hidden md:table-cell">GP/GC</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-corpo" class="text-sm md:text-base">
                         </tbody>
                 </table>
             </div>
-            <div id="loading" class="p-10 text-center text-slate-500">Carregando dados...</div>
+            <div id="loading" class="p-20 text-center text-zinc-600 font-medium">Carregando dados do Supabase...</div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÕES DO SUPABASE
-        const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co"; 
-        const SUPABASE_KEY = "SUA_ANON_PUBLIC_KEY_AQUI"; // Pegue no painel Settings > API
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A"; // Substitua pela sua chave 'anon public'
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function carregarLiga(ligaId) {
+        async function carregar(liga, elemento) {
+            // Gerenciar estado dos botões
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            elemento.classList.add('active');
+
             const corpo = document.getElementById('tabela-corpo');
             const loader = document.getElementById('loading');
             
-            // Atualizar visual das abas
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.toggle('tab-active', btn.getAttribute('data-liga') === ligaId);
-            });
-
             corpo.innerHTML = "";
             loader.style.display = "block";
 
-            try {
-                const { data, error } = await supabase
-                    .from('tabelas_ligas')
-                    .select('*')
-                    .eq('liga', ligaId)
-                    .order('posicao', { ascending: true });
+            const { data, error } = await supabaseClient
+                .from('tabelas_ligas')
+                .select('*')
+                .eq('liga', liga)
+                .order('posicao', { ascending: true });
 
-                if (error) throw error;
+            loader.style.display = "none";
 
-                loader.style.display = "none";
-                
-                if (data.length === 0) {
-                    corpo.innerHTML = `<tr><td colspan="10" class="p-10 text-center text-slate-500">Nenhum dado encontrado para esta liga.</td></tr>`;
-                    return;
-                }
-
+            if (data && data.length > 0) {
                 data.forEach(clube => {
-                    const row = `
-                        <tr class="border-b border-slate-700/50">
-                            <td class="p-4 font-bold text-slate-400">${clube.posicao}º</td>
-                            <td class="p-4 flex items-center gap-3">
-                                <img src="${clube.escudo}" class="w-8 h-8 object-contain" onerror="this.src='https://via.placeholder.com/32?text=?'">
-                                <span class="font-semibold">${clube.time}</span>
+                    corpo.innerHTML += `
+                        <tr>
+                            <td class="p-4 text-left font-mono text-zinc-500">${clube.posicao}º</td>
+                            <td class="p-4 text-left flex items-center gap-3">
+                                <img src="${clube.escudo}" class="w-6 h-6 object-contain" onerror="this.src='https://via.placeholder.com/24'">
+                                <span class="font-bold text-zinc-200">${clube.time}</span>
                             </td>
-                            <td class="p-4 text-center font-bold text-blue-400">${clube.pontos}</td>
-                            <td class="p-4 text-center">${clube.jogos}</td>
-                            <td class="p-4 text-center text-green-500">${clube.vitorias}</td>
-                            <td class="p-4 text-center text-slate-400">${clube.empates}</td>
-                            <td class="p-4 text-center text-red-500">${clube.derrotas}</td>
-                            <td class="p-4 text-center hidden md:table-cell text-slate-400">${clube.gols_pro}</td>
-                            <td class="p-4 text-center hidden md:table-cell text-slate-400">${clube.gols_contra}</td>
-                            <td class="p-4 text-center font-medium ${clube.sg >= 0 ? 'text-green-400' : 'text-red-400'}">${clube.sg}</td>
+                            <td class="p-4 font-black text-blue-500">${clube.pontos}</td>
+                            <td class="p-4 text-zinc-400">${clube.jogos}</td>
+                            <td class="p-4 text-green-500/80">${clube.vitorias}</td>
+                            <td class="p-4 font-medium ${clube.sg >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${clube.sg}</td>
+                            <td class="p-4 hidden md:table-cell text-zinc-600 text-xs">${clube.gols_pro} : ${clube.gols_contra}</td>
                         </tr>
                     `;
-                    corpo.innerHTML += row;
                 });
-
-            } catch (err) {
-                console.error("Erro:", err);
-                loader.innerText = "Erro ao carregar dados do banco.";
+            } else {
+                corpo.innerHTML = `<tr><td colspan="7" class="p-10 text-zinc-600">Nenhum dado encontrado para a liga ${liga}. Rode o crawler.</td></tr>`;
             }
         }
 
-        // Inicia carregando a Premier League por padrão
-        window.onload = () => carregarLiga('PL');
+        // Inicialização automática
+        window.onload = () => {
+            const btnBrasil = document.querySelector('.tab-btn');
+            carregar('BR', btnBrasil);
+        }
     </script>
 </body>
 </html>
