@@ -157,19 +157,37 @@
         }
 
         /* GRID DO CONFRONTO - O SEGREDO DO ALINHAMENTO */
+        /* Ajuste na Grid para dar mais espaço ao placar central */
         .confronto {
             display: grid;
-            grid-template-columns: 1fr 120px 1fr; /* Coluna central do placar fixa */
+            grid-template-columns: 1fr 140px 1fr; /* Aumentei um pouco a largura central */
             align-items: center;
             width: 100%;
-            gap: 10px;
+            gap: 5px;
         }
 
-        .team-box {
+        /* Caixa do Placar corrigida */
+        .placar-box {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 10px 5px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            text-align: center;
+            min-height: 60px; /* Garante altura mínima */
+            white-space: nowrap; /* Impede que o texto quebre linha */
+        }
+
+        .placar-numeros {
+            color: #fff;
+            font-weight: 900;
+            font-size: 1.8rem;
+            letter-spacing: 2px; /* Reduzi o espaçamento para caber melhor */
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .team-box img {
@@ -185,27 +203,6 @@
             color: #fff;
             text-transform: uppercase;
             max-width: 120px;
-        }
-
-        /* O PLACAR ENQUADRADO */
-        .placar-box {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 10px;
-            padding: 12px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
-        }
-
-        .placar-numeros {
-            color: #fff;
-            font-weight: 900;
-            font-size: 1.85rem; /* TAMANHO GRANDE */
-            letter-spacing: 8px; /* Espaçamento entre os números e o X */
-            padding-left: 8px; /* Ajuste para o X ficar no centro */
-            line-height: 1;
         }
 
         .vs-texto {
@@ -345,12 +342,12 @@
                             <div class="team-name">${j.time_casa}</div>
                         </div>
                         
-                        <div class="placar-box">
-                            ${temPlacar ? 
-                                `<div class="placar-numeros">${j.status_ou_horario}</div>` : 
-                                `<div class="vs-texto">VS</div>`
-                            }
-                        </div>
+                       `<div class="placar-box">
+            ${temPlacar ? 
+                `<span class="placar-numeros">${j.status_ou_horario.replace(/\s/g, '')}</span>` : 
+                `<span class="vs-texto">VS</span>`
+            }
+        </div>`
 
                         <div class="team-box">
                             <img src="https://logodetimes.com/times/${slugFora}/logo-${slugFora}-256.png" onerror="this.src='${LOGO_RESERVA}'">
