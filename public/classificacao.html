@@ -9,39 +9,17 @@
     <style>
         body { background-color: #050505; color: #eee; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-card { background: #111; border: 1px solid #222; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
         .tab-btn { border-bottom: 3px solid transparent; transition: 0.3s; color: #888; cursor: pointer; }
         .tab-btn.active { border-bottom: 3px solid #2563eb; color: #fff; font-weight: bold; }
-        
         tr { border-bottom: 1px solid #1a1a1a; transition: 0.2s; cursor: pointer; }
         tr:hover { background: #161616; }
-        
         .scrollbar-hide::-webkit-scrollbar { display: none; }
-
-        /* MODAL ANIMATION SYSTEM */
-        #modal-detalhes { 
-            opacity: 0; 
-            visibility: hidden; 
-            transition: all 0.3s ease-in-out;
-            pointer-events: none;
-            display: flex; /* Mantém o flex para centralizar, mas invisível */
-        }
-
-        .modal-content { 
-            transform: translateY(20px) scale(0.95); 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-
-        /* ESTADO ATIVO DO MODAL */
-        #modal-detalhes.active { 
-            opacity: 1; 
-            visibility: visible; 
-            pointer-events: auto;
-        }
-
-        #modal-detalhes.active .modal-content { 
-            transform: translateY(0) scale(1); 
-        }
+        
+        /* Modal Style */
+        #modal-detalhes { transition: opacity 0.3s ease, visibility 0.3s; }
+        .modal-content { transform: scale(0.9); transition: transform 0.3s ease; }
+        #modal-detalhes.active { opacity: 1; visibility: visible; display: flex; }
+        #modal-detalhes.active .modal-content { transform: scale(1); }
     </style>
 </head>
 <body class="p-4 md:p-10">
@@ -80,9 +58,9 @@
         </div>
     </div>
 
-    <div id="modal-detalhes" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-4">
+    <div id="modal-detalhes" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="modal-content glass-card w-full max-w-md rounded-2xl p-6 relative border border-zinc-800">
-            <button onclick="fecharModal()" class="absolute top-4 right-4 text-zinc-500 hover:text-white text-2xl transition-colors">&times;</button>
+            <button onclick="fecharModal()" class="absolute top-4 right-4 text-zinc-500 hover:text-white text-2xl">&times;</button>
             
             <div class="text-center mb-6">
                 <img id="m-escudo" src="" class="w-20 h-20 mx-auto mb-4 object-contain">
@@ -92,21 +70,25 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-                    <p class="text-zinc-500 text-xs uppercase mb-1">Pontos / Posição</p>
-                    <p class="text-xl font-bold text-white"><span id="m-pontos"></span> pts <span class="text-zinc-600">|</span> <span id="m-posicao"></span></p>
+                    <p class="text-zinc-500 text-xs uppercase">Pontos</p>
+                    <p id="m-pontos" class="text-xl font-bold text-white"></p>
                 </div>
                 <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-                    <p class="text-zinc-500 text-xs uppercase mb-1">Saldo de Gols</p>
-                    <p id="m-sg" class="text-xl font-bold"></p>
+                    <p class="text-zinc-500 text-xs uppercase">Posição</p>
+                    <p id="m-posicao" class="text-xl font-bold text-white"></p>
                 </div>
-                <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 col-span-2">
-                    <p class="text-zinc-500 text-xs uppercase mb-1">Campanha (V - E - D)</p>
+                <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
+                    <p class="text-zinc-500 text-xs uppercase">V/E/D</p>
                     <p id="m-ved" class="text-lg font-bold text-zinc-300"></p>
                 </div>
-                <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 col-span-2">
-                    <p class="text-zinc-500 text-xs uppercase mb-1">Gols (Marcados / Sofridos)</p>
+                <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
+                    <p class="text-zinc-500 text-xs uppercase">Gols (Pro/Contra)</p>
                     <p id="m-gols" class="text-lg font-bold text-zinc-300"></p>
                 </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-blue-600/10 border border-blue-600/20 rounded-xl text-center">
+                <p class="text-blue-400 text-sm">Saldo de Gols: <span id="m-sg" class="font-bold"></span></p>
             </div>
         </div>
     </div>
@@ -127,7 +109,7 @@
 
             corpo.innerHTML = "";
             loader.style.display = "block";
-            loader.innerText = `Carregando ${liga}...`;
+            loader.innerText = `Carregando liga: ${liga}...`;
 
             try {
                 const { data, error } = await supabaseClient
@@ -142,7 +124,8 @@
 
                 if (data && data.length > 0) {
                     data.forEach((clube, index) => {
-                        const imgEscudo = (clube.escudo && !clube.escudo.includes("base64")) 
+                        const bugEscudoBr = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+                        const imgEscudo = (clube.escudo && clube.escudo !== bugEscudoBr) 
                             ? clube.escudo 
                             : `https://via.placeholder.com/30/222/fff?text=${clube.time.charAt(0)}`;
 
@@ -150,7 +133,7 @@
                             <tr onclick="abrirModal(${index})">
                                 <td class="p-4 text-left font-mono text-zinc-500">${clube.posicao}º</td>
                                 <td class="p-4 text-left flex items-center gap-3">
-                                    <img src="${imgEscudo}" class="w-7 h-7 object-contain">
+                                    <img src="${imgEscudo}" class="w-7 h-7 object-contain" onerror="this.src='https://via.placeholder.com/28?text=?'">
                                     <span class="font-bold text-zinc-200">${clube.time}</span>
                                 </td>
                                 <td class="p-4 font-black text-blue-500">${clube.pontos}</td>
@@ -162,42 +145,53 @@
                             </tr>
                         `;
                     });
+                } else {
+                    loader.style.display = "block";
+                    loader.innerText = `Nenhum dado encontrado.`;
                 }
             } catch (err) {
-                loader.innerText = "Erro ao carregar dados.";
+                loader.innerText = "Erro ao conectar com o banco.";
             }
         }
+function abrirModal(index) {
+        const clube = dadosAtuais[index];
+        const modal = document.getElementById('modal-detalhes');
+        
+        document.getElementById('m-escudo').src = clube.escudo || '';
+        document.getElementById('m-nome').innerText = clube.time;
+        document.getElementById('m-liga').innerText = `Campeonato: ${clube.liga}`;
+        document.getElementById('m-pontos').innerText = clube.pontos;
+        document.getElementById('m-posicao').innerText = `${clube.posicao}º Lugar`;
+        document.getElementById('m-ved').innerText = `${clube.vitorias}V / ${clube.empates}E / ${clube.derrotas}D`;
+        document.getElementById('m-gols').innerText = `${clube.gols_pro} / ${clube.gols_contra}`;
+        document.getElementById('m-sg').innerText = clube.sg;
 
-        function abrirModal(index) {
-            const clube = dadosAtuais[index];
-            const modal = document.getElementById('modal-detalhes');
-            
-            document.getElementById('m-escudo').src = clube.escudo || '';
-            document.getElementById('m-nome').innerText = clube.time;
-            document.getElementById('m-liga').innerText = `Liga: ${clube.liga}`;
-            document.getElementById('m-pontos').innerText = clube.pontos;
-            document.getElementById('m-posicao').innerText = `${clube.posicao}º`;
-            document.getElementById('m-ved').innerText = `${clube.vitorias} Vitórias / ${clube.empates} Empates / ${clube.derrotas} Derrotas`;
-            document.getElementById('m-gols').innerText = `${clube.gols_pro} GP / ${clube.gols_contra} GC`;
-            
-            const sgElem = document.getElementById('m-sg');
-            sgElem.innerText = clube.sg > 0 ? `+${clube.sg}` : clube.sg;
-            sgElem.className = `text-xl font-bold ${clube.sg >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
-
+        // Remove o 'hidden' se existir e adiciona 'active' no próximo frame
+        modal.classList.remove('hidden');
+        setTimeout(() => {
             modal.classList.add('active');
-        }
+        }, 10);
+    }
 
-        function fecharModal() {
-            document.getElementById('modal-detalhes').classList.remove('active');
-        }
+    function fecharModal() {
+        const modal = document.getElementById('modal-detalhes');
+        modal.classList.remove('active');
+        
+        // Espera a animação acabar (300ms) para esconder totalmente
+        setTimeout(() => {
+            if (!modal.classList.contains('active')) {
+                modal.classList.add('hidden');
+            }
+        }, 300);
+    }
 
-        // Fechar ao clicar fora
-        window.onclick = (e) => {
-            const modal = document.getElementById('modal-detalhes');
-            if (e.target === modal) fecharModal();
+    // Fechar ao clicar fora do conteúdo (Ajustado)
+    window.onclick = (event) => {
+        const modal = document.getElementById('modal-detalhes');
+        if (event.target === modal) {
+            fecharModal();
         }
-
-        window.onload = () => carregar('BR', document.getElementById('default-tab'));
-    </script>
+    }
+</script>
 </body>
 </html>
