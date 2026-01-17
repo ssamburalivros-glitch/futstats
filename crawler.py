@@ -31,36 +31,43 @@ def capturar_liga(liga_id, espn_id):
             print(f"❌ Nenhuma entrada encontrada para {liga_id}")
             return
 
-        for entry in entries:
-            team = entry.get('team', {})
-            stats_list = entry.get('stats', [])
-            
-            # Criamos o dicionário mapeando os nomes das colunas da ESPN
-            s = {item.get('name'): item.get('value') for item in stats_list}
-            
-            # ATENÇÃO: Verifique se esses nomes (pointsFor, etc) existem na resposta
-            dados = {
-                "liga": liga_id,
-                "time": team.get('displayName'),
-                "posicao": int(s.get('rank') or 0),
-                "escudo": team.get('logos', [{}])[0].get('href') if team.get('logos') else "",
-                "jogos": int(s.get('gamesPlayed') or 0),
-                "vitorias": int(s.get('wins') or 0),
-                "empates": int(s.get('ties') or 0),
-                "derrotas": int(s.get('losses') or 0),
-                "gols_pro": int(s.get('pointsFor') or 0),       # GP
-                "gols_contra": int(s.get('pointsAgainst') or 0), # GC
-                "sg": int(s.get('pointDifferential') or 0),
-                "pontos": int(s.get('points') or 0)
-            }
+  # Dentro da função capturar_dados_liga, substitua o loop for por este:
+for entry in entries:
+    team_data = entry.get('team', {})
+    stats_list = entry.get('stats', [])
+    
+    # Cria um dicionário mapeando o NOME da estatística para o VALOR
+    # Isso evita pegar a coluna errada
+    stats_map = {s.get('name'): s.get('value') for s in stats_list}
+    
+    # Captura com nomes alternativos (Fallbacks)
+    gp = stats_map.get('pointsFor') or stats_map.get('goalsFor') or 0
+    gc = stats_map.get('pointsAgainst') or stats_map.get('goalsAgainst') or 0
+    sg = stats_map.get('pointDifferential') or stats_map.get('goalDifference') or 0
+    v  = stats_map.get('wins') or 0
+    e  = stats_map.get('ties') or stats_map.get('draws') or 0
+    d  = stats_map.get('losses') or 0
+    pts = stats_map.get('points') or 0
+    jogos = stats_map.get('gamesPlayed') or 0
+    pos = stats_map.get('rank') or 0
 
-            # DEBUG: Mostra no log o que está sendo enviado (pode apagar depois)
-            if dados["time"] == "Real Madrid" or dados["time"] == "Flamengo":
-                print(f"DEBUG {dados['time']}: GP={dados['gols_pro']}, GC={dados['gols_contra']}")
+    dados_time = {
+        "liga": liga_sigla,
+        "time": team_data.get('displayName'),
+        "posicao": int(pos),
+        "escudo": team_data.get('logos', [{}])[0].get('href') if team_data.get('logos') else "",
+        "jogos": int(jogos),
+        "vitorias": int(v),
+        "empates": int(e),
+        "derrotas": int(d),
+        "gols_pro": int(gp),
+        "gols_contra": int(gc),
+        "sg": int(sg),
+        "pontos": int(pts)
+    }
 
-            # Envio para o Supabase
-            try:
-                supabase.table("tabelas_ligas").upsert(dados, on_conflict="liga, time").execute()
+    # UPSERT para atualizar os "zeros" existentes
+    supabase.table("tabelas_ligas").upsert(dados_time, on_conflict="liga, time").execute()
             except Exception as db_err:
                 print(f"❌ Erro ao inserir no banco: {db_err}")
 
