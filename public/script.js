@@ -4,118 +4,100 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const ESCUDO_PADRAO = "https://cdn-icons-png.flaticon.com/512/53/53244.png";
 
-// NOTÍCIAS COM SEUS ARQUIVOS .WEBP
-const noticiasCarrossel = [
-    {
-        id: 1,
-        img: 'img/carrossel1.webp',
-        categoria: 'Inteligência Neural',
-        tit: 'O Futuro do Futebol é Orientado por Dados',
-        desc: 'Nossa rede neural processa mais de 10.000 variáveis por segundo.',
-        detalhes: 'Modelos de regressão avançados e histórico de performance em tempo real.'
-    },
-    {
-        id: 2,
-        img: 'img/carrossel2.webp',
-        categoria: 'Arena H2H',
-        tit: 'Duelos Lendários, Análises Exatas',
-        desc: 'Compare gigantes europeus ou rivais locais com precisão.',
-        detalhes: 'A ferramenta avalia saldo de gols e solidez defensiva.'
-    },
-    {
-        id: 3,
-        img: 'img/carrossel3.webp',
-        categoria: 'Ao Vivo',
-        tit: 'Estatísticas Refinadas em Tempo Real',
-        desc: 'Live Feeds com gráficos de pressão e escalações.',
-        detalhes: 'Redução de latência para atualizações em menos de 5 segundos.'
-    },
-    {
-        id: 4, 
-        img: 'img/carrosel4.webp',
-        categoria: 'Novidade',
-        tit:'Paulistão 2026 Ao Vivo', 
-        desc:'Tabela, jogos e horários do Campeonato Paulista.',
-        detalhes:'Acompanhe o campeonato mais tradicional do Brasil com cobertura completa.', 
-    }
-];
-
 document.addEventListener('DOMContentLoaded', () => {
+    // Verificadores de Página
     const ehIndex = document.getElementById('carousel-slides');
     const ehClassificacao = document.getElementById('tabela-corpo');
     const ehArena = document.getElementById('liga-a');
 
-    if (ehIndex) inicializarHome();
+    // --- EXECUÇÃO PARA INDEX.HTML ---
+    if (ehIndex) {
+        console.log("Modo: Home");
+        inicializarHome();
+    }
+
+    // --- EXECUÇÃO PARA CLASSIFICACAO.HTML ---
     if (ehClassificacao) {
+        console.log("Modo: Classificação");
         carregarTabela('BR');
         configurarFiltrosLigas();
+        // Listener fechar modal
+        const btnClose = document.querySelector('.close-modal-btn');
+        if(btnClose) btnClose.onclick = () => document.getElementById('modal-time').style.display = 'none';
     }
-    if (ehArena) configurarArena();
+
+    // --- EXECUÇÃO PARA ARENA.HTML ---
+    if (ehArena) {
+        console.log("Modo: Arena");
+        configurarArena();
+    }
 });
 
-// --- LÓGICA DO CARROSSEL ---
+// ==========================================
+// LÓGICA DA HOME (INDEX)
+// ==========================================
 function inicializarHome() {
+    // 1. Gerar os Slides do Carrossel (Se estiver vazio no HTML)
     const slidesContainer = document.getElementById('carousel-slides');
-    if(!slidesContainer) return;
+    const banners = [
+        { img: 'logos/carrossel1.webp', tit: 'ANÁLISE NEURAL', desc: 'Dados processados em tempo real.' },
+        { img: 'logos/carrossel2.web', tit: 'ARENA H2H', desc: 'Compare times com inteligência artificial.' },
+        { img: 'logos/carrossel3.web', tit: 'BRASILEIRÃO 2026', desc: 'Acompanhe a subida dos gigantes.' }
+    ];
 
-    slidesContainer.innerHTML = noticiasCarrossel.map((n, index) => `
-        <div class="slide ${index === 0 ? 'active' : ''}">
-            <img src="${n.img}" onerror="this.src='https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1000'">
-            <div class="slide-overlay">
-                <span class="news-category">${n.categoria}</span>
-                <h2>${n.tit}</h2>
-                <p>${n.desc}</p>
-                <button class="btn-saiba-mais" onclick="mostrarDetalhesNoticia(${n.id})">SAIBA MAIS</button>
+    slidesContainer.innerHTML = banners.map(b => `
+        <div class="slide">
+            <img src="${b.img}" onerror="this.src='https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=1000'">
+            <div class="slide-caption">
+                <h2>${b.tit}</h2>
+                <p>${b.desc}</p>
             </div>
         </div>
     `).join('');
 
+    // 2. Movimento do Carrossel
     let index = 0;
-    setInterval(() => {
-        index = (index + 1) % noticiasCarrossel.length;
+    const mover = () => {
+        index = (index + 1) % banners.length;
         slidesContainer.style.transform = `translateX(-${index * 100}%)`;
-    }, 6000);
+    };
+    let interval = setInterval(mover, 5000);
+
+    // 3. Insight de IA Aleatório
+    const insights = [
+        "Palmeiras tem 87% de eficiência em passes curtos nesta temporada.",
+        "Flamengo demonstra maior vigor físico após os 70 minutos de jogo.",
+        "A média de gols da Premier League subiu 12% em relação a 2025.",
+        "Tendência detectada: Jogos às 16h tem maior incidência de escanteios."
+    ];
+    const output = document.getElementById('ia-output');
+    if(output) output.innerText = insights[Math.floor(Math.random() * insights.length)];
 }
 
-function mostrarDetalhesNoticia(id) {
-    const noticia = noticiasCarrossel.find(n => n.id === id);
-    const painel = document.getElementById('news-details-panel');
-    if (noticia && painel) {
-        document.getElementById('details-title').innerText = noticia.tit;
-        document.getElementById('details-content').innerText = noticia.detalhes;
-        painel.style.display = 'block';
-        painel.scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
-// --- CLASSIFICAÇÃO (AQUI ESTÁ A CORREÇÃO DO GP/GC) ---
+// ==========================================
+// LÓGICA DA CLASSIFICAÇÃO
+// ==========================================
 async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
     if(!corpo) return;
     corpo.innerHTML = "<tr><td colspan='7' align='center'>Carregando Matrix...</td></tr>";
 
     const { data, error } = await _supabase.from('tabelas_ligas').select('*').eq('liga', liga).order('posicao');
-    if (error || !data) return;
+    if (error) return;
 
     corpo.innerHTML = data.map(item => {
-        // Tenta pegar 'gols_pro' OU 'gp'. Tenta pegar 'gols_contra' OU 'gc'.
-        const gp = item.gols_pro ?? item.gp ?? 0;
-        const gc = item.gols_contra ?? item.gc ?? 0;
-        const sg = item.sg ?? (gp - gc);
-        
         const d = JSON.stringify(item).replace(/'/g, "&apos;");
-        
         return `
             <tr onclick='abrirModalTime(${d})' style="cursor:pointer;">
                 <td>${item.posicao}º</td>
                 <td><div style="display:flex;align-items:center;gap:10px;">
-                    <img src="${item.escudo || ESCUDO_PADRAO}" width="24" height="24">
+                    <img src="${item.escudo || ESCUDO_PADRAO}" width="24" height="24" onerror="this.src='${ESCUDO_PADRAO}'">
                     <span>${item.time}</span>
                 </div></td>
                 <td align="center">${item.jogos || 0}</td>
-                <td align="center">${gp}</td>
-                <td align="center">${gc}</td>
-                <td align="center"><strong>${sg}</strong></td>
+                <td align="center">${item.gols_pro || 0}</td>
+                <td align="center">${item.gols_contra || 0}</td>
+                <td align="center"><strong>${item.sg || 0}</strong></td>
                 <td align="center" style="color:#00ff88;font-weight:bold;">${item.pontos || 0}</td>
             </tr>`;
     }).join('');
@@ -124,18 +106,13 @@ async function carregarTabela(liga) {
 function abrirModalTime(time) {
     const m = document.getElementById('modal-time');
     if(!m) return;
-    
-    // Mapeamento seguro para o Modal também
-    const gp = time.gols_pro ?? time.gp ?? 0;
-    const gc = time.gols_contra ?? time.gc ?? 0;
-
     document.getElementById('modal-nome-time').innerText = time.time;
     document.getElementById('modal-escudo').src = time.escudo || ESCUDO_PADRAO;
     document.getElementById('modal-pos').innerText = (time.posicao || '0') + "º";
     document.getElementById('modal-pts').innerText = time.pontos || '0';
-    document.getElementById('modal-gp').innerText = gp;
-    document.getElementById('modal-gc').innerText = gc;
-    document.getElementById('modal-sg').innerText = time.sg ?? (gp - gc);
+    document.getElementById('modal-gp').innerText = time.gols_pro || 0;
+    document.getElementById('modal-gc').innerText = time.gols_contra || 0;
+    document.getElementById('modal-sg').innerText = time.sg || 0;
     document.getElementById('modal-jogos').innerText = time.jogos || 0;
     m.style.display = 'flex';
 }
@@ -150,14 +127,9 @@ function configurarFiltrosLigas() {
     });
 }
 
-function configurarArena() {
-    // Lógica Arena simplificada para manter o foco no GP/GC
-    const btn = document.getElementById('btn-comparar');
-    if(btn) {
-        btn.onclick = () => { /* sua lógica de comparação */ };
-    }
-}
-
+// ==========================================
+// LÓGICA DA ARENA
+// ==========================================
 function configurarArena() {
     const selects = ['liga-a', 'liga-b'];
     selects.forEach(id => {
@@ -167,6 +139,7 @@ function configurarArena() {
             const lado = id.split('-')[1];
             const selectTime = document.getElementById(`time-${lado}`);
             const { data } = await _supabase.from('tabelas_ligas').select('*').eq('liga', this.value).order('time');
+            
             selectTime.innerHTML = '<option value="">Selecione o Time</option>';
             data?.forEach(t => {
                 const opt = document.createElement('option');
@@ -180,11 +153,9 @@ function configurarArena() {
     const btn = document.getElementById('btn-comparar');
     if(btn) {
         btn.onclick = () => {
-            const valA = document.getElementById('time-a').value;
-            const valB = document.getElementById('time-b').value;
-            if (valA && valB) {
-                const tA = JSON.parse(valA);
-                const tB = JSON.parse(valB);
+            const tA = JSON.parse(document.getElementById('time-a').value || "{}");
+            const tB = JSON.parse(document.getElementById('time-b').value || "{}");
+            if (tA.time && tB.time) {
                 document.getElementById('h2h-display').style.display = 'block';
                 document.getElementById('name-a').innerText = tA.time;
                 document.getElementById('name-b').innerText = tB.time;
