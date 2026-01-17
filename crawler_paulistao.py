@@ -21,68 +21,72 @@ def crawler_classificacao():
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # No Sr. Goool, a tabela principal tem a classe 'table-classificacao'
+        # Tenta encontrar a tabela pela classe específica
         tabela = soup.find("table", class_="table-classificacao")
+        
+        # Se não encontrar pela classe, tenta buscar a tabela que contém "PTS" no cabeçalho
         if not tabela:
-            print("⚠️ Erro: Tabela de classificação não encontrada.")
+            for t in soup.find_all("table"):
+                if "PTS" in t.text:
+                    tabela = t
+                    break
+
+        if not tabela:
+            print("⚠️ Erro: Estrutura de tabela não encontrada no Sr. Goool.")
+            # Opcional: imprimir o soup.text para depurar se o site bloqueou o crawler
             return
 
-        rows = tabela.find("tbody").find_all("tr")
+        # No Sr. Goool, as linhas de dados costumam ter a classe 'linha-par' ou 'linha-impar'
+        # ou simplesmente estão no tbody
+        rows = tabela.select("tbody tr")
         payload = []
 
         for i, row in enumerate(rows):
             cols = row.find_all("td")
             
-            # O Sr. Goool tem colunas extras de propaganda, filtramos por tamanho
-            if len(cols) >= 11:
+            # Filtro para ignorar linhas de propaganda ou cabeçalhos repetidos
+            # A tabela real tem pelo menos 10 colunas
+            if len(cols) >= 10:
                 try:
-                    # Mapeamento das Colunas Sr. Goool:
-                    # 0: Pos, 1: Escudo, 2: Nome, 3: PTS, 4: J, 5: V, 6: E, 7: D, 8: GP, 9: GC, 10: SG
+                    # O nome do time geralmente está no 3º td (índice 2)
                     nome = cols[2].text.strip()
-                    
-                    # Captura do Logo
-                    img_tag = cols[1].find("img")
-                    logo = img_tag.get("src", "") if img_tag else ""
+                    if not nome: continue 
 
-                    # Dados Numéricos
-                    pontos     = cols[3].text.strip()
-                    jogos      = cols[4].text.strip()
-                    vitorias   = cols[5].text.strip()
-                    empates    = cols[6].text.strip()
-                    derrotas   = cols[7].text.strip()
-                    gols_pro   = cols[8].text.strip()
+                    # Dados numéricos conforme a ordem do Sr. Goool
+                    # P J V E D GP GC SG
+                    pontos      = cols[3].text.strip()
+                    jogos       = cols[4].text.strip()
+                    vitorias    = cols[5].text.strip()
+                    empates     = cols[6].text.strip()
+                    derrotas    = cols[7].text.strip()
+                    gols_pro    = cols[8].text.strip()
                     gols_contra = cols[9].text.strip()
-                    saldo_gols = cols[10].text.strip()
+                    # O saldo às vezes está em cols[10] ou cols[11]
+                    saldo_gols  = cols[10].text.strip()
 
                     payload.append({
                         "time_nome": nome,
-                        "time_logo": logo,
-                        "pontos": int(pontos) if pontos.replace('-','').isdigit() else 0,
+                        "pontos": int(pontos) if pontos.isdigit() else 0,
                         "jogos": int(jogos) if jogos.isdigit() else 0,
                         "vitorias": int(vitorias) if vitorias.isdigit() else 0,
                         "empates": int(empates) if empates.isdigit() else 0,
                         "derrotas": int(derrotas) if derrotas.isdigit() else 0,
                         "gols_pro": int(gols_pro) if gols_pro.isdigit() else 0,
                         "gols_contra": int(gols_contra) if gols_contra.isdigit() else 0,
-                        "saldo_gols": int(saldo_gols) if saldo_gols.replace('-','').isdigit() else 0
+                        "saldo_gols": int(saldo_gols.replace('+', '')) if saldo_gols.replace('-', '').replace('+', '').isdigit() else 0
                     })
                 except Exception as e:
-                    print(f"⚠️ Erro ao processar linha {i}: {e}")
+                    continue # Pula linhas de propaganda ou erros de conversão
 
         if payload:
             print(f"📤 Atualizando {len(payload)} times no Supabase...")
-            try:
-                # Limpa a tabela antes de inserir os novos dados detalhados
-                supabase.table("paulistao_classificacao").delete().neq("time_nome", "null").execute()
-                supabase.table("paulistao_classificacao").insert(payload).execute()
-                print("✅ Classificação detalhada atualizada com sucesso!")
-            except Exception as sb_err:
-                print(f"❌ Erro ao salvar no Supabase: {sb_err}")
+            supabase.table("paulistao_classificacao").delete().neq("time_nome", "null").execute()
+            supabase.table("paulistao_classificacao").insert(payload).execute()
+            print("✅ Sucesso!")
         else:
-            print("❌ Nenhum dado extraído.")
+            print("❌ Tabela encontrada, mas nenhum dado foi extraído. Verifique os índices.")
 
     except Exception as e:
         print(f"❌ Erro na requisição: {e}")
-
 if __name__ == "__main__":
     crawler_classificacao()
