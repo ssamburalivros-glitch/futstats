@@ -5,40 +5,49 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const ESCUDO_PADRAO = "https://cdn-icons-png.flaticon.com/512/53/53244.png";
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Inicializa Tabela se existir
-    if (document.getElementById('tabela-corpo')) {
+    // --- VERIFICAÇÃO DE PÁGINA ---
+    const tabelaCorpo = document.getElementById('tabela-corpo');
+    const carrosselContainer = document.querySelector('.carousel-slides');
+
+    // Se estiver na página de CLASSIFICAÇÃO
+    if (tabelaCorpo) {
+        console.log("Iniciando página de classificação...");
         carregarTabela('BR');
         configurarFiltrosLigas();
+        
+        // Configura Modal
+        const btnFechar = document.querySelector('.close-modal-btn');
+        if (btnFechar) btnFechar.onclick = () => document.getElementById('modal-time').style.display = 'none';
     }
 
-    // 2. Inicializa Carrossel se existir
-    inicializarCarrossel();
-
-    // 3. Configura Modal
-    const btnFechar = document.querySelector('.close-modal-btn');
-    if (btnFechar) btnFechar.onclick = () => document.getElementById('modal-time').style.display = 'none';
+    // Se estiver na página INDEX (Home)
+    if (carrosselContainer) {
+        console.log("Iniciando carrossel na home...");
+        inicializarCarrossel();
+    }
 });
 
-// --- LOGICA DO CARROSSEL ---
+// --- FUNÇÃO DO CARROSSEL (INDEX) ---
 function inicializarCarrossel() {
     const slides = document.querySelector('.carousel-slides');
     if (!slides) return;
 
-    // Se as fotos sumiram, verifique se os arquivos estão na pasta /logos/
     let index = 0;
+    const totalSlides = slides.children.length;
+
     setInterval(() => {
         index++;
-        if (index > 2) index = 0; // Ajuste conforme o número de imagens
+        if (index >= totalSlides) index = 0;
         slides.style.transform = `translateX(-${index * 100}%)`;
     }, 5000);
 }
 
-// --- LOGICA DA TABELA ---
+// --- FUNÇÃO DA TABELA (CLASSIFICACAO) ---
 async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
     if (!corpo) return;
     
-    corpo.innerHTML = "<tr><td colspan='7' align='center'>Carregando dados...</td></tr>";
+    corpo.innerHTML = "<tr><td colspan='7' align='center'>Sincronizando...</td></tr>";
 
     try {
         const { data, error } = await _supabase
@@ -69,7 +78,7 @@ async function carregarTabela(liga) {
             `;
         }).join('');
     } catch (e) {
-        corpo.innerHTML = "<tr><td colspan='7' align='center'>Erro na conexão.</td></tr>";
+        console.error(e);
     }
 }
 
@@ -82,8 +91,6 @@ function abrirModalTime(time) {
     document.getElementById('modal-liga-badge').innerText = time.liga || "LIGA";
     document.getElementById('modal-pos').innerText = (time.posicao || '0') + "º";
     document.getElementById('modal-pts').innerText = time.pontos || '0';
-    
-    // IMPORTANTE: Se aparecer 0 aqui, rode o Crawler no GitHub
     document.getElementById('modal-gp').innerText = time.gols_pro || 0;
     document.getElementById('modal-gc').innerText = time.gols_contra || 0;
     document.getElementById('modal-sg').innerText = time.sg || 0;
