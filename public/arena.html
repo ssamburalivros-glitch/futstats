@@ -161,94 +161,134 @@
         </div>
     </div>
 
-    <script>
-        const SB_URL = "https://sihunefyfkecumbiyxva.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
-        const client = supabase.createClient(SB_URL, SB_KEY);
+   <script>
+    const SB_URL = "https://sihunefyfkecumbiyxva.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
+    const client = supabase.createClient(SB_URL, SB_KEY);
 
-        // Mapeie aqui os nomes EXATOS das suas tabelas no Supabase
-        const ligasMap = {
-            "SP": "paulistao_classificacao",
-            "BR": "classificacao_brasileirao",
-            "PL": "classificacao_premier",
-            "ES": "classificacao_laliga",
-            "IT": "classificacao_seriea",
-            "DE": "classificacao_bundesliga",
-            "FR": "classificacao_ligue1",
-            "PT": "classificacao_portugal"
-        };
+    // Verifique se os nomes das tabelas no seu Supabase são EXATAMENTE esses:
+    const ligasMap = {
+        "SP": "paulistao_classificacao",
+        "BR": "classificacao_brasileirao",
+        "PL": "classificacao_premier",
+        "ES": "classificacao_laliga",
+        "IT": "classificacao_seriea",
+        "DE": "classificacao_bundesliga",
+        "FR": "classificacao_ligue1",
+        "PT": "classificacao_portugal"
+    };
 
-        const getSlug = (n) => {
-            if(!n) return "escudo";
-            let s = n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            if(s.includes("bragantino")) return "red-bull-bragantino";
-            if(s.includes("noroeste")) return "noroeste";
-            if(s.includes("botafogo")) return "botafogo-sp";
-            return s.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        };
+    const getSlug = (n) => {
+        if(!n) return "escudo";
+        let s = n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if(s.includes("bragantino")) return "red-bull-bragantino";
+        if(s.includes("noroeste")) return "noroeste";
+        if(s.includes("botafogo")) return "botafogo-sp";
+        return s.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    };
 
-        async function atualizarTimes(selectLiga, selectTime) {
-            const liga = selectLiga.value;
-            if (!liga) { selectTime.disabled = true; return; }
+    async function atualizarTimes(selectLiga, selectTime) {
+        const liga = selectLiga.value;
+        if (!liga) { selectTime.disabled = true; return; }
 
-            const { data } = await client.from(ligasMap[liga]).select('time_nome').order('time_nome');
-            if (data) {
-                selectTime.innerHTML = '<option value="">Selecione o Time</option>' + 
-                    data.map(t => `<option value="${t.time_nome}">${t.time_nome}</option>`).join('');
-                selectTime.disabled = false;
-            }
+        const tabela = ligasMap[liga];
+        
+        // Buscamos todas as colunas para não errar o nome da coluna de texto
+        const { data, error } = await client.from(tabela).select('*');
+
+        if (error) {
+            console.error("Erro ao buscar liga:", error);
+            alert("Erro ao carregar times desta liga. Verifique se a tabela '" + tabela + "' existe no Supabase.");
+            return;
         }
 
-        async function calcular() {
-            const lA = document.getElementById('liga-a').value;
-            const tA = document.getElementById('time-a').value;
-            const lB = document.getElementById('liga-b').value;
-            const tB = document.getElementById('time-b').value;
+        if (data && data.length > 0) {
+            // Identifica qual coluna guarda o nome (pode ser time_nome, name, equipe, etc)
+            const colNome = Object.keys(data[0]).find(key => 
+                ['time_nome', 'name', 'nome', 'equipe', 'team'].includes(key.toLowerCase())
+            );
 
-            if (!tA || !tB) return;
-
-            const { data: dA } = await client.from(ligasMap[lA]).select('*').eq('time_nome', tA).single();
-            const { data: dB } = await client.from(ligasMap[lB]).select('*').eq('time_nome', tB).single();
-
-            if (dA && dB) {
-                document.getElementById('h2h-result').style.display = 'block';
-                
-                // Imagens e Dados
-                document.getElementById('img-a').src = `https://logodetimes.com/times/${getSlug(dA.time_nome)}/logo-${getSlug(dA.time_nome)}-256.png`;
-                document.getElementById('img-b').src = `https://logodetimes.com/times/${getSlug(dB.time_nome)}/logo-${getSlug(dB.time_nome)}-256.png`;
-                
-                document.getElementById('name-a').innerText = dA.time_nome;
-                document.getElementById('name-b').innerText = dB.time_nome;
-
-                // Stats
-                document.getElementById('pts-a').innerText = dA.pontos;
-                document.getElementById('pts-b').innerText = dB.pontos;
-                document.getElementById('vit-a').innerText = dA.vitorias;
-                document.getElementById('vit-b').innerText = dB.vitorias;
-                document.getElementById('sg-a').innerText = dA.saldo_gols;
-                document.getElementById('sg-b').innerText = dB.saldo_gols;
-                document.getElementById('jog-a').innerText = dA.jogos;
-                document.getElementById('jog-b').innerText = dB.jogos;
-
-                // Probabilidade
-                const pA = (dA.pontos * 2) + dA.saldo_gols;
-                const pB = (dB.pontos * 2) + dB.saldo_gols;
-                const total = (pA + pB) || 1;
-                let percA = Math.round((pA / total) * 100);
-                if(percA > 88) percA = 88; if(percA < 12) percA = 12;
-                let percB = 100 - percA;
-
-                document.getElementById('bar-a').style.width = percA + '%';
-                document.getElementById('bar-b').style.width = percB + '%';
-                document.getElementById('perc-a').innerText = percA + '%';
-                document.getElementById('perc-b').innerText = percB + '%';
-            }
+            selectTime.innerHTML = '<option value="">Selecione o Time</option>' + 
+                data.map(t => `<option value="${t[colNome]}">${t[colNome]}</option>`).join('');
+            selectTime.disabled = false;
         }
+    }
 
-        document.getElementById('liga-a').addEventListener('change', () => atualizarTimes(document.getElementById('liga-a'), document.getElementById('time-a')));
-        document.getElementById('liga-b').addEventListener('change', () => atualizarTimes(document.getElementById('liga-b'), document.getElementById('time-b')));
-        document.getElementById('time-a').addEventListener('change', calcular);
-        document.getElementById('time-b').addEventListener('change', calcular);
-    </script>
-</body>
-</html>
+    async function calcular() {
+        const lA = document.getElementById('liga-a').value;
+        const tA = document.getElementById('time-a').value;
+        const lB = document.getElementById('liga-b').value;
+        const tB = document.getElementById('time-b').value;
+
+        if (!tA || !tB) return;
+
+        // Busca dados dinamicamente descobrindo o nome da coluna
+        const buscarDados = async (liga, nomeTime) => {
+            const { data } = await client.from(ligasMap[liga]).select('*');
+            const colNome = Object.keys(data[0]).find(key => ['time_nome', 'name', 'nome', 'equipe'].includes(key.toLowerCase()));
+            return data.find(item => item[colNome] === nomeTime);
+        };
+
+        const dA = await buscarDados(lA, tA);
+        const dB = await buscarDados(lB, tB);
+
+        if (dA && dB) {
+            document.getElementById('h2h-result').style.display = 'block';
+            
+            // Ajuste de nomes de colunas para os números (pontos, vitorias, saldo_gols, jogos)
+            const getVal = (obj, keys) => {
+                const found = Object.keys(obj).find(k => keys.includes(k.toLowerCase()));
+                return obj[found] || 0;
+            };
+
+            const statsA = {
+                nome: tA,
+                pts: getVal(dA, ['pontos', 'points', 'pts']),
+                vit: getVal(dA, ['vitorias', 'wins', 'v']),
+                sg: getVal(dA, ['saldo_gols', 'goals_diff', 'sg', 'gd']),
+                jog: getVal(dA, ['jogos', 'matches', 'j', 'played'])
+            };
+
+            const statsB = {
+                nome: tB,
+                pts: getVal(dB, ['pontos', 'points', 'pts']),
+                vit: getVal(dB, ['vitorias', 'wins', 'v']),
+                sg: getVal(dB, ['saldo_gols', 'goals_diff', 'sg', 'gd']),
+                jog: getVal(dB, ['jogos', 'matches', 'j', 'played'])
+            };
+
+            // Atualiza UI
+            document.getElementById('img-a').src = `https://logodetimes.com/times/${getSlug(statsA.nome)}/logo-${getSlug(statsA.nome)}-256.png`;
+            document.getElementById('img-b').src = `https://logodetimes.com/times/${getSlug(statsB.nome)}/logo-${getSlug(statsB.nome)}-256.png`;
+            document.getElementById('name-a').innerText = statsA.nome;
+            document.getElementById('name-b').innerText = statsB.nome;
+
+            document.getElementById('pts-a').innerText = statsA.pts;
+            document.getElementById('pts-b').innerText = statsB.pts;
+            document.getElementById('vit-a').innerText = statsA.vit;
+            document.getElementById('vit-b').innerText = statsB.vit;
+            document.getElementById('sg-a').innerText = statsA.sg;
+            document.getElementById('sg-b').innerText = statsB.sg;
+            document.getElementById('jog-a').innerText = statsA.jog;
+            document.getElementById('jog-b').innerText = statsB.jog;
+
+            // Probabilidade
+            const pA = (statsA.pts * 2) + statsA.sg;
+            const pB = (statsB.pts * 2) + statsB.sg;
+            const total = (pA + pB) || 1;
+            let percA = Math.round((pA / total) * 100);
+            if(percA > 88) percA = 88; if(percA < 12) percA = 12;
+            let percB = 100 - percA;
+
+            document.getElementById('bar-a').style.width = percA + '%';
+            document.getElementById('bar-b').style.width = percB + '%';
+            document.getElementById('perc-a').innerText = percA + '%';
+            document.getElementById('perc-b').innerText = percB + '%';
+        }
+    }
+
+    document.getElementById('liga-a').addEventListener('change', () => atualizarTimes(document.getElementById('liga-a'), document.getElementById('time-a')));
+    document.getElementById('liga-b').addEventListener('change', () => atualizarTimes(document.getElementById('liga-b'), document.getElementById('time-b')));
+    document.getElementById('time-a').addEventListener('change', calcular);
+    document.getElementById('time-b').addEventListener('change', calcular);
+</script>
