@@ -30,7 +30,16 @@ const noticiasCarrossel = [
         titulo: 'Acompanhe o Tempo Real com Estatísticas Refinadas',
         descricao: 'Nossos Live Feeds agora mostram gráficos de pressão e escalações oficiais mais rápido. Não perca nenhum detalhe do jogo.',
         detalhes: 'Informações sobre as novas features do modo Ao Vivo. Integramos uma nova fonte de dados que reduz a latência das atualizações de gol para menos de 5 segundos. Agora, ao clicar em um jogo ao vivo, você verá um gráfico de "Momento de Pressão" (xT), indicando qual time está mais próximo de marcar. As escalações oficiais são atualizadas assim que confirmadas pelos clubes.'
-    }
+    },
+	{
+		id: 4, 
+		img:'img/carrosel4.webp',
+		categoria: 'Novidade',
+		titulo:'Paulistão 2026 Acompanhamento Ao Vivo', 
+		descricao:'Tabela, jogos e horários do Campeonato Paulista 2026',
+		detalhe:'O Campeonato Paulista de Futebol, mais conhecido como Campeonato Paulista ou ainda Paulistão,Organizada pela Federação Paulista de Futebol desde 1941, é a liga de futebol mais antiga do Brasil. Acompanhe seu Time', 
+	},
+
 ];
 
 // --- INICIALIZAÇÃO SEGURA ---
