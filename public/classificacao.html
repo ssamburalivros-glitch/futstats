@@ -154,36 +154,45 @@
             }
         }
 
-        function abrirModal(index) {
-            const clube = dadosAtuais[index];
-            const modal = document.getElementById('modal-detalhes');
-            
-            document.getElementById('m-escudo').src = clube.escudo || '';
-            document.getElementById('m-nome').innerText = clube.time;
-            document.getElementById('m-liga').innerText = `Campeonato: ${clube.liga}`;
-            document.getElementById('m-pontos').innerText = clube.pontos;
-            document.getElementById('m-posicao').innerText = `${clube.posicao}º Lugar`;
-            document.getElementById('m-ved').innerText = `${clube.vitorias}V / ${clube.empates}E / ${clube.derrotas}D`;
-            document.getElementById('m-gols').innerText = `${clube.gols_pro} / ${clube.gols_contra}`;
-            document.getElementById('m-sg').innerText = clube.sg;
+       function abrirModal(index) {
+        const clube = dadosAtuais[index];
+        const modal = document.getElementById('modal-detalhes');
+        
+        document.getElementById('m-escudo').src = clube.escudo || '';
+        document.getElementById('m-nome').innerText = clube.time;
+        document.getElementById('m-liga').innerText = `Campeonato: ${clube.liga}`;
+        document.getElementById('m-pontos').innerText = clube.pontos;
+        document.getElementById('m-posicao').innerText = `${clube.posicao}º Lugar`;
+        document.getElementById('m-ved').innerText = `${clube.vitorias}V / ${clube.empates}E / ${clube.derrotas}D`;
+        document.getElementById('m-gols').innerText = `${clube.gols_pro} / ${clube.gols_contra}`;
+        document.getElementById('m-sg').innerText = clube.sg;
 
+        // Remove o 'hidden' se existir e adiciona 'active' no próximo frame
+        modal.classList.remove('hidden');
+        setTimeout(() => {
             modal.classList.add('active');
-            modal.classList.remove('hidden');
-        }
+        }, 10);
+    }
 
-        function fecharModal() {
-            const modal = document.getElementById('modal-detalhes');
-            modal.classList.remove('active');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
+    function fecharModal() {
+        const modal = document.getElementById('modal-detalhes');
+        modal.classList.remove('active');
+        
+        // Espera a animação acabar (300ms) para esconder totalmente
+        setTimeout(() => {
+            if (!modal.classList.contains('active')) {
+                modal.classList.add('hidden');
+            }
+        }, 300);
+    }
 
-        // Fechar ao clicar fora do conteúdo
-        window.onclick = (event) => {
-            const modal = document.getElementById('modal-detalhes');
-            if (event.target == modal) fecharModal();
+    // Fechar ao clicar fora do conteúdo (Ajustado)
+    window.onclick = (event) => {
+        const modal = document.getElementById('modal-detalhes');
+        if (event.target === modal) {
+            fecharModal();
         }
-
-        window.onload = () => carregar('BR', document.getElementById('default-tab'));
-    </script>
+    }
+</script>
 </body>
 </html>
