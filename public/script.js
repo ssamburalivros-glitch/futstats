@@ -86,51 +86,46 @@ function inicializarCarrossel() {
         dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
     }, 6000);
 }
-
-// --- CLASSIFICAÇÃO (Ajustado para GP/GC que você pediu) ---
 async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
-    if (!corpo) return;
-    corpo.innerHTML = "<tr><td colspan='7' align='center'>Sincronizando...</td></tr>";
+    if(!corpo) return;
+    corpo.innerHTML = "<tr><td colspan='7' align='center'>Carregando Matrix...</td></tr>";
 
-    try {
-        const { data, error } = await _supabase.from('tabelas_ligas').select('*').eq('liga', liga).order('posicao');
-        if (error) throw error;
+    const { data, error } = await _supabase.from('tabelas_ligas').select('*').eq('liga', liga).order('posicao');
+    if (error) return;
 
-        corpo.innerHTML = data.map(item => {
-            const dadosTime = JSON.stringify(item).replace(/'/g, "&apos;");
-            return `
-                <tr class="row-interativa" onclick='abrirModalTime(${dadosTime})'>
-                    <td>${item.posicao}º</td>
-                    <td>
-                        <div class="team-clickable">
-                            <img src="${item.escudo || ESCUDO_PADRAO}" class="team-cell-img" width="20">
-                            <span>${item.time}</span>
-                        </div>
-                    </td>
-                    <td align="center">${item.jogos}</td>
-                    <td align="center">${item.gols_pro || 0}</td>
-                    <td align="center">${item.gols_contra || 0}</td>
-                    <td align="center">${item.sg || 0}</td>
-                    <td align="center" style="color:#00ff88; font-weight:bold;">${item.pontos}</td>
-                </tr>
-            `;
-        }).join('');
-    } catch (e) { console.error(e); }
+    corpo.innerHTML = data.map(item => {
+        const d = JSON.stringify(item).replace(/'/g, "&apos;");
+        return `
+            <tr onclick='abrirModalTime(${d})' style="cursor:pointer;">
+                <td>${item.posicao}º</td>
+                <td><div style="display:flex;align-items:center;gap:10px;">
+                    <img src="${item.escudo || ESCUDO_PADRAO}" width="24" height="24" onerror="this.src='${ESCUDO_PADRAO}'">
+                    <span>${item.time}</span>
+                </div></td>
+                <td align="center">${item.jogos || 0}</td>
+                <td align="center">${item.gols_pro || 0}</td>
+                <td align="center">${item.gols_contra || 0}</td>
+                <td align="center"><strong>${item.sg || 0}</strong></td>
+                <td align="center" style="color:#00ff88;font-weight:bold;">${item.pontos || 0}</td>
+            </tr>`;
+    }).join('');
 }
 
-function mostrarDetalhesNoticia(idNoticia) {
-    const panel = document.getElementById('news-details-panel');
-    const noticia = noticiasCarrossel.find(n => n.id === idNoticia);
-    if (!noticia || !panel) return;
-    document.getElementById('details-title').innerText = noticia.titulo;
-    document.getElementById('details-content').innerHTML = noticia.detalhes;
-    panel.style.display = 'block';
-    panel.scrollIntoView({ behavior: 'smooth' });
+function abrirModalTime(time) {
+    const m = document.getElementById('modal-time');
+    if(!m) return;
+    document.getElementById('modal-nome-time').innerText = time.time;
+    document.getElementById('modal-escudo').src = time.escudo || ESCUDO_PADRAO;
+    document.getElementById('modal-pos').innerText = (time.posicao || '0') + "º";
+    document.getElementById('modal-pts').innerText = time.pontos || '0';
+    document.getElementById('modal-gp').innerText = time.gols_pro || 0;
+    document.getElementById('modal-gc').innerText = time.gols_contra || 0;
+    document.getElementById('modal-sg').innerText = time.sg || 0;
+    document.getElementById('modal-jogos').innerText = time.jogos || 0;
+    m.style.display = 'flex';
 }
 
-// Funções Auxiliares mantidas do seu original
-function fecharModalTime() { document.getElementById('modal-time').style.display = 'none'; }
 function configurarFiltrosLigas() {
     document.querySelectorAll('.league-btn').forEach(btn => {
         btn.onclick = function() {
@@ -140,9 +135,48 @@ function configurarFiltrosLigas() {
         };
     });
 }
-async function carregarIA() {
-    const output = document.getElementById('ia-output');
-    if (!output) return;
-    const { data } = await _supabase.from('site_info').select('comentario_ia').eq('id', 1).single();
-    if (data) output.innerText = data.comentario_ia;
+
+// ==========================================
+// LÓGICA DA ARENA
+// ==========================================
+function configurarArena() {
+    const selects = ['liga-a', 'liga-b'];
+    selects.forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.addEventListener('change', async function() {
+            const lado = id.split('-')[1];
+            const selectTime = document.getElementById(`time-${lado}`);
+            const { data } = await _supabase.from('tabelas_ligas').select('*').eq('liga', this.value).order('time');
+            
+            selectTime.innerHTML = '<option value="">Selecione o Time</option>';
+            data?.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = JSON.stringify(t);
+                opt.innerText = t.time;
+                selectTime.appendChild(opt);
+            });
+        });
+    });
+
+    const btn = document.getElementById('btn-comparar');
+    if(btn) {
+        btn.onclick = () => {
+            const tA = JSON.parse(document.getElementById('time-a').value || "{}");
+            const tB = JSON.parse(document.getElementById('time-b').value || "{}");
+            if (tA.time && tB.time) {
+                document.getElementById('h2h-display').style.display = 'block';
+                document.getElementById('name-a').innerText = tA.time;
+                document.getElementById('name-b').innerText = tB.time;
+                document.getElementById('img-a').src = tA.escudo || ESCUDO_PADRAO;
+                document.getElementById('img-b').src = tB.escudo || ESCUDO_PADRAO;
+                const total = (tA.pontos || 0) + (tB.pontos || 0) + 1;
+                const pA = Math.round(((tA.pontos || 0) / total) * 100);
+                document.getElementById('perc-a').innerText = pA + "%";
+                document.getElementById('perc-b').innerText = (100 - pA) + "%";
+                document.getElementById('bar-a').style.width = pA + "%";
+                document.getElementById('bar-b').style.width = (100 - pA) + "%";
+            }
+        };
+    }
 }
