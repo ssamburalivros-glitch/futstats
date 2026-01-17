@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paulistão 2026 | FutStats</title>
+    <title>Paulistão 2026 | FutStats Detalhado</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -25,121 +25,89 @@
             color: var(--text);
             font-family: 'Montserrat', sans-serif;
             margin: 0;
-            overflow-x: hidden;
-        }
-
-        /* Container Principal com largura máxima controlada */
-        .dashboard {
-            max-width: 1100px; /* Impede que fique extremamente largo */
-            margin: 40px auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 350px 1fr; /* Tabela menor, Jogos maior */
-            gap: 30px;
         }
 
         .hero { padding: 40px 20px; text-align: center; border-bottom: 1px solid var(--border); }
-        
+
+        .dashboard {
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 0 15px;
+            display: grid;
+            grid-template-columns: 1.8fr 1.2fr; /* Tabela maior para caber os detalhes */
+            gap: 25px;
+        }
+
         .box { 
             background: var(--panel-bg); 
             border: 1px solid var(--border); 
             border-radius: 12px; 
-            padding: 20px;
-            height: fit-content;
+            padding: 15px; 
         }
 
-        /* Estilo da Tabela */
-        table { width: 100%; border-collapse: collapse; }
-        th { color: #444; padding: 10px; text-transform: uppercase; font-size: 0.6rem; text-align: center; border-bottom: 1px solid var(--border); }
-        td { padding: 10px 5px; border-bottom: 1px solid #111; text-align: center; font-size: 0.8rem; }
+        /* Estilo da Tabela Detalhada */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { color: #555; padding: 12px 5px; text-transform: uppercase; font-size: 0.6rem; border-bottom: 2px solid var(--border); }
+        td { padding: 12px 5px; border-bottom: 1px solid #111; text-align: center; font-size: 0.75rem; color: #bbb; }
+        
         .t-flex { display: flex; align-items: center; gap: 8px; text-align: left; }
-        .t-flex img { width: 20px; height: 20px; object-fit: contain; }
+        .t-flex img { width: 22px; height: 22px; object-fit: contain; }
+        .time-nome { font-weight: 700; color: #fff; }
+
+        .pts-col { font-weight: 900; color: #fff; background: rgba(255,255,255,0.03); }
 
         /* Estilo do Carrossel */
-        .swiper { width: 100%; max-width: 650px; margin: 0 auto; }
-        .data-label { text-align: center; color: #666; font-weight: 800; font-size: 0.75rem; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
-        
-        .card-jogo {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 12px;
-        }
+        .data-label { text-align: center; color: #666; font-weight: 800; font-size: 0.7rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
+        .card-jogo { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 10px; }
+        .confronto { display: grid; grid-template-columns: 1fr 100px 1fr; align-items: center; text-align: center; }
+        .team img { width: 40px; height: 40px; margin-bottom: 5px; }
+        .team span { font-size: 0.65rem; font-weight: 700; display: block; text-transform: uppercase; }
 
-        /* GRID DO CONFRONTO - Centralização Real */
-        .confronto {
-            display: grid;
-            grid-template-columns: 1fr 100px 1fr; /* Espaço fixo para o placar no meio */
-            align-items: center;
-            gap: 10px;
-        }
+        .placar-box { background: #161616; border: 1px solid #222; border-radius: 6px; height: 45px; display: flex; align-items: center; justify-content: center; }
+        .placar-val { font-weight: 900; font-size: 1.6rem; letter-spacing: 2px; color: #fff; }
+        .vs { color: #333; font-weight: 900; }
 
-        .team { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .team img { width: 45px; height: 45px; margin-bottom: 8px; object-fit: contain; }
-        .team span { 
-            font-size: 0.65rem; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            text-align: center;
-            line-height: 1.2;
-            height: 30px; /* Espaço fixo para o nome */
-            display: flex;
-            align-items: center;
-        }
-
-        /* Placar Enquadrado */
-        .placar-box {
-            background: #161616;
-            border: 1px solid #222;
-            border-radius: 6px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 80px;
-        }
-
-        .placar-val {
-            font-weight: 900;
-            font-size: 1.5rem;
-            letter-spacing: 2px;
-            color: #fff;
-        }
-
-        .vs { color: #333; font-weight: 900; font-size: 0.9rem; }
-
-        /* Paginação */
-        .swiper-pagination-bullet { background: #444; }
-        .swiper-pagination-bullet-active { background: #fff; }
-
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
             .dashboard { grid-template-columns: 1fr; }
-            .swiper { max-width: 100%; }
         }
     </style>
 </head>
 <body>
 
     <div class="hero">
-        <h1 style="margin:0; font-weight:900; letter-spacing: -1px;">PAULISTÃO 2026</h1>
-        <p style="font-size: 0.65rem; color: #444; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px;">Resultados e Classificação</p>
+        <h1 style="margin:0; font-weight:900;">PAULISTÃO 2026</h1>
     </div>
 
     <div class="dashboard">
         <div class="box">
-            <h2 style="font-size:0.7rem; color:#444; text-transform:uppercase; margin:0 0 20px 0;">Classificação Geral</h2>
-            <table>
-                <thead><tr><th>#</th><th style="text-align:left">Time</th><th>PTS</th></tr></thead>
-                <tbody id="lista-classificacao"></tbody>
-            </table>
+            <h2 style="font-size:0.7rem; color:#666; text-transform:uppercase; margin-bottom:15px;">Classificação Detalhada</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th style="text-align:left">Time</th>
+                            <th>J</th>
+                            <th>V</th>
+                            <th>E</th>
+                            <th>D</th>
+                            <th>GP</th>
+                            <th>GC</th>
+                            <th>SG</th>
+                            <th class="pts-col">PTS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-classificacao"></tbody>
+                </table>
+            </div>
         </div>
 
         <div class="box">
-            <h2 style="font-size:0.7rem; color:#444; text-transform:uppercase; margin:0 0 20px 0;">Calendário de Rodadas</h2>
+            <h2 style="font-size:0.7rem; color:#666; text-transform:uppercase; margin-bottom:15px;">Rodadas</h2>
             <div class="swiper mySwiper">
                 <div class="swiper-wrapper" id="container-carrossel"></div>
-                <div style="margin-top: 20px;" class="swiper-pagination"></div>
+                <div style="margin-top:20px" class="swiper-pagination"></div>
             </div>
         </div>
     </div>
@@ -149,72 +117,66 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A';
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Função de slug melhorada para os logos
         const getSlug = (n) => {
             if(!n) return "escudo";
             let s = n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             if(s.includes("bragantino")) return "red-bull-bragantino";
-            if(s.includes("novorizontino")) return "novorizontino";
-            if(s.includes("noroeste")) return "noroeste";
-            if(s.includes("primavera")) return "primavera";
             return s.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
         };
 
-        async function carregarTudo() {
-            try {
-                const { data: classif } = await client.from('paulistao_classificacao').select('*').order('pontos', { ascending: false });
-                const { data: jogos } = await client.from('paulistao_jogos').select('*').order('id', { ascending: true });
+        async function carregarDados() {
+            // Buscando classificação (certifique-se que as colunas existem no seu Supabase)
+            const { data: classif } = await client.from('paulistao_classificacao').select('*').order('pontos', { ascending: false });
+            const { data: jogos } = await client.from('paulistao_jogos').select('*').order('id', { ascending: true });
 
-                if(classif) {
-                    document.getElementById('lista-classificacao').innerHTML = classif.slice(0, 16).map((t, i) => `
-                        <tr>
-                            <td style="color:#333; font-weight:bold">${i+1}</td>
-                            <td><div class="t-flex"><img src="https://logodetimes.com/times/${getSlug(t.time_nome)}/logo-${getSlug(t.time_nome)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${t.time_nome}</span></div></td>
-                            <td style="color:#fff; font-weight:900;">${t.pontos}</td>
-                        </tr>`).join('');
+            if(classif) {
+                document.getElementById('lista-classificacao').innerHTML = classif.map((t, i) => `
+                    <tr>
+                        <td style="font-weight:bold; color:#444">${i+1}</td>
+                        <td>
+                            <div class="t-flex">
+                                <img src="https://logodetimes.com/times/${getSlug(t.time_nome)}/logo-${getSlug(t.time_nome)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'">
+                                <span class="time-nome">${t.time_nome}</span>
+                            </div>
+                        </td>
+                        <td>${t.jogos || 0}</td>
+                        <td>${t.vitorias || 0}</td>
+                        <td>${t.empates || 0}</td>
+                        <td>${t.derrotas || 0}</td>
+                        <td>${t.gols_pro || 0}</td>
+                        <td>${t.gols_contra || 0}</td>
+                        <td style="color:${(t.saldo_gols || 0) >= 0 ? '#555' : '#ff4444'}">${t.saldo_gols || 0}</td>
+                        <td class="pts-col">${t.pontos || 0}</td>
+                    </tr>`).join('');
+            }
+
+            if(jogos) {
+                const agrupados = jogos.reduce((acc, j) => {
+                    if (!acc[j.data_jogo]) acc[j.data_jogo] = [];
+                    acc[j.data_jogo].push(j);
+                    return acc;
+                }, {});
+
+                let slides = '';
+                for (const data in agrupados) {
+                    let cards = agrupados[data].map(j => {
+                        const temP = j.status_ou_horario && j.status_ou_horario.includes('X');
+                        return `
+                        <div class="card-jogo">
+                            <div class="confronto">
+                                <div class="team"><img src="https://logodetimes.com/times/${getSlug(j.time_casa)}/logo-${getSlug(j.time_casa)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${j.time_casa}</span></div>
+                                <div class="placar-box"><div class="${temP ? 'placar-val' : 'vs'}">${j.status_ou_horario}</div></div>
+                                <div class="team"><img src="https://logodetimes.com/times/${getSlug(j.time_fora)}/logo-${getSlug(j.time_fora)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${j.time_fora}</span></div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                    slides += `<div class="swiper-slide"><div class="data-label">${data}</div>${cards}</div>`;
                 }
-
-                if(jogos) {
-                    const grupos = jogos.reduce((acc, j) => {
-                        if (!acc[j.data_jogo]) acc[j.data_jogo] = [];
-                        acc[j.data_jogo].push(j);
-                        return acc;
-                    }, {});
-
-                    let slides = '';
-                    for (const data in grupos) {
-                        let cards = grupos[data].map(j => {
-                            const temP = j.status_ou_horario && j.status_ou_horario.includes('X');
-                            return `
-                            <div class="card-jogo">
-                                <div class="confronto">
-                                    <div class="team">
-                                        <img src="https://logodetimes.com/times/${getSlug(j.time_casa)}/logo-${getSlug(j.time_casa)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'">
-                                        <span>${j.time_casa}</span>
-                                    </div>
-                                    <div class="placar-box">
-                                        <div class="${temP ? 'placar-val' : 'vs'}">${j.status_ou_horario}</div>
-                                    </div>
-                                    <div class="team">
-                                        <img src="https://logodetimes.com/times/${getSlug(j.time_fora)}/logo-${getSlug(j.time_fora)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'">
-                                        <span>${j.time_fora}</span>
-                                    </div>
-                                </div>
-                            </div>`;
-                        }).join('');
-                        slides += `<div class="swiper-slide"><div class="data-label">${data}</div>${cards}</div>`;
-                    }
-                    document.getElementById('container-carrossel').innerHTML = slides;
-
-                    new Swiper(".mySwiper", {
-                        autoHeight: true,
-                        spaceBetween: 30,
-                        pagination: { el: ".swiper-pagination", clickable: true },
-                    });
-                }
-            } catch (err) { console.error(err); }
+                document.getElementById('container-carrossel').innerHTML = slides;
+                new Swiper(".mySwiper", { spaceBetween: 20, pagination: { el: ".swiper-pagination", clickable: true } });
+            }
         }
-        carregarTudo();
+        carregarDados();
     </script>
 </body>
 </html>
