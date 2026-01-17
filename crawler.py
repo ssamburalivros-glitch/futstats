@@ -4,7 +4,6 @@ import requests
 from supabase import create_client
 
 # --- CONFIGURAÇÃO ---
-# No GitHub Actions, certifique-se que SUPABASE_URL e SUPABASE_KEY estão nos Secrets
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -16,14 +15,15 @@ LIGAS = {
 }
 
 def capturar_liga(liga_id, espn_id):
-    print(f"\n📡 Sincronizando: {liga_id}...")
+    print(f"📡 Sincronizando: {liga_id}...")
+    # Usamos o endpoint de API da ESPN, não o link do site
     url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/standings"
     
     try:
         res = requests.get(url, timeout=20).json()
         
-        # A estrutura da França às vezes muda, essa linha trata os dois caminhos possíveis
-        if 'children' in res:
+        # A França (fra.1) costuma vir dentro de 'children' ou direto em 'standings'
+        if 'children' in res and len(res['children']) > 0:
             entries = res['children'][0].get('standings', {}).get('entries', [])
         else:
             entries = res.get('standings', {}).get('entries', [])
@@ -36,23 +36,24 @@ def capturar_liga(liga_id, espn_id):
             team = entry.get('team', {})
             stats_list = entry.get('stats', [])
             
-            # NORMALIZAÇÃO: Criamos um dicionário com tudo em MINÚSCULO para evitar erros
+            # Normaliza tudo para minúsculo para não errar o nome do campo
             s = {str(item.get('name')).lower(): item.get('value') for item in stats_list}
             
-            # MAPEAMENTO INTELIGENTE (Busca por vários nomes possíveis que a ESPN usa)
-            vitorias = s.get('wins') or s.get('victories') or 0
-            empates = s.get('ties') or s.get('draws') or 0
-            derrotas = s.get('losses') or 0
+            # MAPEAMENTO ESPECÍFICO PARA FRANÇA E OUTRAS
+            vitorias = s.get('wins', 0)
+            empates = s.get('ties', 0)
+            derrotas = s.get('losses', 0)
             
-            # Gols Pro: tenta 'pointsfor' (comum na França) ou 'goalsfor'
-            gp = s.get('pointsfor') or s.get('goalsfor') or 0
-            # Gols Contra: tenta 'pointsagainst' ou 'goalsagainst'
-            gc = s.get('pointsagainst') or s.get('goalsagainst') or 0
+            # Gols Pro: Na França a ESPN chama de 'pointsfor'
+            gp = s.get('goalsfor') or s.get('pointsfor') or 0
             
-            sg = s.get('pointdifferential') or s.get('goaldifference') or (int(gp) - int(gc))
-            pts = s.get('points') or 0
-            jogos = s.get('gamesplayed') or 0
-            pos = s.get('rank') or 0
+            # Gols Contra: Na França a ESPN chama de 'pointsagainst'
+            gc = s.get('goalsagainst') or s.get('pointsagainst') or 0
+            
+            sg = s.get('goaldifference') or s.get('pointdifferential') or (int(gp) - int(gc))
+            pts = s.get('points', 0)
+            jogos = s.get('gamesplayed', 0)
+            pos = s.get('rank', 0)
 
             dados = {
                 "liga": liga_id,
@@ -69,14 +70,10 @@ def capturar_liga(liga_id, espn_id):
                 "pontos": int(pts)
             }
 
-            # Upsert no Supabase
+            # Envia ao Supabase
             supabase.table("tabelas_ligas").upsert(dados, on_conflict="liga, time").execute()
-            
-            # Print especial para debug da França
-            if liga_id == "FR" and pos == 1:
-                print(f"🇫🇷 Líder da França: {dados['time']} | GP: {dados['gols_pro']} | GC: {dados['gols_contra']}")
 
-        print(f"✅ {liga_id} atualizada com sucesso.")
+        print(f"✅ {liga_id} atualizada.")
 
     except Exception as e:
         print(f"❌ Erro na liga {liga_id}: {e}")
