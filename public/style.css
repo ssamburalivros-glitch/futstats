@@ -565,4 +565,51 @@ td {
         font-size: 0.6rem;
     }
 }
+/* Container do Modal */
+.modal-time-content {
+    background: #0f0f0f;
+    border: 1px solid #222;
+    border-radius: 24px;
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+}
 
+/* Grid V-E-D */
+.performance-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.perf-box {
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.perf-box.win { background: rgba(0, 255, 136, 0.1); color: #00ff88; }
+.perf-box.draw { background: rgba(255, 255, 255, 0.05); color: #aaa; }
+.perf-box.loss { background: rgba(255, 68, 68, 0.1); color: #ff4444; }
+
+.perf-label { font-size: 0.65rem; display: block; margin-bottom: 4px; opacity: 0.6; }
+.perf-value { font-size: 1.2rem; font-weight: 800; }
+
+/* Grid de Gols */
+.gols-summary {
+    background: #161616;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 15px;
+    border-radius: 16px;
+    margin-top: 10px;
+}
+
+.gol-item { text-align: center; border-right: 1px solid #222; }
+.gol-item:last-child { border-right: none; }
+.gol-label { font-size: 0.55rem; color: #666; display: block; }
+.gol-value { font-weight: 700; color: #fff; }
+
+.modal-footer { text-align: center; margin-top: 20px; font-size: 0.7rem; color: #444; }
