@@ -3,6 +3,7 @@ import time
 import requests
 from supabase import create_client
 
+# Configurações de Ambiente
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -14,11 +15,13 @@ LIGAS = {
 }
 
 def capturar_liga(liga_id, espn_id):
-    print(f"📡 Sincronizando: {liga_id}...")
+    print(f"📡 Buscando dados: {liga_id}...")
     url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/standings"
     
     try:
         res = requests.get(url, timeout=20).json()
+        
+        # Ajuste para a estrutura da França e outras ligas
         if 'children' in res:
             entries = res['children'][0].get('standings', {}).get('entries', [])
         else:
@@ -28,22 +31,22 @@ def capturar_liga(liga_id, espn_id):
             team = entry.get('team', {})
             stats_list = entry.get('stats', [])
             
-            # Criamos um dicionário com nomes em minúsculo para facilitar a busca
+            # Criamos um mapa com nomes em minúsculo para não errar
             s = {str(item.get('name')).lower(): item.get('value') for item in stats_list}
             
-            # MAPEAMENTO CORRIGIDO (A ESPN usa nomes variados)
-            v = int(s.get('wins') or s.get('victories') or 0)
-            e = int(s.get('ties') or s.get('draws') or 0)
-            d = int(s.get('losses') or 0)
+            # CAPTURA DE DADOS (Gols e Vitórias)
+            # A ESPN usa 'goalsfor' em umas e 'pointsfor' em outras (França)
+            gp = int(s.get('goalsfor') or s.get('pointsfor') or s.get('allgoalsfor') or 0)
+            gc = int(s.get('goalsagainst') or s.get('pointsagainst') or s.get('allgoalsagainst') or 0)
             
-            # Gols Pro: tenta 'goalsfor' ou 'pointsfor'
-            gp = int(s.get('goalsfor') or s.get('pointsfor') or 0)
-            # Gols Contra: tenta 'goalsagainst' ou 'pointsagainst'
-            gc = int(s.get('goalsagainst') or s.get('pointsagainst') or 0)
+            vitorias = int(s.get('wins') or s.get('victories') or 0)
+            empates = int(s.get('ties') or s.get('draws') or 0)
+            derrotas = int(s.get('losses') or 0)
             
-            pts = int(s.get('points') or 0)
             jogos = int(s.get('gamesplayed') or 0)
+            pts = int(s.get('points') or 0)
             pos = int(s.get('rank') or 0)
+            # Se o saldo (sg) não vier, o Python calcula
             sg = int(s.get('pointdifferential') or s.get('goaldifference') or (gp - gc))
 
             dados = {
@@ -52,22 +55,22 @@ def capturar_liga(liga_id, espn_id):
                 "posicao": pos,
                 "escudo": team.get('logos', [{}])[0].get('href') if team.get('logos') else "",
                 "jogos": jogos,
-                "vitorias": v,
-                "empates": e,
-                "derrotas": d,
+                "vitorias": vitorias,
+                "empates": empates,
+                "derrotas": derrotas,
                 "gols_pro": gp,
                 "gols_contra": gc,
                 "sg": sg,
                 "pontos": pts
             }
 
-            # Upsert no Supabase
+            # Envia para o Supabase
             supabase.table("tabelas_ligas").upsert(dados, on_conflict="liga, time").execute()
 
-        print(f"✅ {liga_id} atualizada com sucesso.")
+        print(f"✅ {liga_id} sincronizada com Gols!")
 
-    except Exception as err:
-        print(f"❌ Erro na liga {liga_id}: {err}")
+    except Exception as e:
+        print(f"❌ Erro na liga {liga_id}: {e}")
 
 if __name__ == "__main__":
     for liga, code in LIGAS.items():
