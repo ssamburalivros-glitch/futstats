@@ -1,41 +1,51 @@
-name: Sincronização de Dados
+name: Sincronização de Futebol FutStats
 
 on:
   schedule:
-    - cron: '0 */3 * * *' # Roda a cada 3 horas
-  workflow_dispatch: # Permite rodar manualmente
+    - cron: '0 */3 * * *' # Roda automaticamente a cada 3 horas
+  workflow_dispatch:      # Permite que você clique no botão "Run workflow" manualmente
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout código
+      - name: Checkout do repositório
         uses: actions/checkout@v3
 
-      - name: Configurar Python
+      - name: Configurar Python 3.9
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
       - name: Instalar dependências
         run: |
-          pip install requests supabase groq
+          python -m pip install --upgrade pip
+          pip install requests supabase groq beautifulsoup4 lxml
 
-      - name: 1. Rodar Crawler Europa (Ligas Principais)
+      - name: 1. Sincronizar Ligas Europeias
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python crawler_europa.py
 
-      - name: 2. Rodar Crawler Paulistão
+      - name: 2. Sincronizar Paulistão
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python crawler_paulistao.py
 
-      - name: 3. Rodar Análise Neural (IA)
+      - name: 3. Gerar Análise Neural (IA)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python analise_neural.py
+
+      - name: Confirmar Alterações (Git)
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update: Dados sincronizados via GitHub Actions" || echo "Sem mudanças para commitar"
+          git push || echo "Sem mudanças para subir"
