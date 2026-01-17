@@ -3,32 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Paulistão 2026 </title>
+    <title>FutStats | Paulistão 2026</title>
     
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-</head>
-<body>
-
-    <header>
-        <div class="header-content">
-            <a href="index.html" class="brand-container">
-                <img src="logos/logo.png" alt="FS" class="site-logo-img">
-                <h1 class="logo">FutStats</h1>
-            </a>
-            <div class="nav-container">
-                <nav class="nav-links">
-                    <a href="classificacao.html">Classificação</a>
-                    <a href="arena.html">Arena H2H</a>
-                    <a href="aovivo.html">Jogos ao Vivo</a>
-                    <a href="paulistao.html">Paulistão 2026</a>
-                </nav>
-                <button class="btn-download">Baixar APP</button>
-            </div>
-        </div>
-    </header>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <style>
         :root {
@@ -37,6 +19,7 @@
             --card: #0f0f0f;
             --border: #1a1a1a;
             --text: #f0f0f0;
+            --accent: #00ff88;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -49,8 +32,20 @@
             padding-bottom: 20px;
         }
 
-        .hero { padding: 30px 15px; text-align: center; border-bottom: 1px solid var(--border); }
-        .hero h1 { margin: 0; font-weight: 900; font-size: 1.5rem; text-transform: uppercase; }
+        /* Ajuste do Header para não quebrar o layout */
+        header { background: #000; border-bottom: 1px solid var(--border); padding: 15px 6%; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1250px; margin: 0 auto; }
+        .brand-container { display: flex; align-items: center; text-decoration: none; color: white; gap: 10px; }
+        .site-logo-img { width: 30px; }
+        .logo { font-weight: 900; font-size: 1.2rem; margin: 0; }
+        
+        .nav-container { display: flex; align-items: center; gap: 20px; }
+        .nav-links a { color: #888; text-decoration: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-left: 15px; }
+        .nav-links a:hover { color: var(--accent); }
+        .btn-download { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 4px; font-weight: 700; font-size: 0.7rem; cursor: pointer; }
+
+        .hero { padding: 30px 15px; text-align: center; border-bottom: 1px solid var(--border); background: #000; }
+        .hero h1 { margin: 0; font-weight: 900; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; }
 
         /* Grid Responsivo */
         .dashboard {
@@ -75,22 +70,16 @@
             letter-spacing: 1px; margin-bottom: 15px; font-weight: 700;
         }
 
-        /* Tabela Mobile-Friendly */
-        .table-wrapper { 
-            overflow-x: auto; 
-            margin: 0 -5px; /* Ganha espaço nas bordas no mobile */
-            -webkit-overflow-scrolling: touch;
-        }
-        
+        /* Tabela */
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th { color: #444; padding: 10px 5px; text-transform: uppercase; font-size: 0.55rem; border-bottom: 2px solid var(--border); }
+        th { color: #444; padding: 10px 5px; text-transform: uppercase; font-size: 0.55rem; border-bottom: 2px solid var(--border); text-align: center; }
         td { padding: 12px 5px; border-bottom: 1px solid #111; text-align: center; font-size: 0.8rem; }
-        
         .t-flex { display: flex; align-items: center; gap: 8px; text-align: left; }
-        .t-flex img { width: 22px; height: 22px; }
+        .t-flex img { width: 22px; height: 22px; object-fit: contain; }
 
-        /* Calendário Mobile */
-        .swiper { width: 100%; padding-bottom: 45px !important; }
+        /* Calendário Swiper */
+        .swiper { width: 100%; padding-bottom: 40px !important; }
         .card-jogo {
             background: var(--card);
             border: 1px solid var(--border);
@@ -98,25 +87,24 @@
             padding: 12px;
             margin-bottom: 8px;
         }
-
         .confronto {
             display: grid;
-            grid-template-columns: 1fr 70px 1fr;
+            grid-template-columns: 1fr 80px 1fr;
             align-items: center;
             gap: 5px;
         }
+        .team { cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+        .team img { width: 30px; height: 30px; margin-bottom: 5px; }
+        .team span { font-size: 0.6rem; font-weight: 700; text-align: center; color: #ccc; }
 
-        .team img { width: 32px; height: 32px; margin-bottom: 5px; }
-        .team span { font-size: 0.6rem; font-weight: 700; text-align: center; display: block; }
+        .placar-box { background: #161616; border-radius: 6px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #222; }
+        .placar-val { font-weight: 900; font-size: 1rem; color: var(--accent); }
 
-        .placar-box { background: #161616; border-radius: 6px; height: 36px; display: flex; align-items: center; justify-content: center; }
-        .placar-val { font-weight: 900; font-size: 1.2rem; color: #fff; }
+        /* Paginação (Bolinhas do Calendário) */
+        .swiper-pagination-bullet { background: #444 !important; opacity: 1 !important; }
+        .swiper-pagination-bullet-active { background: var(--accent) !important; width: 15px !important; border-radius: 4px !important; }
 
-        /* Paginação Customizada */
-        .swiper-pagination-bullet { margin: 0 3px !important; background: #333; opacity: 1; }
-        .swiper-pagination-bullet-active { background: #fff; width: 12px; border-radius: 3px; }
-
-        /* Modal Ajustado para Mobile */
+        /* Modal */
         .modal {
             display: none; position: fixed; z-index: 1000; 
             left: 0; top: 0; width: 100%; height: 100%; 
@@ -131,25 +119,37 @@
             position: relative;
         }
         .modal-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 20px; }
-        .stat-item { background: #111; padding: 10px; border-radius: 8px; }
+        .stat-item { background: #111; padding: 10px; border-radius: 8px; border: 1px solid #1a1a1a; }
         .stat-val { font-size: 1.1rem; font-weight: 900; color: #fff; display: block;}
         .stat-label { font-size: 0.55rem; color: #444; text-transform: uppercase; }
 
-        /* MEDIA QUERIES PARA MOBILE */
         @media (max-width: 1024px) {
-            .dashboard { grid-template-columns: 1fr; } /* Empilha Tabela e Rodada */
-            .box { border-radius: 0; border-left: none; border-right: none; } /* Visual mais limpo no celular */
-            .hero h1 { font-size: 1.3rem; }
-        }
-
-        @media (max-width: 480px) {
-            .hero { padding: 20px 10px; }
-            td { font-size: 0.75rem; padding: 10px 3px; }
-            .team span { font-size: 0.55rem; }
+            .dashboard { grid-template-columns: 1fr; }
+            .header-content { flex-direction: column; gap: 15px; }
+            .nav-links a { margin: 0 10px; }
         }
     </style>
 </head>
 <body>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="brand-container">
+                <img src="logos/logo.png" alt="FS" class="site-logo-img">
+                <h1 class="logo">FutStats</h1>
+            </a>
+            <div class="nav-container">
+                <nav class="nav-links">
+                    <a href="classificacao.html">Classificação</a>
+                    <a href="arena.html">Arena H2H</a>
+                    <a href="aovivo.html">Jogos ao Vivo</a>
+                    <a href="paulistao.html" style="color: var(--accent);">Paulistão 2026</a>
+                </nav>
+                <button class="btn-download">APP</button>
+            </div>
+        </div>
+    </header>
+
     <div id="teamModal" class="modal">
         <div class="modal-content">
             <span style="position: absolute; top: 10px; right: 15px; color: #444; font-size: 24px; cursor: pointer;" onclick="fecharModal()">&times;</span>
@@ -161,7 +161,7 @@
 
     <div class="dashboard">
         <div class="box">
-            <div class="section-title">Classificação</div>
+            <div class="section-title">Classificação Geral</div>
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -175,7 +175,7 @@
         </div>
 
         <div class="box">
-            <div class="section-title">Próximos Jogos</div>
+            <div class="section-title">Calendário de Rodadas</div>
             <div class="swiper mySwiper">
                 <div class="swiper-wrapper" id="container-carrossel"></div>
                 <div class="swiper-pagination"></div>
@@ -184,7 +184,6 @@
     </div>
 
     <script>
-        // Use o mesmo bloco de Script enviado na resposta anterior
         const SUPABASE_URL = 'https://sihunefyfkecumbiyxva.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A';
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -207,12 +206,12 @@
 
             if(classif) {
                 document.getElementById('lista-classificacao').innerHTML = classif.map((t, i) => `
-                    <tr onclick="abrirModal('${t.time_nome}')">
+                    <tr onclick="abrirModal('${t.time_nome}')" style="cursor:pointer">
                         <td>${i+1}</td>
                         <td><div class="t-flex"><img src="https://logodetimes.com/times/${getSlug(t.time_nome)}/logo-${getSlug(t.time_nome)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${t.time_nome}</span></div></td>
                         <td>${t.jogos}</td><td>${t.vitorias}</td><td>${t.empates}</td><td>${t.derrotas}</td>
-                        <td style="color:${t.saldo_gols < 0 ? '#ff4444' : '#666'}">${t.saldo_gols}</td>
-                        <td style="font-weight:900; background: rgba(255,255,255,0.03);">${t.pontos}</td>
+                        <td style="color:${t.saldo_gols < 0 ? '#ff4444' : '#00ff88'}">${t.saldo_gols}</td>
+                        <td style="font-weight:900; background: rgba(255,255,255,0.03); color: #fff;">${t.pontos}</td>
                     </tr>`).join('');
             }
 
@@ -233,10 +232,16 @@
                                 <div class="team" onclick="abrirModal('${j.time_fora}')"><img src="https://logodetimes.com/times/${getSlug(j.time_fora)}/logo-${getSlug(j.time_fora)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${j.time_fora}</span></div>
                             </div>
                         </div>`).join('');
-                    slides += `<div class="swiper-slide"><div style="text-align:center; font-size:0.65rem; color:#555; margin-bottom:10px; font-weight:800;">${data}</div>${cards}</div>`;
+                    slides += `<div class="swiper-slide"><div style="text-align:center; font-size:0.7rem; color:var(--accent); margin-bottom:15px; font-weight:800; border-bottom: 1px solid #1a1a1a; padding-bottom:5px;">${data}</div>${cards}</div>`;
                 }
                 document.getElementById('container-carrossel').innerHTML = slides;
-                new Swiper(".mySwiper", { spaceBetween: 20, pagination: { el: ".swiper-pagination", clickable: true } });
+                
+                // Inicia o Swiper (as setinhas e arraste)
+                new Swiper(".mySwiper", { 
+                    spaceBetween: 20, 
+                    pagination: { el: ".swiper-pagination", clickable: true },
+                    grabCursor: true
+                });
             }
         }
 
@@ -245,7 +250,7 @@
             if(!t) return;
             document.getElementById('modal-body').innerHTML = `
                 <img src="https://logodetimes.com/times/${getSlug(t.time_nome)}/logo-${getSlug(t.time_nome)}-256.png" style="width:60px; margin-bottom:10px;">
-                <h3 style="margin:0;">${t.time_nome}</h3>
+                <h3 style="margin:0; color:#fff;">${t.time_nome}</h3>
                 <div class="modal-stats">
                     <div class="stat-item"><span class="stat-val">${t.pontos}</span><span class="stat-label">PTS</span></div>
                     <div class="stat-item"><span class="stat-val">${t.jogos}</span><span class="stat-label">J</span></div>
