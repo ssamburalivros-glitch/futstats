@@ -58,11 +58,30 @@
         .pts-col { font-weight: 900; color: #fff; background: rgba(255,255,255,0.03); }
 
         /* CARROSSEL - Ajuste Anti-Esticamento */
-        .swiper { 
-            width: 100%; 
-            max-width: 370px; /* Garante que o conteúdo interno não estique */
-            margin: 0 auto;
-        }
+       .swiper { 
+    width: 100%; 
+    max-width: 370px; 
+    margin: 0 auto;
+    padding-bottom: 50px !important; /* Aumenta o espaço para as bolinhas não colarem nos cards */
+    position: relative;
+}
+
+/* Posicionamento das Bolinhas (Paginação) */
+.swiper-pagination {
+    bottom: 5px !important; /* Empurra as bolinhas para o limite inferior do box */
+}
+
+/* Estilo das bolinhas para ficarem mais visíveis */
+.swiper-pagination-bullet { 
+    background: #444; 
+    opacity: 1;
+}
+
+.swiper-pagination-bullet-active { 
+    background: #fff; 
+    width: 20px; /* Deixa a bolinha ativa mais comprida (estilo moderno) */
+    border-radius: 4px;
+}
         
         .card-jogo {
             background: var(--card);
