@@ -1,83 +1,41 @@
-name: Monitoramento FutStats
+name: Sincronização de Dados
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Rápido: Ao Vivo
-    - cron: '0 */6 * * *'  # Lento: Calendário, Classificação e IA
-  workflow_dispatch:
+    - cron: '0 */3 * * *' # Roda a cada 3 horas
+  workflow_dispatch: # Permite rodar manualmente
 
 jobs:
-  ao_vivo:
-    if: github.event.schedule == '*/5 * * * *' || github.event_name == 'workflow_dispatch'
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout código
+        uses: actions/checkout@v3
 
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.9'
 
-      - name: Instalar Dependências
+      - name: Instalar dependências
         run: |
-          python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 supabase
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install requests supabase groq
 
-      - name: Rodar Crawlers Rapidos
+      - name: 1. Rodar Crawler Europa (Ligas Principais)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python crawler_europa.py
+
+      - name: 2. Rodar Crawler Paulistão
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python crawler_paulistao.py
+
+      - name: 3. Rodar Análise Neural (IA)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: |
-          python crawler_ao_vivo.py
-          python crawler_paulistao.py
-
-      - name: Salvar Dados
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add games.json paulistao_data.json || echo "Arquivos json não encontrados"
-          git commit -m "Update: Dados ao vivo e Paulistao" || echo "Sem mudanças para commitar"
-          git push || echo "Erro ao dar push ou nada para subir"
-
-  processamento_geral:
-    if: github.event.schedule == '0 */6 * * *' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configurar Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Instalar Dependências e Playwright
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 supabase playwright
-          playwright install chromium # Necessário para o crawler de calendário clicar no site
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Rodar Crawlers e IA
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: |
-          python crawler.py
-          python crawler_details.py
-          python crawler_forma.py
-          python analise_ia.py
-          python crawler_paulistao.py
-        
-
-      - name: Salvar Tudo
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Update: Processamento 6h completo com Calendário" || echo "Sem mudanças para commitar"
-          git push || echo "Erro ao dar push ou nada para subir"
+        run: python analise_neural.py
