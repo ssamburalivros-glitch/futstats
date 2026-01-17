@@ -52,9 +52,11 @@ def capturar_liga(liga_id, espn_id):
             print(f"⚠️ Aviso: Dados não encontrados para {liga_id}")
             return
 
-        for entry in entries:
+    for entry in entries:
             team = entry.get('team', {})
             stats_list = entry.get('stats', [])
+            
+            # Criamos o dicionário de stats (nome da stat -> valor)
             s = {item.get('name'): item.get('value') for item in stats_list}
             
             dados = {
@@ -66,6 +68,8 @@ def capturar_liga(liga_id, espn_id):
                 "vitorias": int(s.get('wins') or 0),
                 "empates": int(s.get('ties') or 0),
                 "derrotas": int(s.get('losses') or 0),
+                "gols_pro": int(s.get('pointsFor') or 0),      # CAPTURA GP
+                "gols_contra": int(s.get('pointsAgainst') or 0), # CAPTURA GC
                 "sg": int(s.get('pointDifferential') or 0),
                 "pontos": int(s.get('points') or 0)
             }
