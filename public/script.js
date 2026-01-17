@@ -12,15 +12,15 @@ const noticiasCarrossel = [
         img: 'img/carrossel1.webp',
         categoria: 'Inteligência Neural',
         titulo: 'O Futuro do Futebol é Orientado por Dados',
-        descricao: 'Nossa rede neural processa mais de 10.000 variáveis por segundo para entregar a você a probabilidade real de vitória.',
-        detalhes: 'O algoritmo FutStats utiliza modelos de regressão avançados e histórico de performance em tempo real.'
+        descricao: 'Nossa rede neural processa mais de 10.000 variáveis por segundo.',
+        detalhes: 'O algoritmo FutStats utiliza modelos de regressão avançados e histórico de performance.'
     },
     {
         id: 2,
         img: 'img/carrossel2.webp',
         categoria: 'Arena H2H',
         titulo: 'Duelos Lendários, Análises Exatas',
-        descricao: 'Compare gigantes europeus ou rivais locais com a mesma precisão na nossa Arena.',
+        descricao: 'Compare gigantes europeus ou rivais locais com a mesma precisão.',
         detalhes: 'A ferramenta avalia saldo de gols, eficiência ofensiva e solidez defensiva.'
     },
     {
@@ -28,8 +28,8 @@ const noticiasCarrossel = [
         img: 'img/carrossel3.webp',
         categoria: 'Ao Vivo',
         titulo: 'Tempo Real com Estatísticas Refinadas',
-        descricao: 'Live Feeds agora mostram gráficos de pressão e escalações oficiais mais rápido.',
-        detalhes: 'Integramos uma nova fonte de dados que reduz a latência das atualizações de gol.'
+        descricao: 'Live Feeds agora mostram gráficos de pressão mais rápido.',
+        detalhes: 'Integramos uma nova fonte de dados que reduz a latência das atualizações.'
     },
     {
         id: 4, 
@@ -62,14 +62,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (ehAoVivo) carregarAoVivo();
 
-    // Listeners de fechar modal
+    // Listeners Globais para Fechar Modais
     document.querySelectorAll('.close-modal-btn').forEach(btn => btn.onclick = fecharModalTime);
+    
     const closeBtnLive = document.querySelector('.close-modal-live');
     if (closeBtnLive) closeBtnLive.onclick = fecharModalLive;
 
     window.onclick = (e) => {
-        if (e.target.classList.contains('modal-time-overlay')) fecharModalTime();
-        if (e.target.id === 'modal-live') fecharModalLive();
+        const modalTime = document.getElementById('modal-time');
+        const modalLive = document.getElementById('modal-live');
+        if (e.target === modalTime) fecharModalTime();
+        if (e.target === modalLive) fecharModalLive();
     };
 });
 
@@ -89,13 +92,14 @@ async function carregarTabela(liga) {
     const corpo = document.getElementById('tabela-corpo');
     if (!corpo) return;
     
-    corpo.innerHTML = "<tr><td colspan='7' align='center'>Sincronizando dados...</td></tr>";
+    corpo.innerHTML = "<tr><td colspan='7' align='center'>Sincronizando dados neurais...</td></tr>";
 
     try {
         const { data, error } = await _supabase.from('tabelas_ligas').select('*').eq('liga', liga).order('posicao');
         if (error) throw error;
 
         corpo.innerHTML = data.map(item => {
+            // Prepara o objeto para ser passado como string para a função de clique
             const dadosTime = JSON.stringify(item).replace(/'/g, "&apos;");
             return `
                 <tr class="row-interativa" onclick='abrirModalTime(${dadosTime})'>
@@ -116,7 +120,7 @@ async function carregarTabela(liga) {
         }).join('');
     } catch (e) { 
         console.error(e); 
-        corpo.innerHTML = "<tr><td colspan='7' align='center' style='color:red'>Erro ao carregar dados.</td></tr>"; 
+        corpo.innerHTML = "<tr><td colspan='7' align='center' style='color:red'>Erro na rede neural.</td></tr>"; 
     }
 }
 
@@ -143,24 +147,32 @@ function inicializarPesquisa() {
     });
 }
 
-// --- MODAL DE TIME ---
+// --- MODAL DE TIME (DETALHES ESTILO PAULISTÃO) ---
 function abrirModalTime(time) {
     const modal = document.getElementById('modal-time');
     if (!modal) return;
 
+    // Identidade do Time
     document.getElementById('modal-nome-time').innerText = time.time;
+    document.getElementById('modal-escudo').src = time.escudo || ESCUDO_PADRAO;
+    document.getElementById('modal-liga-badge').innerText = time.liga || "LIGA";
+
+    // Stats Principais (Cards de Cima)
     document.getElementById('modal-pos').innerText = (time.posicao || '0') + "º";
     document.getElementById('modal-pts').innerText = time.pontos || '0';
-    document.getElementById('modal-liga-badge').innerText = time.liga || "LIGA";
-    
-    // Novos campos (GP, GC, SG, Jogos)
-    if(document.getElementById('modal-gp')) document.getElementById('modal-gp').innerText = time.gols_pro || 0;
-    if(document.getElementById('modal-gc')) document.getElementById('modal-gc').innerText = time.gols_contra || 0;
-    if(document.getElementById('modal-sg')) document.getElementById('modal-sg').innerText = time.sg || 0;
-    if(document.getElementById('modal-jogos')) document.getElementById('modal-jogos').innerText = time.jogos || 0;
 
-    const img = document.getElementById('modal-escudo');
-    if (img) img.src = time.escudo || ESCUDO_PADRAO;
+    // Desempenho V-E-D (Badges Coloridas)
+    document.getElementById('modal-v').innerText = time.vitorias || 0;
+    document.getElementById('modal-e').innerText = time.empates || 0;
+    document.getElementById('modal-d').innerText = time.derrotas || 0;
+
+    // Grid de Gols (Gols Pró, Contra e Saldo)
+    document.getElementById('modal-gp').innerText = time.gols_pro || 0;
+    document.getElementById('modal-gc').innerText = time.gols_contra || 0;
+    document.getElementById('modal-sg').innerText = time.sg || 0;
+
+    // Footer
+    document.getElementById('modal-jogos').innerText = time.jogos || 0;
 
     modal.style.display = 'flex';
 }
@@ -207,7 +219,7 @@ function configurarH2H() {
 }
 
 function processarDuelo(a, b) {
-    const display = document.getElementById('h2h-result') || document.getElementById('h2h-display');
+    const display = document.getElementById('h2h-display');
     if (!display) return;
     display.style.display = 'block';
 
@@ -221,7 +233,6 @@ function processarDuelo(a, b) {
     document.getElementById('sg-a').innerText = a.sg || 0;
     document.getElementById('sg-b').innerText = b.sg || 0;
 
-    // Cálculo Probabilidade FutStats
     const pA = (a.pontos * 0.5) + ((a.sg || 0) * 0.5) + 10;
     const pB = (b.pontos * 0.5) + ((b.sg || 0) * 0.5) + 10;
     const winA = Math.round((pA / (pA + pB)) * 100);
@@ -288,4 +299,7 @@ async function carregarAoVivo() {
     } catch (e) { console.error(e); }
 }
 
-function fecharModalLive() { document.getElementById('modal-live').style.display = 'none'; }
+function fecharModalLive() { 
+    const modal = document.getElementById('modal-live');
+    if (modal) modal.style.display = 'none'; 
+}
