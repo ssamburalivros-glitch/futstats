@@ -18,7 +18,7 @@
 </head>
 <body class="p-4 md:p-10">
 
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-6xl mx-auto">
         <h1 class="text-3xl font-bold text-center mb-10 text-white tracking-tight">Estatísticas de Futebol</h1>
 
         <nav class="flex overflow-x-auto gap-6 mb-8 border-b border-zinc-800 justify-start md:justify-center scrollbar-hide">
@@ -40,6 +40,8 @@
                             <th class="p-4">PTS</th>
                             <th class="p-4">PJ</th>
                             <th class="p-4">VIT</th>
+                            <th class="p-4">GP</th>
+                            <th class="p-4">GC</th>
                             <th class="p-4">SG</th>
                         </tr>
                     </thead>
@@ -60,17 +62,14 @@
             const corpo = document.getElementById('tabela-corpo');
             const loader = document.getElementById('loading');
             
-            // 1. Gerenciar visual das abas
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             elemento.classList.add('active');
 
-            // 2. Mostrar carregando
             corpo.innerHTML = "";
             loader.style.display = "block";
             loader.innerText = `Carregando liga: ${liga}...`;
 
             try {
-                // 3. Buscar dados
                 const { data, error } = await supabaseClient
                     .from('tabelas_ligas')
                     .select('*')
@@ -83,7 +82,6 @@
 
                 if (data && data.length > 0) {
                     data.forEach(clube => {
-                        // Se o escudo for base64 de 1px (comum no BR quando zerado) ou vazio, usa placeholder
                         const bugEscudoBr = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                         const imgEscudo = (clube.escudo && clube.escudo !== bugEscudoBr) 
                             ? clube.escudo 
@@ -99,13 +97,15 @@
                                 <td class="p-4 font-black text-blue-500">${clube.pontos}</td>
                                 <td class="p-4 text-zinc-400">${clube.jogos}</td>
                                 <td class="p-4 text-green-500/80">${clube.vitorias}</td>
+                                <td class="p-4 text-zinc-400">${clube.gols_pro}</td>
+                                <td class="p-4 text-zinc-400">${clube.gols_contra}</td>
                                 <td class="p-4 font-medium ${clube.sg >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${clube.sg}</td>
                             </tr>
                         `;
                     });
                 } else {
                     loader.style.display = "block";
-                    loader.innerText = `Nenhum dado encontrado para ${liga}. Rode o Crawler primeiro.`;
+                    loader.innerText = `Nenhum dado encontrado para ${liga}. Verifique se o Crawler rodou com sucesso.`;
                 }
             } catch (err) {
                 console.error("Erro Supabase:", err);
@@ -114,7 +114,6 @@
             }
         }
 
-        // 4. Iniciar automaticamente ao abrir a página
         window.onload = () => {
             const defaultTab = document.getElementById('default-tab');
             carregar('BR', defaultTab);
