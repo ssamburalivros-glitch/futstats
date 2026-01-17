@@ -9,6 +9,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* Este bloco garante que o carrossel tenha visibilidade, 
+           mesmo que o style.css externo tenha algum conflito com o novo header */
+        .hero-carousel {
+            position: relative;
+            width: 100%;
+            height: 550px; /* Altura padrão para as imagens aparecerem */
+            background: #000;
+            overflow: hidden;
+            display: block !important;
+        }
+
+        .carousel-slides {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Garante que os slides injetados pelo JS ocupem todo o espaço */
+        .slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .slide.active {
+            opacity: 1;
+            z-index: 1;
+        }
+    </style>
 </head>
 <body>
 
@@ -45,13 +79,11 @@
 
     <main>
         <section class="hero-carousel">
-            <div class="carousel-slides" id="carousel-slides">
-                </div>
+            <div class="carousel-slides" id="carousel-slides"></div>
             
             <div class="carousel-controls">
                 <button class="control-btn" id="prev-slide">&lt;</button>
-                <div class="carousel-dots" id="carousel-dots">
-                    </div>
+                <div class="carousel-dots" id="carousel-dots"></div>
                 <button class="control-btn" id="next-slide">&gt;</button>
             </div>
         </section>
