@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Arena H2H</title>
+    <title>FutStats | Arena H2H Global</title>
     
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -30,7 +30,6 @@
             padding-bottom: 40px;
         }
 
-        /* Header Padrão */
         header { background: #000; border-bottom: 1px solid var(--border); padding: 15px 6%; }
         .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1250px; margin: 0 auto; }
         .brand-container { display: flex; align-items: center; text-decoration: none; color: white; gap: 10px; }
@@ -39,93 +38,43 @@
         .nav-links a { color: #888; text-decoration: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-left: 15px; }
         .nav-links a:hover { color: #fff; }
 
-        /* Container Arena */
-        .arena-wrapper {
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 0 15px;
-        }
-
-        .box-arena { 
-            background: var(--panel); 
-            border: 1px solid var(--border); 
-            border-radius: 16px; 
-            padding: 30px;
-            text-align: center;
-        }
-
+        .arena-wrapper { max-width: 900px; margin: 30px auto; padding: 0 15px; }
+        .box-arena { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 30px; text-align: center; }
         .cyber-title { font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
         .subtitle { color: #555; font-size: 0.75rem; margin-bottom: 30px; text-transform: uppercase; }
 
-        /* Controles de Seleção */
-        .h2h-grid {
-            display: grid;
-            grid-template-columns: 1fr 60px 1fr;
-            gap: 20px;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-
+        .h2h-grid { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 20px; align-items: center; margin-bottom: 40px; }
         .selector-group { display: flex; flex-direction: column; gap: 10px; }
         .selector-group label { font-size: 0.6rem; color: #444; text-transform: uppercase; text-align: left; font-weight: 700; }
         
-        select {
-            background: #111;
-            border: 1px solid #222;
-            color: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            font-family: 'Montserrat';
-            font-size: 0.8rem;
-            outline: none;
-            cursor: pointer;
-        }
+        select { background: #111; border: 1px solid #222; color: #fff; padding: 12px; border-radius: 8px; font-family: 'Montserrat'; font-size: 0.8rem; outline: none; cursor: pointer; width: 100%; }
         select:disabled { opacity: 0.3; cursor: not-allowed; }
 
         .vs-divider { font-weight: 900; font-style: italic; color: #222; font-size: 1.2rem; }
 
-        /* Exibição do Confronto */
         #h2h-result { display: none; border-top: 1px solid #1a1a1a; padding-top: 40px; animation: fadeIn 0.5s ease; }
-        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .battle-display { display: flex; justify-content: space-around; align-items: center; margin-bottom: 40px; }
         .gladiator img { height: 90px; width: auto; margin-bottom: 15px; }
         .gladiator h3 { font-size: 0.9rem; margin: 0; font-weight: 800; }
 
-        /* Tabela de Stats */
         .stats-table { max-width: 500px; margin: 0 auto; }
-        .stat-row { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 12px 0; 
-            border-bottom: 1px solid #111; 
-            align-items: center;
-        }
-        .val { font-weight: 900; font-size: 1rem; color: #fff; width: 50px; }
+        .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #111; align-items: center; }
+        .val { font-weight: 900; font-size: 1rem; color: #fff; width: 60px; }
         .label { font-size: 0.65rem; color: #555; text-transform: uppercase; font-weight: 700; }
         .val.right { text-align: right; }
         .val.left { text-align: left; }
 
-        /* Probabilidades */
         .prob-container { margin-top: 40px; }
-        .prob-bar {
-            height: 10px;
-            background: #111;
-            border-radius: 5px;
-            overflow: hidden;
-            display: flex;
-            margin: 10px 0;
-        }
-        #bar-a { background: #fff; width: 50%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        #bar-b { background: #333; width: 50%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .prob-bar { height: 10px; background: #111; border-radius: 5px; overflow: hidden; display: flex; margin: 10px 0; }
+        #bar-a { background: #fff; width: 50%; transition: width 0.8s ease; }
+        #bar-b { background: #333; width: 50%; transition: width 0.8s ease; }
         .prob-texts { display: flex; justify-content: space-between; font-weight: 900; font-size: 0.9rem; }
 
         @media (max-width: 600px) {
             .h2h-grid { grid-template-columns: 1fr; }
-            .vs-divider { padding: 10px 0; }
-            .battle-display { gap: 10px; }
-            .gladiator img { height: 60px; }
+            .battle-display { flex-direction: column; gap: 20px; }
         }
     </style>
 </head>
@@ -150,8 +99,8 @@
 
     <div class="arena-wrapper">
         <div class="box-arena">
-            <h2 class="cyber-title">Arena H2H</h2>
-            <p class="subtitle">Análise Comparativa de Desempenho</p>
+            <h2 class="cyber-title">Arena de Batalha</h2>
+            <p class="subtitle">Multi-Ligas: Compare qualquer time</p>
 
             <div class="h2h-grid">
                 <div class="selector-group">
@@ -160,10 +109,14 @@
                         <option value="">Escolha a Liga</option>
                         <option value="SP">Paulistão 2026</option>
                         <option value="BR">Brasileirão Série A</option>
+                        <option value="PL">Premier League (Ing)</option>
+                        <option value="ES">La Liga (Esp)</option>
+                        <option value="IT">Serie A (Ita)</option>
+                        <option value="DE">Bundesliga (Ale)</option>
+                        <option value="FR">Ligue 1 (Fra)</option>
+                        <option value="PT">Liga Portugal</option>
                     </select>
-                    <select id="time-a" disabled>
-                        <option value="">Selecione o Time</option>
-                    </select>
+                    <select id="time-a" disabled><option value="">Selecione o Time</option></select>
                 </div>
 
                 <div class="vs-divider">VS</div>
@@ -174,73 +127,55 @@
                         <option value="">Escolha a Liga</option>
                         <option value="SP">Paulistão 2026</option>
                         <option value="BR">Brasileirão Série A</option>
+                        <option value="PL">Premier League (Ing)</option>
+                        <option value="ES">La Liga (Esp)</option>
+                        <option value="IT">Serie A (Ita)</option>
+                        <option value="DE">Bundesliga (Ale)</option>
+                        <option value="FR">Ligue 1 (Fra)</option>
+                        <option value="PT">Liga Portugal</option>
                     </select>
-                    <select id="time-b" disabled>
-                        <option value="">Selecione o Time</option>
-                    </select>
+                    <select id="time-b" disabled><option value="">Selecione o Time</option></select>
                 </div>
             </div>
 
             <div id="h2h-result">
                 <div class="battle-display">
-                    <div class="gladiator">
-                        <img id="img-a" src="" alt="">
-                        <h3 id="name-a">--</h3>
-                    </div>
-                    <div class="vs-divider" style="color: #fff; font-size: 2rem;">X</div>
-                    <div class="gladiator">
-                        <img id="img-b" src="" alt="">
-                        <h3 id="name-b">--</h3>
-                    </div>
+                    <div class="gladiator"><img id="img-a" src=""><h3 id="name-a">--</h3></div>
+                    <div style="font-weight: 900; font-size: 2rem;">X</div>
+                    <div class="gladiator"><img id="img-b" src=""><h3 id="name-b">--</h3></div>
                 </div>
 
                 <div class="stats-table">
-                    <div class="stat-row">
-                        <span id="pts-a" class="val left">--</span>
-                        <span class="label">Pontos</span>
-                        <span id="pts-b" class="val right">--</span>
-                    </div>
-                    <div class="stat-row">
-                        <span id="vit-a" class="val left">--</span>
-                        <span class="label">Vitórias</span>
-                        <span id="vit-b" class="val right">--</span>
-                    </div>
-                    <div class="stat-row">
-                        <span id="sg-a" class="val left">--</span>
-                        <span class="label">Saldo de Gols</span>
-                        <span id="sg-b" class="val right">--</span>
-                    </div>
-                    <div class="stat-row">
-                        <span id="jog-a" class="val left">--</span>
-                        <span class="label">Jogos</span>
-                        <span id="jog-b" class="val right">--</span>
-                    </div>
+                    <div class="stat-row"><span id="pts-a" class="val left">--</span><span class="label">Pontos</span><span id="pts-b" class="val right">--</span></div>
+                    <div class="stat-row"><span id="vit-a" class="val left">--</span><span class="label">Vitórias</span><span id="vit-b" class="val right">--</span></div>
+                    <div class="stat-row"><span id="sg-a" class="val left">--</span><span class="label">Saldo de Gols</span><span id="sg-b" class="val right">--</span></div>
+                    <div class="stat-row"><span id="jog-a" class="val left">--</span><span class="label">Jogos Realizados</span><span id="jog-b" class="val right">--</span></div>
                 </div>
 
                 <div class="prob-container">
-                    <span class="label" style="display: block; margin-bottom: 5px;">Probabilidade de Vitória</span>
-                    <div class="prob-bar">
-                        <div id="bar-a"></div>
-                        <div id="bar-b"></div>
-                    </div>
-                    <div class="prob-texts">
-                        <span id="perc-a">50%</span>
-                        <span id="perc-b">50%</span>
-                    </div>
+                    <span class="label">Probabilidade FutStats Neural</span>
+                    <div class="prob-bar"><div id="bar-a"></div><div id="bar-b"></div></div>
+                    <div class="prob-texts"><span id="perc-a">50%</span><span id="perc-b">50%</span></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuração Supabase
         const SB_URL = "https://sihunefyfkecumbiyxva.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
         const client = supabase.createClient(SB_URL, SB_KEY);
 
+        // Mapeie aqui os nomes EXATOS das suas tabelas no Supabase
         const ligasMap = {
             "SP": "paulistao_classificacao",
-            "BR": "classificacao_brasileirao"
+            "BR": "classificacao_brasileirao",
+            "PL": "classificacao_premier",
+            "ES": "classificacao_laliga",
+            "IT": "classificacao_seriea",
+            "DE": "classificacao_bundesliga",
+            "FR": "classificacao_ligue1",
+            "PT": "classificacao_portugal"
         };
 
         const getSlug = (n) => {
@@ -252,16 +187,11 @@
             return s.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
         };
 
-        async function carregarTimes(selectLiga, selectTime) {
+        async function atualizarTimes(selectLiga, selectTime) {
             const liga = selectLiga.value;
-            if (!liga) {
-                selectTime.disabled = true;
-                selectTime.innerHTML = '<option>Selecione o Time</option>';
-                return;
-            }
+            if (!liga) { selectTime.disabled = true; return; }
 
             const { data } = await client.from(ligasMap[liga]).select('time_nome').order('time_nome');
-
             if (data) {
                 selectTime.innerHTML = '<option value="">Selecione o Time</option>' + 
                     data.map(t => `<option value="${t.time_nome}">${t.time_nome}</option>`).join('');
@@ -269,27 +199,28 @@
             }
         }
 
-        async function comparar() {
-            const ligaA = document.getElementById('liga-a').value;
-            const timeA = document.getElementById('time-a').value;
-            const ligaB = document.getElementById('liga-b').value;
-            const timeB = document.getElementById('time-b').value;
+        async function calcular() {
+            const lA = document.getElementById('liga-a').value;
+            const tA = document.getElementById('time-a').value;
+            const lB = document.getElementById('liga-b').value;
+            const tB = document.getElementById('time-b').value;
 
-            if (!timeA || !timeB) return;
+            if (!tA || !tB) return;
 
-            const { data: dA } = await client.from(ligasMap[ligaA]).select('*').eq('time_nome', timeA).single();
-            const { data: dB } = await client.from(ligasMap[ligaB]).select('*').eq('time_nome', timeB).single();
+            const { data: dA } = await client.from(ligasMap[lA]).select('*').eq('time_nome', tA).single();
+            const { data: dB } = await client.from(ligasMap[lB]).select('*').eq('time_nome', tB).single();
 
             if (dA && dB) {
                 document.getElementById('h2h-result').style.display = 'block';
-
-                // Fotos e Nomes
+                
+                // Imagens e Dados
                 document.getElementById('img-a').src = `https://logodetimes.com/times/${getSlug(dA.time_nome)}/logo-${getSlug(dA.time_nome)}-256.png`;
                 document.getElementById('img-b').src = `https://logodetimes.com/times/${getSlug(dB.time_nome)}/logo-${getSlug(dB.time_nome)}-256.png`;
+                
                 document.getElementById('name-a').innerText = dA.time_nome;
                 document.getElementById('name-b').innerText = dB.time_nome;
 
-                // Estatísticas
+                // Stats
                 document.getElementById('pts-a').innerText = dA.pontos;
                 document.getElementById('pts-b').innerText = dB.pontos;
                 document.getElementById('vit-a').innerText = dA.vitorias;
@@ -299,28 +230,25 @@
                 document.getElementById('jog-a').innerText = dA.jogos;
                 document.getElementById('jog-b').innerText = dB.jogos;
 
-                // Lógica de Probabilidade (Pontos + Saldo + Vitórias)
-                const pesoA = (dA.pontos * 3) + (dA.vitorias * 2) + dA.saldo_gols;
-                const pesoB = (dB.pontos * 3) + (dB.vitorias * 2) + dB.saldo_gols;
-                const total = (pesoA + pesoB) || 1;
+                // Probabilidade
+                const pA = (dA.pontos * 2) + dA.saldo_gols;
+                const pB = (dB.pontos * 2) + dB.saldo_gols;
+                const total = (pA + pB) || 1;
+                let percA = Math.round((pA / total) * 100);
+                if(percA > 88) percA = 88; if(percA < 12) percA = 12;
+                let percB = 100 - percA;
 
-                let pA = Math.round((pesoA / total) * 100);
-                if (pA > 85) pA = 85; if (pA < 15) pA = 15; // Limites para não ficar 100%
-                let pB = 100 - pA;
-
-                document.getElementById('bar-a').style.width = pA + '%';
-                document.getElementById('bar-b').style.width = pB + '%';
-                document.getElementById('perc-a').innerText = pA + '%';
-                document.getElementById('perc-b').innerText = pB + '%';
+                document.getElementById('bar-a').style.width = percA + '%';
+                document.getElementById('bar-b').style.width = percB + '%';
+                document.getElementById('perc-a').innerText = percA + '%';
+                document.getElementById('perc-b').innerText = percB + '%';
             }
         }
 
-        // Listeners
-        document.getElementById('liga-a').addEventListener('change', () => carregarTimes(document.getElementById('liga-a'), document.getElementById('time-a')));
-        document.getElementById('liga-b').addEventListener('change', () => carregarTimes(document.getElementById('liga-b'), document.getElementById('time-b')));
-        document.getElementById('time-a').addEventListener('change', comparar);
-        document.getElementById('time-b').addEventListener('change', comparar);
-
+        document.getElementById('liga-a').addEventListener('change', () => atualizarTimes(document.getElementById('liga-a'), document.getElementById('time-a')));
+        document.getElementById('liga-b').addEventListener('change', () => atualizarTimes(document.getElementById('liga-b'), document.getElementById('time-b')));
+        document.getElementById('time-a').addEventListener('change', calcular);
+        document.getElementById('time-b').addEventListener('change', calcular);
     </script>
 </body>
 </html>
