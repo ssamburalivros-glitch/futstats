@@ -1,7 +1,6 @@
 import os
-import json
-import re
 import requests
+from bs4 import BeautifulSoup
 from supabase import create_client
 
 # Configurações do Supabase
@@ -9,60 +8,75 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-URL_GE = "https://ge.globo.com/sp/futebol/campeonato-paulista/"
+URL_CLASS = "https://www.espn.com.br/futebol/classificacao/_/liga/bra.camp.paulista"
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 }
 
 def crawler_classificacao():
-    print("🚀 Iniciando busca profunda por dados no GE...")
+    print("🚀 Iniciando raspagem COMPLETA da ESPN (Paulistão 2026)...")
     try:
-        response = requests.get(URL_GE, headers=HEADERS, timeout=30)
+        response = requests.get(URL_CLASS, headers=HEADERS, timeout=20)
         response.raise_for_status()
-        html = response.text
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-        # 1. Tentar encontrar o JSON de classificação usando Expressão Regular
-        # O GE armazena os dados em uma variável chamada "classificacao" dentro de um JSON maior
-        match = re.search(r'\"classificacao\":\s*(\[.*?\]),\"configuracoes\"', html)
-        
-        if not match:
-            # Segunda tentativa de Regex caso a estrutura mude levemente
-            match = re.search(r'\"classificacao\":(\[{\"equipe\":.*?}\])', html)
+        # A ESPN divide em: Table--fixed-left (Nomes) e Table__Scroller (Dados)
+        tabelas_nomes = soup.select('.Table--fixed-left') 
+        tabelas_dados = soup.select('.Table__Scroller')
 
-        if match:
-            dados_json = json.loads(match.group(1))
-            payload = []
+        if not tabelas_nomes or not tabelas_dados:
+            print("⚠️ Erro: Estrutura da ESPN não encontrada.")
+            return
 
-            for item in dados_json:
-                equipe = item.get('equipe', {})
-                nome = equipe.get('nome_popular') or equipe.get('nome')
-                stats = item.get('stats', item) # Em algumas versões o campo é 'stats', em outras é direto na raiz
+        letras = ['A', 'B', 'C', 'D']
+        payload = []
 
-                if nome:
+        # Itera pelos 4 grupos (A, B, C, D)
+        for idx in range(min(len(tabelas_nomes), 4)):
+            rows_nomes = tabelas_nomes[idx].find_all("tr")[1:] # Pula cabeçalho
+            rows_dados = tabelas_dados[idx].find_all("tr")[1:]
+
+            for i in range(len(rows_nomes)):
+                try:
+                    # 1. Nome do Time
+                    nome_container = rows_nomes[i].find("span", class_="hide-mobile")
+                    nome = nome_container.text.strip() if nome_container else rows_nomes[i].text.strip()
+                    
+                    # 2. Logo
+                    img_tag = rows_nomes[i].find("img")
+                    logo = img_tag.get("src", "") if img_tag else ""
+
+                    # 3. Dados Numéricos (Colunas da ESPN)
+                    cols = rows_dados[i].find_all("td")
+                    # Mapeamento ESPN: 0:J, 1:V, 2:E, 3:D, 4:GP, 5:GC, 6:SG, 7:PTS
+                    
                     payload.append({
+                        "grupo": f"Grupo {letras[idx]}",
                         "time_nome": nome,
-                        "pontos": int(stats.get('pontos', 0)),
-                        "jogos": int(stats.get('jogos', 0)),
-                        "vitorias": int(stats.get('vitorias', 0)),
-                        "empates": int(stats.get('empates', 0)),
-                        "derrotas": int(stats.get('derrotas', 0)),
-                        "gols_pro": int(stats.get('gols_pro', 0)),
-                        "gols_contra": int(stats.get('gols_contra', 0)),
-                        "saldo_gols": int(stats.get('saldo_gols', 0))
+                        "time_logo": logo,
+                        "jogos": int(cols[0].text.strip()),
+                        "vitorias": int(cols[1].text.strip()),
+                        "empates": int(cols[2].text.strip()),
+                        "derrotas": int(cols[3].text.strip()),
+                        "gols_pro": int(cols[4].text.strip()),
+                        "gols_contra": int(cols[5].text.strip()),
+                        "saldo_gols": int(cols[6].text.strip().replace('+', '')),
+                        "pontos": int(cols[7].text.strip())
                     })
+                except Exception as e:
+                    print(f"⚠️ Erro no Grupo {letras[idx]}, linha {i}: {e}")
 
-            if payload:
-                print(f"📤 Enviando {len(payload)} times ao Supabase...")
-                supabase.table("paulistao_classificacao").delete().neq("time_nome", "null").execute()
-                supabase.table("paulistao_classificacao").insert(payload).execute()
-                print("✅ Classificação detalhada atualizada!")
-                return
-
-        print("❌ Não foi possível encontrar o padrão de dados na página.")
+        if payload:
+            print(f"📤 Enviando {len(payload)} times detalhados para o Supabase...")
+            # Limpa e insere
+            supabase.table("paulistao_classificacao").delete().neq("time_nome", "null").execute()
+            supabase.table("paulistao_classificacao").insert(payload).execute()
+            print("✅ Sucesso! Classificação completa atualizada.")
+        else:
+            print("❌ Nenhum dado processado.")
 
     except Exception as e:
-        print(f"❌ Erro crítico: {e}")
+        print(f"❌ Erro na requisição: {e}")
 
 if __name__ == "__main__":
     crawler_classificacao()
