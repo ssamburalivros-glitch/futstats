@@ -2,8 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paulistão 2026 | FutStats</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Paulistão 2026 | FutStats Pro</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -20,68 +20,58 @@
             --text: #f0f0f0;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
             background-color: var(--bg);
             color: var(--text);
             font-family: 'Montserrat', sans-serif;
             margin: 0;
+            padding-bottom: 20px;
         }
 
-        .hero { padding: 40px 20px; text-align: center; border-bottom: 1px solid var(--border); }
-        .hero h1 { margin: 0; font-weight: 900; font-size: 1.8rem; }
+        .hero { padding: 30px 15px; text-align: center; border-bottom: 1px solid var(--border); }
+        .hero h1 { margin: 0; font-weight: 900; font-size: 1.5rem; text-transform: uppercase; }
 
-        /* Dashboard: Ajuste de proporção para evitar esticamento */
+        /* Grid Responsivo */
         .dashboard {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 15px;
+            max-width: 1250px;
+            margin: 15px auto;
+            padding: 0 10px;
             display: grid;
-            grid-template-columns: 1fr 400px; /* Tabela flexível, Calendário fixo em 400px */
-            gap: 25px;
-            align-items: start;
+            grid-template-columns: 1fr 400px; 
+            gap: 15px;
         }
 
         .box { 
             background: var(--panel); 
             border: 1px solid var(--border); 
             border-radius: 12px; 
-            padding: 15px; 
+            padding: 15px;
+            overflow: hidden;
         }
 
-        /* Tabela Detalhada */
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { color: #444; padding: 10px 5px; text-transform: uppercase; font-size: 0.6rem; border-bottom: 2px solid var(--border); }
-        td { padding: 10px 5px; border-bottom: 1px solid #111; text-align: center; font-size: 0.75rem; }
-        .t-flex { display: flex; align-items: center; gap: 8px; text-align: left; }
-        .t-flex img { width: 20px; height: 20px; }
-        .pts-col { font-weight: 900; color: #fff; background: rgba(255,255,255,0.03); }
+        .section-title {
+            font-size: 0.65rem; color: #555; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 15px; font-weight: 700;
+        }
 
-        /* CARROSSEL - Ajuste Anti-Esticamento */
-       .swiper { 
-    width: 100%; 
-    max-width: 370px; 
-    margin: 0 auto;
-    padding-bottom: 50px !important; /* Aumenta o espaço para as bolinhas não colarem nos cards */
-    position: relative;
-}
-
-
-/* Diminui o espaçamento entre as bolinhas */
-.swiper-pagination-bullet {
-    margin: 0 4px !important; /* Espaçamento horizontal reduzido (o padrão costuma ser 8px) */
-    background: #444; 
-    opacity: 1;
-    transition: all 0.3s ease;
-}
-
-/* Mantém o estilo da bolinha ativa */
-.swiper-pagination-bullet-active {
-    background: #fff;
-    width: 16px; /* Ajustei para 16px para não ocupar muito espaço agora que estão mais juntas */
-    border-radius: 4px;
-}
+        /* Tabela Mobile-Friendly */
+        .table-wrapper { 
+            overflow-x: auto; 
+            margin: 0 -5px; /* Ganha espaço nas bordas no mobile */
+            -webkit-overflow-scrolling: touch;
+        }
         
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { color: #444; padding: 10px 5px; text-transform: uppercase; font-size: 0.55rem; border-bottom: 2px solid var(--border); }
+        td { padding: 12px 5px; border-bottom: 1px solid #111; text-align: center; font-size: 0.8rem; }
+        
+        .t-flex { display: flex; align-items: center; gap: 8px; text-align: left; }
+        .t-flex img { width: 22px; height: 22px; }
+
+        /* Calendário Mobile */
+        .swiper { width: 100%; padding-bottom: 45px !important; }
         .card-jogo {
             background: var(--card);
             border: 1px solid var(--border);
@@ -90,54 +80,74 @@
             margin-bottom: 8px;
         }
 
-        .data-label { text-align: center; color: #555; font-weight: 800; font-size: 0.7rem; margin-bottom: 15px; text-transform: uppercase; }
-
         .confronto {
             display: grid;
-            grid-template-columns: 1fr 80px 1fr; /* Placar mais compacto */
+            grid-template-columns: 1fr 70px 1fr;
             align-items: center;
             gap: 5px;
         }
 
-        .team { display: flex; flex-direction: column; align-items: center; }
         .team img { width: 32px; height: 32px; margin-bottom: 5px; }
-        .team span { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; text-align: center; line-height: 1; }
+        .team span { font-size: 0.6rem; font-weight: 700; text-align: center; display: block; }
 
-        .placar-box {
-            background: #161616;
-            border: 1px solid #222;
-            border-radius: 6px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .placar-box { background: #161616; border-radius: 6px; height: 36px; display: flex; align-items: center; justify-content: center; }
+        .placar-val { font-weight: 900; font-size: 1.2rem; color: #fff; }
+
+        /* Paginação Customizada */
+        .swiper-pagination-bullet { margin: 0 3px !important; background: #333; opacity: 1; }
+        .swiper-pagination-bullet-active { background: #fff; width: 12px; border-radius: 3px; }
+
+        /* Modal Ajustado para Mobile */
+        .modal {
+            display: none; position: fixed; z-index: 1000; 
+            left: 0; top: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9);
+            align-items: center; justify-content: center;
+            padding: 15px;
+        }
+        .modal-content {
+            background: #0a0a0a; border: 1px solid #222;
+            padding: 25px 15px; border-radius: 16px;
+            width: 100%; max-width: 350px; text-align: center;
+            position: relative;
+        }
+        .modal-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 20px; }
+        .stat-item { background: #111; padding: 10px; border-radius: 8px; }
+        .stat-val { font-size: 1.1rem; font-weight: 900; color: #fff; display: block;}
+        .stat-label { font-size: 0.55rem; color: #444; text-transform: uppercase; }
+
+        /* MEDIA QUERIES PARA MOBILE */
+        @media (max-width: 1024px) {
+            .dashboard { grid-template-columns: 1fr; } /* Empilha Tabela e Rodada */
+            .box { border-radius: 0; border-left: none; border-right: none; } /* Visual mais limpo no celular */
+            .hero h1 { font-size: 1.3rem; }
         }
 
-        .placar-val { font-weight: 900; font-size: 1.3rem; color: #fff; }
-        .vs { color: #333; font-weight: 900; font-size: 0.8rem; }
-
-        @media (max-width: 1000px) {
-            .dashboard { grid-template-columns: 1fr; }
-            .swiper { max-width: 100%; }
+        @media (max-width: 480px) {
+            .hero { padding: 20px 10px; }
+            td { font-size: 0.75rem; padding: 10px 3px; }
+            .team span { font-size: 0.55rem; }
         }
     </style>
 </head>
 <body>
-
-    <div class="hero">
-        <h1>PAULISTÃO 2026</h1>
+    <div id="teamModal" class="modal">
+        <div class="modal-content">
+            <span style="position: absolute; top: 10px; right: 15px; color: #444; font-size: 24px; cursor: pointer;" onclick="fecharModal()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
     </div>
+
+    <div class="hero"><h1>Paulistão 2026</h1></div>
 
     <div class="dashboard">
         <div class="box">
-            <h2 style="font-size:0.7rem; color:#666; margin-bottom:15px; text-transform:uppercase;">Classificação</h2>
+            <div class="section-title">Classificação</div>
             <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th style="text-align:left">Time</th>
-                            <th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th><th class="pts-col">PTS</th>
+                            <th>#</th><th style="text-align:left">Time</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th><th style="background: rgba(255,255,255,0.05);">PTS</th>
                         </tr>
                     </thead>
                     <tbody id="lista-classificacao"></tbody>
@@ -146,67 +156,88 @@
         </div>
 
         <div class="box">
-            <h2 style="font-size:0.7rem; color:#666; margin-bottom:15px; text-transform:uppercase;">Rodadas</h2>
+            <div class="section-title">Próximos Jogos</div>
             <div class="swiper mySwiper">
                 <div class="swiper-wrapper" id="container-carrossel"></div>
-                <div style="margin-top:15px" class="swiper-pagination"></div>
+                <div class="swiper-pagination"></div>
             </div>
         </div>
     </div>
 
     <script>
+        // Use o mesmo bloco de Script enviado na resposta anterior
         const SUPABASE_URL = 'https://sihunefyfkecumbiyxva.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A';
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let dadosTimes = [];
 
         const getSlug = (n) => {
             if(!n) return "escudo";
             let s = n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             if(s.includes("bragantino")) return "red-bull-bragantino";
+            if(s.includes("noroeste")) return "noroeste";
+            if(s.includes("botafogo")) return "botafogo-sp";
             return s.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
         };
 
         async function carregar() {
             const { data: classif } = await client.from('paulistao_classificacao').select('*').order('pontos', { ascending: false });
             const { data: jogos } = await client.from('paulistao_jogos').select('*').order('id', { ascending: true });
+            dadosTimes = classif || [];
 
             if(classif) {
                 document.getElementById('lista-classificacao').innerHTML = classif.map((t, i) => `
-                    <tr>
-                        <td style="color:#444">${i+1}</td>
-                        <td><div class="t-flex"><img src="https://logodetimes.com/times/${getSlug(t.time_nome)}/logo-${getSlug(t.time_nome)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span style="font-weight:700">${t.time_nome}</span></div></td>
-                        <td>${t.jogos || 0}</td><td>${t.vitorias || 0}</td><td>${t.empates || 0}</td><td>${t.derrotas || 0}</td>
-                        <td style="color:${t.saldo_gols < 0 ? '#ff4444' : '#666'}">${t.saldo_gols || 0}</td>
-                        <td class="pts-col">${t.pontos || 0}</td>
+                    <tr onclick="abrirModal('${t.time_nome}')">
+                        <td>${i+1}</td>
+                        <td><div class="t-flex"><img src="https://logodetimes.com/times/${getSlug(t.time_nome)}/logo-${getSlug(t.time_nome)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${t.time_nome}</span></div></td>
+                        <td>${t.jogos}</td><td>${t.vitorias}</td><td>${t.empates}</td><td>${t.derrotas}</td>
+                        <td style="color:${t.saldo_gols < 0 ? '#ff4444' : '#666'}">${t.saldo_gols}</td>
+                        <td style="font-weight:900; background: rgba(255,255,255,0.03);">${t.pontos}</td>
                     </tr>`).join('');
             }
 
             if(jogos) {
-                const agrupados = jogos.reduce((acc, j) => {
+                const grupos = jogos.reduce((acc, j) => {
                     if (!acc[j.data_jogo]) acc[j.data_jogo] = [];
                     acc[j.data_jogo].push(j);
                     return acc;
                 }, {});
 
                 let slides = '';
-                for (const data in agrupados) {
-                    let cards = agrupados[data].map(j => {
-                        const temP = j.status_ou_horario && j.status_ou_horario.includes('X');
-                        return `
+                for (const data in grupos) {
+                    let cards = grupos[data].map(j => `
                         <div class="card-jogo">
                             <div class="confronto">
-                                <div class="team"><img src="https://logodetimes.com/times/${getSlug(j.time_casa)}/logo-${getSlug(j.time_casa)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${j.time_casa}</span></div>
-                                <div class="placar-box"><div class="${temP ? 'placar-val' : 'vs'}">${j.status_ou_horario}</div></div>
-                                <div class="team"><img src="https://logodetimes.com/times/${getSlug(j.time_fora)}/logo-${getSlug(j.time_fora)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${j.time_fora}</span></div>
+                                <div class="team" onclick="abrirModal('${j.time_casa}')"><img src="https://logodetimes.com/times/${getSlug(j.time_casa)}/logo-${getSlug(j.time_casa)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${j.time_casa}</span></div>
+                                <div class="placar-box"><div class="placar-val">${j.status_ou_horario}</div></div>
+                                <div class="team" onclick="abrirModal('${j.time_fora}')"><img src="https://logodetimes.com/times/${getSlug(j.time_fora)}/logo-${getSlug(j.time_fora)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${j.time_fora}</span></div>
                             </div>
-                        </div>`;
-                    }).join('');
-                    slides += `<div class="swiper-slide"><div class="data-label">${data}</div>${cards}</div>`;
+                        </div>`).join('');
+                    slides += `<div class="swiper-slide"><div style="text-align:center; font-size:0.65rem; color:#555; margin-bottom:10px; font-weight:800;">${data}</div>${cards}</div>`;
                 }
                 document.getElementById('container-carrossel').innerHTML = slides;
                 new Swiper(".mySwiper", { spaceBetween: 20, pagination: { el: ".swiper-pagination", clickable: true } });
             }
         }
+
+        function abrirModal(nome) {
+            const t = dadosTimes.find(x => x.time_nome === nome);
+            if(!t) return;
+            document.getElementById('modal-body').innerHTML = `
+                <img src="https://logodetimes.com/times/${getSlug(t.time_nome)}/logo-${getSlug(t.time_nome)}-256.png" style="width:60px; margin-bottom:10px;">
+                <h3 style="margin:0;">${t.time_nome}</h3>
+                <div class="modal-stats">
+                    <div class="stat-item"><span class="stat-val">${t.pontos}</span><span class="stat-label">PTS</span></div>
+                    <div class="stat-item"><span class="stat-val">${t.jogos}</span><span class="stat-label">J</span></div>
+                    <div class="stat-item"><span class="stat-val">${t.vitorias}</span><span class="stat-label">V</span></div>
+                    <div class="stat-item"><span class="stat-val">${t.saldo_gols}</span><span class="stat-label">SG</span></div>
+                    <div class="stat-item" style="grid-column: span 2;"><span class="stat-val" style="font-size:0.9rem">${t.gols_pro} GP / ${t.gols_contra} GC</span><span class="stat-label">Gols</span></div>
+                </div>`;
+            document.getElementById('teamModal').style.display = "flex";
+        }
+        function fecharModal() { document.getElementById('teamModal').style.display = "none"; }
+        window.onclick = (e) => { if(e.target == document.getElementById('teamModal')) fecharModal(); };
         carregar();
     </script>
 </body>
