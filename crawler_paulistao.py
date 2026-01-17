@@ -8,79 +8,78 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-URL_CLASS = "https://www.espn.com.br/futebol/classificacao/_/liga/bra.camp.paulista"
+# URL do Sr. Goool - Classificação Geral (Contém todos os dados detalhados)
+URL_CLASS = "https://www.srgoool.com.br/classificacao/Paulistao/Serie-A1/2026#classificacao-geral"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 }
 
 def crawler_classificacao():
-    print("🚀 Iniciando raspagem da classificação Paulistão 2026...")
+    print("🚀 Iniciando raspagem detalhada via Sr. Goool...")
     try:
         response = requests.get(URL_CLASS, headers=HEADERS, timeout=20)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # Localiza todas as tabelas de grupos
-        tabelas_nomes = soup.select('.Table--fixed-left') 
-        tabelas_dados = soup.select('.Table__Scroller')
-
-        if not tabelas_nomes:
-            print("⚠️ Erro: Estrutura de tabela não encontrada.")
+        # No Sr. Goool, a tabela principal tem a classe 'table-classificacao'
+        tabela = soup.find("table", class_="table-classificacao")
+        if not tabela:
+            print("⚠️ Erro: Tabela de classificação não encontrada.")
             return
 
-        letras = ['A', 'B', 'C', 'D']
+        rows = tabela.find("tbody").find_all("tr")
         payload = []
 
-        # Itera sobre os grupos
-        for idx in range(min(len(tabelas_nomes), 4)):
-            rows_nomes = tabelas_nomes[idx].find_all("tr")[1:] # Pula cabeçalho
-            rows_dados = tabelas_dados[idx].find_all("tr")[1:]
-
-            for i in range(len(rows_nomes)):
+        for i, row in enumerate(rows):
+            cols = row.find_all("td")
+            
+            # O Sr. Goool tem colunas extras de propaganda, filtramos por tamanho
+            if len(cols) >= 11:
                 try:
-                    # 1. Captura o nome do time
-                    nome_container = rows_nomes[i].find("span", class_="hide-mobile")
-                    nome = nome_container.text.strip() if nome_container else rows_nomes[i].text.strip()
+                    # Mapeamento das Colunas Sr. Goool:
+                    # 0: Pos, 1: Escudo, 2: Nome, 3: PTS, 4: J, 5: V, 6: E, 7: D, 8: GP, 9: GC, 10: SG
+                    nome = cols[2].text.strip()
                     
-                    # 2. Captura o LOGO com correção para imagens dinâmicas
-                    img_tag = rows_nomes[i].find("img")
-                    logo = ""
-                    if img_tag:
-                        # Tenta pegar o src normal
-                        logo = img_tag.get("src", "")
-                        
-                        # CORREÇÃO CRÍTICA: Se for base64 ou placeholder, busca no data-src
-                        if "data:image" in logo or "transparent" in logo or not logo:
-                            logo = img_tag.get("data-src") or img_tag.get("data-lazy-src") or logo
+                    # Captura do Logo
+                    img_tag = cols[1].find("img")
+                    logo = img_tag.get("src", "") if img_tag else ""
 
-                    # 3. Captura os dados numéricos (J, PTS)
-                    cols = rows_dados[i].find_all("td")
-                    jogos = cols[0].text.strip()
-                    pontos = cols[7].text.strip()
+                    # Dados Numéricos
+                    pontos     = cols[3].text.strip()
+                    jogos      = cols[4].text.strip()
+                    vitorias   = cols[5].text.strip()
+                    empates    = cols[6].text.strip()
+                    derrotas   = cols[7].text.strip()
+                    gols_pro   = cols[8].text.strip()
+                    gols_contra = cols[9].text.strip()
+                    saldo_gols = cols[10].text.strip()
 
                     payload.append({
-                        "grupo": f"Grupo {letras[idx]}",
                         "time_nome": nome,
                         "time_logo": logo,
-                        "pontos": int(pontos) if pontos.isdigit() else 0,
-                        "jogos": int(jogos) if jogos.isdigit() else 0
+                        "pontos": int(pontos) if pontos.replace('-','').isdigit() else 0,
+                        "jogos": int(jogos) if jogos.isdigit() else 0,
+                        "vitorias": int(vitorias) if vitorias.isdigit() else 0,
+                        "empates": int(empates) if empates.isdigit() else 0,
+                        "derrotas": int(derrotas) if derrotas.isdigit() else 0,
+                        "gols_pro": int(gols_pro) if gols_pro.isdigit() else 0,
+                        "gols_contra": int(gols_contra) if gols_contra.isdigit() else 0,
+                        "saldo_gols": int(saldo_gols) if saldo_gols.replace('-','').isdigit() else 0
                     })
                 except Exception as e:
-                    print(f"⚠️ Erro na linha {i} do Grupo {letras[idx]}: {e}")
+                    print(f"⚠️ Erro ao processar linha {i}: {e}")
 
         if payload:
-            print(f"📤 Enviando {len(payload)} times para o Supabase...")
-            
-            # Limpa e insere usando o filtro gt(id, 0) para garantir a limpeza
+            print(f"📤 Atualizando {len(payload)} times no Supabase...")
             try:
-                # Se sua tabela não tiver 'id', use neq('time_nome', 'null')
+                # Limpa a tabela antes de inserir os novos dados detalhados
                 supabase.table("paulistao_classificacao").delete().neq("time_nome", "null").execute()
                 supabase.table("paulistao_classificacao").insert(payload).execute()
-                print("✅ Atualização de classificação concluída!")
+                print("✅ Classificação detalhada atualizada com sucesso!")
             except Exception as sb_err:
                 print(f"❌ Erro ao salvar no Supabase: {sb_err}")
         else:
-            print("❌ Nenhum dado foi processado.")
+            print("❌ Nenhum dado extraído.")
 
     except Exception as e:
         print(f"❌ Erro na requisição: {e}")
