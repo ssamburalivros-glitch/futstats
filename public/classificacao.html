@@ -56,52 +56,46 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A"; // Substitua pela sua chave 'anon public'
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function carregar(liga, elemento) {
-            // Gerenciar estado dos botões
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            elemento.classList.add('active');
+       async function carregar(liga, elemento) {
+        // ... (seu código de seleção de botões)
+        
+        const { data, error } = await supabaseClient
+            .from('tabelas_ligas')
+            .select('*')
+            .eq('liga', liga) // Filtra pela sigla (BR, PL, ES...)
+            .order('posicao', { ascending: true });
 
-            const corpo = document.getElementById('tabela-corpo');
-            const loader = document.getElementById('loading');
-            
-            corpo.innerHTML = "";
-            loader.style.display = "block";
+        const corpo = document.getElementById('tabela-corpo');
+        corpo.innerHTML = "";
 
-            const { data, error } = await supabaseClient
-                .from('tabelas_ligas')
-                .select('*')
-                .eq('liga', liga)
-                .order('posicao', { ascending: true });
+        if (data && data.length > 0) {
+            data.forEach(clube => {
+                // CORREÇÃO DOS LOGOS: Se o escudo for vazio ou base64 quebrado, usa placeholder
+                const imgEscudo = (clube.escudo && clube.escudo.length > 50) 
+                    ? clube.escudo 
+                    : `https://via.placeholder.com/30/222/fff?text=${clube.time.charAt(0)}`;
 
-            loader.style.display = "none";
-
-            if (data && data.length > 0) {
-                data.forEach(clube => {
-                    corpo.innerHTML += `
-                        <tr>
-                            <td class="p-4 text-left font-mono text-zinc-500">${clube.posicao}º</td>
-                            <td class="p-4 text-left flex items-center gap-3">
-                                <img src="${clube.escudo}" class="w-6 h-6 object-contain" onerror="this.src='https://via.placeholder.com/24'">
-                                <span class="font-bold text-zinc-200">${clube.time}</span>
-                            </td>
-                            <td class="p-4 font-black text-blue-500">${clube.pontos}</td>
-                            <td class="p-4 text-zinc-400">${clube.jogos}</td>
-                            <td class="p-4 text-green-500/80">${clube.vitorias}</td>
-                            <td class="p-4 font-medium ${clube.sg >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${clube.sg}</td>
-                            <td class="p-4 hidden md:table-cell text-zinc-600 text-xs">${clube.gols_pro} : ${clube.gols_contra}</td>
-                        </tr>
-                    `;
-                });
-            } else {
-                corpo.innerHTML = `<tr><td colspan="7" class="p-10 text-zinc-600">Nenhum dado encontrado para a liga ${liga}. Rode o crawler.</td></tr>`;
-            }
+                corpo.innerHTML += `
+                    <tr>
+                        <td class="p-4 text-left font-mono text-zinc-500">${clube.posicao}º</td>
+                        <td class="p-4 text-left flex items-center gap-3">
+                            <img src="${imgEscudo}" 
+                                 class="w-7 h-7 object-contain" 
+                                 style="min-width: 28px"
+                                 onerror="this.src='https://via.placeholder.com/28?text=?'">
+                            <span class="font-bold text-zinc-200">${clube.time}</span>
+                        </td>
+                        <td class="p-4 font-black text-blue-500">${clube.pontos}</td>
+                        <td class="p-4 text-zinc-400">${clube.jogos}</td>
+                        <td class="p-4 text-green-500/80">${clube.vitorias}</td>
+                        <td class="p-4 font-medium ${clube.sg >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${clube.sg}</td>
+                    </tr>
+                `;
+            });
+        } else {
+            corpo.innerHTML = `<tr><td colspan="6" class="p-10 text-zinc-600">Sem dados para ${liga}. Verifique o Crawler.</td></tr>`;
         }
-
-        // Inicialização automática
-        window.onload = () => {
-            const btnBrasil = document.querySelector('.tab-btn');
-            carregar('BR', btnBrasil);
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
