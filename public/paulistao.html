@@ -5,248 +5,188 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paulistão 2026 | FutStats</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link rel="stylesheet" href="style.css">
-
+    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <style>
         :root {
             --bg-dark: #050505;
             --panel-bg: #0a0a0a;
             --card-bg: #0f0f0f;
-            --border-color: #1a1a1a;
-            --text-main: #f0f0f0;
+            --border: #1a1a1a;
+            --text: #f0f0f0;
         }
 
         body {
             background-color: var(--bg-dark);
-            color: var(--text-main);
+            color: var(--text);
             font-family: 'Montserrat', sans-serif;
             margin: 0;
+            padding-bottom: 50px;
         }
 
-        .paulistao-hero {
-            padding: 120px 20px 40px;
-            text-align: center;
-            background: linear-gradient(to bottom, #000, #0a0a0a);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .dashboard-container {
-            max-width: 1300px;
-            margin: 40px auto;
-            padding: 0 20px;
+        /* Layout */
+        .dashboard {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
             display: grid;
-            grid-template-columns: 1fr 1.6fr;
-            gap: 30px;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 20px;
         }
 
-        .panel-header {
-            background: #111;
-            padding: 15px 20px;
-            border-left: 3px solid #333;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            color: #888;
-            text-transform: uppercase;
-        }
+        .hero { padding: 60px 20px; text-align: center; }
+        
+        /* Tabela */
+        .box { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 12px; padding: 15px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th { color: #444; padding: 10px; text-transform: uppercase; font-size: 0.6rem; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 8px; border-bottom: 1px solid #111; text-align: center; }
+        .t-flex { display: flex; align-items: center; gap: 8px; text-align: left; font-weight: bold; }
+        .t-flex img { width: 22px; height: 22px; object-fit: contain; }
 
-        /* TABELA */
-        .tabela-container {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .tabela-paulista { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        .tabela-paulista th { background: #111; padding: 15px; color: #444; font-size: 0.6rem; text-transform: uppercase; }
-        .tabela-paulista td { padding: 12px; border-bottom: 1px solid #151515; text-align: center; color: #ccc; }
-        .time-info { display: flex; align-items: center; gap: 10px; text-align: left; }
-        .time-info img { width: 24px; height: 24px; object-fit: contain; }
-
-        /* CARROSSEL */
-        .swiper { width: 100%; padding-bottom: 50px !important; }
-        .data-slide-header {
-            text-align: center;
-            color: #666;
-            font-weight: 800;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-
+        /* Carrossel e Cards */
+        .swiper { width: 100%; min-height: 300px; }
+        .data-label { text-align: center; color: #666; font-weight: 800; font-size: 0.7rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
+        
         .card-jogo {
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
         }
 
         .confronto {
             display: grid;
-            grid-template-columns: 1fr 130px 1fr; /* Espaço fixo para o placar */
+            grid-template-columns: 1fr 120px 1fr;
             align-items: center;
-            width: 100%;
+            text-align: center;
         }
 
-        .team-box { display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .team-box img { width: 45px; height: 45px; margin-bottom: 8px; object-fit: contain; }
-        .team-name { font-size: 0.7rem; font-weight: 700; color: #fff; text-transform: uppercase; }
+        .team img { width: 40px; height: 40px; margin-bottom: 5px; }
+        .team span { font-size: 0.65rem; font-weight: 700; display: block; }
 
-        /* PLACAR ENQUADRADO E SEM QUEBRA */
+        /* Placar Gigante */
         .placar-box {
             background: #161616;
             border: 1px solid #222;
             border-radius: 8px;
-            padding: 10px 5px;
+            height: 50px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            min-height: 50px;
+            justify-content: center;
         }
 
-        .placar-numeros {
-            color: #fff;
+        .placar-val {
             font-weight: 900;
-            font-size: 1.7rem;
-            letter-spacing: 3px;
-            line-height: 1;
-            white-space: nowrap; /* Não deixa quebrar */
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+            white-space: nowrap;
         }
 
-        .vs-texto { color: #333; font-weight: 900; font-size: 1.1rem; }
+        .vs { color: #333; font-weight: 900; }
 
-        .swiper-button-next, .swiper-button-prev { color: #555 !important; transform: scale(0.5); }
-        .swiper-pagination-bullet-active { background: #fff !important; }
-
-        @media (max-width: 900px) {
-            .dashboard-container { grid-template-columns: 1fr; }
-            .confronto { grid-template-columns: 1fr 100px 1fr; }
-            .placar-numeros { font-size: 1.4rem; }
+        @media (max-width: 800px) {
+            .dashboard { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-content">
-            <a href="index.html" class="brand-container"><span class="logo">FUTSTATS</span></a>
-            <div class="nav-container">
-                <nav class="nav-links">
-                    <a href="classificacao.html">CLASSIFICAÇÃO</a> 
-                    <a href="arena.html">ARENA H2H</a> 
-                    <a href="aovivo.html">JOGOS AO VIVO</a> 
-                    <a href="paulistao.html" class="active">PAULISTÃO 2026</a>
-                </nav>
+    <div class="hero">
+        <h1 style="margin:0; font-weight:900;">PAULISTÃO 2026</h1>
+    </div>
+
+    <div class="dashboard">
+        <div class="box">
+            <h2 style="font-size:0.7rem; color:#666; text-transform:uppercase; margin-bottom:15px;">Classificação</h2>
+            <table>
+                <thead><tr><th>#</th><th style="text-align:left">Time</th><th>P</th></tr></thead>
+                <tbody id="lista-classificacao"></tbody>
+            </table>
+        </div>
+
+        <div class="box" style="min-height: 400px;">
+            <h2 style="font-size:0.7rem; color:#666; text-transform:uppercase; margin-bottom:15px;">Calendário</h2>
+            <div class="swiper mySwiper">
+                <div class="swiper-wrapper" id="container-carrossel">
+                    </div>
+                <div class="swiper-pagination"></div>
             </div>
         </div>
-    </header>
+    </div>
 
-    <main>
-        <section class="paulistao-hero">
-            <h1 style="font-size: 2.2rem; font-weight: 800; margin:0;">PAULISTÃO 2026</h1>
-            <p style="color:#444; font-size:0.7rem; letter-spacing:2px; margin-top:10px;">CALENDÁRIO E RESULTADOS ATUALIZADOS</p>
-        </section>
-
-        <div class="dashboard-container">
-            <div id="col-classificacao">
-                <div class="panel-header">Classificação</div>
-                <div class="tabela-container">
-                    <table class="tabela-paulista">
-                        <thead><tr><th>#</th><th style="text-align: left;">TIME</th><th>J</th><th>PTS</th></tr></thead>
-                        <tbody id="lista-classificacao"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="col-jogos">
-                <div class="panel-header">Calendário de Jogos</div>
-                <div class="swiper mySwiper">
-                    <div class="swiper-wrapper" id="container-carrossel"></div>
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
-                    <div class="swiper-pagination"></div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         const SUPABASE_URL = 'https://sihunefyfkecumbiyxva.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A';
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const LOGO_RESERVA = "https://cdn-icons-png.flaticon.com/512/53/53283.png";
 
-        const slug = (n) => n ? n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : "";
+        const getSlug = (n) => n ? n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : "escudo";
 
-        async function init() {
-            const { data: classif } = await client.from('paulistao_classificacao').select('*').order('pontos', { ascending: false });
-            const { data: jogos } = await client.from('paulistao_jogos').select('*').order('id', { ascending: true });
+        async function carregarTudo() {
+            try {
+                const { data: classif } = await client.from('paulistao_classificacao').select('*').order('pontos', { ascending: false });
+                const { data: jogos } = await client.from('paulistao_jogos').select('*').order('id', { ascending: true });
 
-            if(classif) {
-                document.getElementById('lista-classificacao').innerHTML = classif.map((t, i) => `
-                    <tr>
-                        <td style="color:#444; font-weight:bold">${i+1}</td>
-                        <td><div class="time-info"><img src="https://logodetimes.com/times/${slug(t.time_nome)}/logo-${slug(t.time_nome)}-256.png" onerror="this.src='${LOGO_RESERVA}'"><span>${t.time_nome}</span></div></td>
-                        <td>${t.jogos}</td>
-                        <td style="font-weight:900; color:#fff">${t.pontos}</td>
-                    </tr>`).join('');
-            }
-
-            if(jogos) {
-                const agrupados = jogos.reduce((acc, j) => {
-                    if (!acc[j.data_jogo]) acc[j.data_jogo] = [];
-                    acc[j.data_jogo].push(j);
-                    return acc;
-                }, {});
-
-                let slides = '';
-                for (const data in agrupados) {
-                    let cards = agrupados[data].map(j => {
-                        const temPlacar = j.status_ou_horario && j.status_ou_horario.includes('X');
-                        // Removendo espaços extras do placar para evitar quebra
-                        const placarLimpo = temPlacar ? j.status_ou_horario.replace(/\s+/g, ' ') : "VS";
-                        
-                        return `
-                        <div class="card-jogo">
-                            <div class="confronto">
-                                <div class="team-box">
-                                    <img src="https://logodetimes.com/times/${slug(j.time_casa)}/logo-${slug(j.time_casa)}-256.png" onerror="this.src='${LOGO_RESERVA}'">
-                                    <div class="team-name">${j.time_casa}</div>
-                                </div>
-                                <div class="placar-box">
-                                    <span class="${temPlacar ? 'placar-numeros' : 'vs-texto'}">${placarLimpo}</span>
-                                </div>
-                                <div class="team-box">
-                                    <img src="https://logodetimes.com/times/${slug(j.time_fora)}/logo-${slug(j.time_fora)}-256.png" onerror="this.src='${LOGO_RESERVA}'">
-                                    <div class="team-name">${j.time_fora}</div>
-                                </div>
-                            </div>
-                        </div>`;
-                    }).join('');
-
-                    slides += `<div class="swiper-slide"><div class="data-slide-header">${data}</div>${cards}</div>`;
+                // Render Tabela
+                if(classif) {
+                    document.getElementById('lista-classificacao').innerHTML = classif.map((t, i) => `
+                        <tr>
+                            <td>${i+1}</td>
+                            <td><div class="t-flex"><img src="https://logodetimes.com/times/${getSlug(t.time_nome)}/logo-${getSlug(t.time_nome)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'"><span>${t.time_nome}</span></div></td>
+                            <td style="color:#fff; font-weight:900;">${t.pontos}</td>
+                        </tr>`).join('');
                 }
-                document.getElementById('container-carrossel').innerHTML = slides;
 
-                new Swiper(".mySwiper", {
-                    slidesPerView: 1,
-                    spaceBetween: 30,
-                    navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
-                    pagination: { el: ".swiper-pagination", clickable: true },
-                });
+                // Render Carrossel
+                if(jogos) {
+                    const grupos = jogos.reduce((acc, j) => {
+                        if (!acc[j.data_jogo]) acc[j.data_jogo] = [];
+                        acc[j.data_jogo].push(j);
+                        return acc;
+                    }, {});
+
+                    let slides = '';
+                    for (const data in grupos) {
+                        let cards = grupos[data].map(j => {
+                            const temP = j.status_ou_horario && j.status_ou_horario.includes('X');
+                            return `
+                            <div class="card-jogo">
+                                <div class="confronto">
+                                    <div class="team">
+                                        <img src="https://logodetimes.com/times/${getSlug(j.time_casa)}/logo-${getSlug(j.time_casa)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'">
+                                        <span>${j.time_casa}</span>
+                                    </div>
+                                    <div class="placar-box">
+                                        <div class="${temP ? 'placar-val' : 'vs'}">${j.status_ou_horario}</div>
+                                    </div>
+                                    <div class="team">
+                                        <img src="https://logodetimes.com/times/${getSlug(j.time_fora)}/logo-${getSlug(j.time_fora)}-256.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png'">
+                                        <span>${j.time_fora}</span>
+                                    </div>
+                                </div>
+                            </div>`;
+                        }).join('');
+                        slides += `<div class="swiper-slide"><div class="data-label">${data}</div>${cards}</div>`;
+                    }
+                    document.getElementById('container-carrossel').innerHTML = slides;
+
+                    // Inicia o Swiper APENAS após os dados estarem no HTML
+                    new Swiper(".mySwiper", {
+                        spaceBetween: 20,
+                        pagination: { el: ".swiper-pagination", clickable: true },
+                    });
+                }
+            } catch (err) {
+                console.error("Erro ao carregar:", err);
             }
         }
-        init();
+
+        carregarTudo();
     </script>
 </body>
 </html>
