@@ -4,8 +4,8 @@ import requests
 from supabase import create_client
 
 # --- CONFIGURAÇÃO ---
-SUPABASE_URL = os.environ.get("SUPABASE_URL") or "https://sihunefyfkecumbiyxva.supabase.co"
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY") or "SUA_KEY_AQUI"
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 LIGAS = {
@@ -15,69 +15,57 @@ LIGAS = {
 }
 
 def capturar_liga(liga_id, espn_id):
-    print(f"📡 Verificando Liga: {liga_id}...")
+    print(f"📡 Sincronizando: {liga_id}...")
     url = f"https://site.api.espn.com/apis/v2/sports/soccer/{espn_id}/standings"
     
     try:
         res = requests.get(url, timeout=20).json()
-        entries = []
-        
-        # Tenta localizar a lista de times nos dois formatos da API
-        if 'children' in res:
-            entries = res['children'][0].get('standings', {}).get('entries', [])
-        else:
-            entries = res.get('standings', {}).get('entries', [])
+        entries = res['children'][0].get('standings', {}).get('entries', []) if 'children' in res else res.get('standings', {}).get('entries', [])
 
         if not entries:
-            print(f"⚠️ {liga_id}: Sem dados na API no momento.")
+            print(f"⚠️ Sem dados para {liga_id}")
             return
 
         for entry in entries:
             team = entry.get('team', {})
             stats_list = entry.get('stats', [])
             
-            # Cria um dicionário com nomes em MINÚSCULO para busca fácil
-            s = {item.get('name').lower(): item.get('value') for item in stats_list}
+            # Mapeia todas as estatísticas para nomes amigáveis
+            s = {item.get('name'): item.get('value') for item in stats_list}
             
-            # --- SCANNER DE GOLS PRO (GP) ---
-            gp = (s.get('pointsfor') or 
-                  s.get('goalsfor') or 
-                  s.get('scorefor') or 
-                  s.get('for') or 0)
-            
-            # --- SCANNER DE GOLS CONTRA (GC) ---
-            gc = (s.get('pointsagainst') or 
-                  s.get('goalsagainst') or 
-                  s.get('scoreagainst') or 
-                  s.get('against') or 0)
-            
-            # --- SCANNER DE SALDO (SG) ---
-            sg = (s.get('pointdifferential') or 
-                  s.get('goaldifference') or 
-                  s.get('difference') or (int(gp) - int(gc)))
+            # A ESPN usa nomes diferentes. Vamos tentar os mais comuns:
+            vitorias = s.get('wins') or s.get('victories') or 0
+            empates = s.get('ties') or s.get('draws') or 0
+            derrotas = s.get('losses') or 0
+            gp = s.get('pointsFor') or s.get('goalsFor') or 0
+            gc = s.get('pointsAgainst') or s.get('goalsAgainst') or 0
+            sg = s.get('pointDifferential') or s.get('goalDifference') or 0
+            pts = s.get('points') or 0
+            jogos = s.get('gamesPlayed') or 0
+            pos = s.get('rank') or 0
 
             dados = {
                 "liga": liga_id,
                 "time": team.get('displayName'),
-                "posicao": int(s.get('rank') or 0),
+                "posicao": int(pos),
                 "escudo": team.get('logos', [{}])[0].get('href') if team.get('logos') else "",
-                "jogos": int(s.get('gamesplayed') or 0),
-                "vitorias": int(s.get('wins') or 0),
-                "empates": int(s.get('ties') or 0),
-                "derrotas": int(s.get('losses') or 0),
+                "jogos": int(jogos),
+                "vitorias": int(vitorias),
+                "empates": int(empates),
+                "derrotas": int(derrotas),
                 "gols_pro": int(gp),
                 "gols_contra": int(gc),
                 "sg": int(sg),
-                "pontos": int(s.get('points') or 0)
+                "pontos": int(pts)
             }
 
-            # Envio para o Supabase
+            # Upsert no Supabase
             supabase.table("tabelas_ligas").upsert(dados, on_conflict="liga, time").execute()
 
-        print(f"✅ {liga_id} sincronizada. Exemplo GP: {gp}")
+        print(f"✅ {liga_id} atualizada.")
 
     except Exception as e:
-        print(f"❌ Erro em {liga_id}: {e}")
+        print(f"❌ Erro na liga {liga_id}: {e}")
 
 if __name__ == "__main__":
     for liga, code in LIGAS.items():
