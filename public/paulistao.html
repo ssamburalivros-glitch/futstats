@@ -71,15 +71,18 @@
     bottom: 5px !important; /* Empurra as bolinhas para o limite inferior do box */
 }
 
-/* Estilo das bolinhas para ficarem mais visíveis */
-.swiper-pagination-bullet { 
+/* Diminui o espaçamento entre as bolinhas */
+.swiper-pagination-bullet {
+    margin: 0 4px !important; /* Espaçamento horizontal reduzido (o padrão costuma ser 8px) */
     background: #444; 
     opacity: 1;
+    transition: all 0.3s ease;
 }
 
-.swiper-pagination-bullet-active { 
-    background: #fff; 
-    width: 20px; /* Deixa a bolinha ativa mais comprida (estilo moderno) */
+/* Mantém o estilo da bolinha ativa */
+.swiper-pagination-bullet-active {
+    background: #fff;
+    width: 16px; /* Ajustei para 16px para não ocupar muito espaço agora que estão mais juntas */
     border-radius: 4px;
 }
         
