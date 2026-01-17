@@ -9,10 +9,11 @@
     <style>
         body { background-color: #050505; color: #eee; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass-card { background: #111; border: 1px solid #222; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .tab-btn { border-bottom: 3px solid transparent; transition: 0.3s; color: #888; }
+        .tab-btn { border-bottom: 3px solid transparent; transition: 0.3s; color: #888; cursor: pointer; }
         .tab-btn.active { border-bottom: 3px solid #2563eb; color: #fff; font-weight: bold; }
         tr { border-bottom: 1px solid #1a1a1a; transition: 0.2s; }
         tr:hover { background: #161616; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="p-4 md:p-10">
@@ -21,7 +22,7 @@
         <h1 class="text-3xl font-bold text-center mb-10 text-white tracking-tight">Estatísticas de Futebol</h1>
 
         <nav class="flex overflow-x-auto gap-6 mb-8 border-b border-zinc-800 justify-start md:justify-center scrollbar-hide">
-            <button onclick="carregar('BR', this)" class="tab-btn pb-3 px-2 active">Brasil</button>
+            <button onclick="carregar('BR', this)" class="tab-btn pb-3 px-2 active" id="default-tab">Brasil</button>
             <button onclick="carregar('PL', this)" class="tab-btn pb-3 px-2">Inglaterra</button>
             <button onclick="carregar('ES', this)" class="tab-btn pb-3 px-2">Espanha</button>
             <button onclick="carregar('IT', this)" class="tab-btn pb-3 px-2">Itália</button>
@@ -40,62 +41,84 @@
                             <th class="p-4">PJ</th>
                             <th class="p-4">VIT</th>
                             <th class="p-4">SG</th>
-                            <th class="p-4 hidden md:table-cell">GP/GC</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-corpo" class="text-sm md:text-base">
                         </tbody>
                 </table>
             </div>
-            <div id="loading" class="p-20 text-center text-zinc-600 font-medium">Carregando dados do Supabase...</div>
+            <div id="loading" class="p-20 text-center text-zinc-600 font-medium">Conectando ao Supabase...</div>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A"; // Substitua pela sua chave 'anon public'
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-       async function carregar(liga, elemento) {
-        // ... (seu código de seleção de botões)
-        
-        const { data, error } = await supabaseClient
-            .from('tabelas_ligas')
-            .select('*')
-            .eq('liga', liga) // Filtra pela sigla (BR, PL, ES...)
-            .order('posicao', { ascending: true });
+        async function carregar(liga, elemento) {
+            const corpo = document.getElementById('tabela-corpo');
+            const loader = document.getElementById('loading');
+            
+            // 1. Gerenciar visual das abas
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            elemento.classList.add('active');
 
-        const corpo = document.getElementById('tabela-corpo');
-        corpo.innerHTML = "";
+            // 2. Mostrar carregando
+            corpo.innerHTML = "";
+            loader.style.display = "block";
+            loader.innerText = `Carregando liga: ${liga}...`;
 
-        if (data && data.length > 0) {
-            data.forEach(clube => {
-                // CORREÇÃO DOS LOGOS: Se o escudo for vazio ou base64 quebrado, usa placeholder
-                const imgEscudo = (clube.escudo && clube.escudo.length > 50) 
-                    ? clube.escudo 
-                    : `https://via.placeholder.com/30/222/fff?text=${clube.time.charAt(0)}`;
+            try {
+                // 3. Buscar dados
+                const { data, error } = await supabaseClient
+                    .from('tabelas_ligas')
+                    .select('*')
+                    .eq('liga', liga)
+                    .order('posicao', { ascending: true });
 
-                corpo.innerHTML += `
-                    <tr>
-                        <td class="p-4 text-left font-mono text-zinc-500">${clube.posicao}º</td>
-                        <td class="p-4 text-left flex items-center gap-3">
-                            <img src="${imgEscudo}" 
-                                 class="w-7 h-7 object-contain" 
-                                 style="min-width: 28px"
-                                 onerror="this.src='https://via.placeholder.com/28?text=?'">
-                            <span class="font-bold text-zinc-200">${clube.time}</span>
-                        </td>
-                        <td class="p-4 font-black text-blue-500">${clube.pontos}</td>
-                        <td class="p-4 text-zinc-400">${clube.jogos}</td>
-                        <td class="p-4 text-green-500/80">${clube.vitorias}</td>
-                        <td class="p-4 font-medium ${clube.sg >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${clube.sg}</td>
-                    </tr>
-                `;
-            });
-        } else {
-            corpo.innerHTML = `<tr><td colspan="6" class="p-10 text-zinc-600">Sem dados para ${liga}. Verifique o Crawler.</td></tr>`;
+                if (error) throw error;
+
+                loader.style.display = "none";
+
+                if (data && data.length > 0) {
+                    data.forEach(clube => {
+                        // Se o escudo for base64 de 1px (comum no BR quando zerado) ou vazio, usa placeholder
+                        const bugEscudoBr = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+                        const imgEscudo = (clube.escudo && clube.escudo !== bugEscudoBr) 
+                            ? clube.escudo 
+                            : `https://via.placeholder.com/30/222/fff?text=${clube.time.charAt(0)}`;
+
+                        corpo.innerHTML += `
+                            <tr>
+                                <td class="p-4 text-left font-mono text-zinc-500">${clube.posicao}º</td>
+                                <td class="p-4 text-left flex items-center gap-3">
+                                    <img src="${imgEscudo}" class="w-7 h-7 object-contain" onerror="this.src='https://via.placeholder.com/28?text=?'">
+                                    <span class="font-bold text-zinc-200">${clube.time}</span>
+                                </td>
+                                <td class="p-4 font-black text-blue-500">${clube.pontos}</td>
+                                <td class="p-4 text-zinc-400">${clube.jogos}</td>
+                                <td class="p-4 text-green-500/80">${clube.vitorias}</td>
+                                <td class="p-4 font-medium ${clube.sg >= 0 ? 'text-emerald-500' : 'text-rose-500'}">${clube.sg}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    loader.style.display = "block";
+                    loader.innerText = `Nenhum dado encontrado para ${liga}. Rode o Crawler primeiro.`;
+                }
+            } catch (err) {
+                console.error("Erro Supabase:", err);
+                loader.style.display = "block";
+                loader.innerText = "Erro ao conectar com o banco de dados.";
+            }
         }
-    }
-</script>
+
+        // 4. Iniciar automaticamente ao abrir a página
+        window.onload = () => {
+            const defaultTab = document.getElementById('default-tab');
+            carregar('BR', defaultTab);
+        };
+    </script>
 </body>
 </html>
