@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Ao Vivo</title>
+    <title>FutStats | Live Scores</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -29,29 +29,28 @@
         .page-content { max-width: 800px; margin: 30px auto; padding: 0 15px; }
         .cyber-title { font-weight: 900; text-transform: uppercase; letter-spacing: 2px; font-size: 1.3rem; border-left: 4px solid var(--accent); padding-left: 15px; margin-bottom: 25px; }
 
-        .league-section { margin-bottom: 25px; }
+        .league-section { margin-bottom: 25px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
         .league-header { 
-            background: #111; padding: 10px 15px; border-radius: 8px 8px 0 0; 
-            font-size: 0.65rem; font-weight: 800; text-transform: uppercase; 
-            color: var(--accent); border-bottom: 1px solid var(--border);
+            background: #111; padding: 12px 15px; font-size: 0.65rem; font-weight: 800; 
+            text-transform: uppercase; color: var(--accent); border-bottom: 1px solid var(--border);
             display: flex; justify-content: space-between;
         }
 
         .match-card {
-            background: var(--panel); border: 1px solid var(--border); border-top: none;
-            padding: 20px 10px; display: grid; grid-template-columns: 1fr 80px 1fr;
-            align-items: center; transition: 0.2s; cursor: pointer;
+            background: var(--panel); padding: 20px 10px; display: grid; 
+            grid-template-columns: 1fr 90px 1fr; align-items: center; 
+            border-bottom: 1px solid #111; transition: 0.2s;
         }
-        .match-card:last-child { border-radius: 0 0 8px 8px; }
+        .match-card:last-child { border-bottom: none; }
         .match-card:hover { background: #0e0e0e; }
 
         .team { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
-        .team img { width: 35px; height: 35px; object-fit: contain; }
-        .team span { font-size: 0.75rem; font-weight: 700; color: #fff; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .team img { width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
+        .team span { font-size: 0.75rem; font-weight: 700; color: #fff; max-width: 110px; }
 
         .score-box { text-align: center; }
-        .score { font-size: 1.5rem; font-weight: 900; color: #fff; letter-spacing: 3px; }
-        .time-badge { font-size: 0.6rem; color: var(--live); font-weight: 800; display: block; margin-top: 5px; text-transform: uppercase; }
+        .score { font-size: 1.6rem; font-weight: 900; color: #fff; letter-spacing: 2px; line-height: 1; }
+        .time-badge { font-size: 0.65rem; color: var(--live); font-weight: 800; display: block; margin-top: 8px; text-transform: uppercase; }
 
         #loading { text-align: center; padding: 50px; color: #555; font-size: 0.8rem; text-transform: uppercase; }
     </style>
@@ -70,8 +69,8 @@
     </header>
 
     <main class="page-content">
-        <h2 class="cyber-title">Jogos de Hoje</h2>
-        <div id="loading">Sincronizando com Supabase...</div>
+        <h2 class="cyber-title">Live Feeds</h2>
+        <div id="loading">Buscando placares em tempo real...</div>
         <div id="lista-jogos"></div>
     </main>
 
@@ -80,21 +79,28 @@
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // Função que traduz a data
         function getDataPT() {
-            const dias = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+            const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
             const d = new Date();
             return `${dias[d.getDay()]}, ${d.getDate()}/${d.getMonth()+1}`;
         }
 
-        // Função que gera o logo do time baseado no nome se o link falhar
-        function resolverLogo(url, nome) {
-            if (url && url.length > 10 && url !== 'undefined') return url;
-            // Usa o serviço Clearbit/Logo para tentar achar o logo pelo nome do time
-            return `https://logo.clearbit.com/${nome.toLowerCase().replace(/\s/g, '')}.com?size=100&fallback=https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=222&color=fff`;
+        // FUNÇÃO QUE PEGA O LOGO DE QUALQUER JEITO
+        function getLogo(linkBanco, nomeTime) {
+            // Se o link do banco for válido, usa ele
+            if (linkBanco && linkBanco.length > 15 && !linkBanco.includes("undefined")) {
+                return linkBanco;
+            }
+            
+            // Se não, busca por nome (API de Logos de Futebol)
+            // Substituímos espaços por hífens para o buscador
+            const slug = nomeTime.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+            
+            // Tenta primeiro o repositório Clearbit, depois ui-avatars como última opção
+            return `https://logo.clearbit.com/${slug}.com?size=128&fallback=https://ui-avatars.com/api/?name=${encodeURIComponent(nomeTime)}&background=111&color=fff&bold=true`;
         }
 
-        async function fetchLive() {
+        async function carregarPlacares() {
             const container = document.getElementById('lista-jogos');
             const loader = document.getElementById('loading');
 
@@ -107,20 +113,20 @@
                 container.innerHTML = "";
 
                 if (!jogos || jogos.length === 0) {
-                    container.innerHTML = "<p style='text-align:center; color:#444; margin-top:20px;'>Sem jogos ativos.</p>";
+                    container.innerHTML = "<p style='text-align:center; color:#555; padding-top:30px;'>Nenhum jogo ao vivo no momento.</p>";
                     return;
                 }
 
-                // Agrupar por liga
-                const grupos = {};
+                // Agrupando por Ligas
+                const ligas = {};
                 jogos.forEach(j => {
-                    const liga = j.liga || "Outros";
-                    if (!grupos[liga]) grupos[liga] = [];
-                    grupos[liga].push(j);
+                    const nomeLiga = j.liga || "Outras Competições";
+                    if (!ligas[nomeLiga]) ligas[nomeLiga] = [];
+                    ligas[nomeLiga].push(j);
                 });
 
-                for (const liga in grupos) {
-                    let leagueHtml = `
+                for (const liga in ligas) {
+                    let secaoHtml = `
                         <div class="league-section">
                             <div class="league-header">
                                 <span>${liga}</span>
@@ -128,48 +134,48 @@
                             </div>
                     `;
 
-                    grupos[liga].forEach(j => {
-                        // Mapeamento flexível para evitar UNDEFINED
-                        const timeCasa = j.time_casa || j.timeCasa || "Time A";
-                        const timeFora = j.time_fora || j.timeFora || "Time B";
-                        const golsCasa = j.gols_casa ?? j.golsCasa ?? 0;
-                        const golsFora = j.gols_fora ?? j.golsFora ?? 0;
-                        const tempo = j.tempo || j.status || "AO VIVO";
-                        
-                        const imgCasa = resolverLogo(j.escudo_casa || j.escudoCasa, timeCasa);
-                        const imgFora = resolverLogo(j.escudo_fora || j.escudoFora, timeFora);
+                    ligas[liga].forEach(j => {
+                        // Verificação de campos para evitar o "undefined"
+                        const casa = j.time_casa || "Time A";
+                        const fora = j.time_fora || "Time B";
+                        const golsC = j.gols_casa ?? 0;
+                        const golsF = j.gols_fora ?? 0;
+                        const status = j.tempo || "AO VIVO";
 
-                        leagueHtml += `
+                        const escudoC = getLogo(j.escudo_casa, casa);
+                        const escudoF = getLogo(j.escudo_fora, fora);
+
+                        secaoHtml += `
                             <div class="match-card">
                                 <div class="team">
-                                    <img src="${imgCasa}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(timeCasa)}&background=333&color=fff'">
-                                    <span>${timeCasa}</span>
+                                    <img src="${escudoC}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(casa)}&background=333&color=fff'">
+                                    <span>${casa}</span>
                                 </div>
                                 <div class="score-box">
-                                    <div class="score">${golsCasa} - ${golsFora}</div>
-                                    <span class="time-badge">${tempo}</span>
+                                    <div class="score">${golsC} - ${golsF}</div>
+                                    <span class="time-badge">${status}</span>
                                 </div>
                                 <div class="team">
-                                    <img src="${imgFora}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(timeFora)}&background=333&color=fff'">
-                                    <span>${timeFora}</span>
+                                    <img src="${escudoF}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(fora)}&background=333&color=fff'">
+                                    <span>${fora}</span>
                                 </div>
                             </div>
                         `;
                     });
 
-                    leagueHtml += `</div>`;
-                    container.innerHTML += leagueHtml;
+                    secaoHtml += `</div>`;
+                    container.innerHTML += secaoHtml;
                 }
 
             } catch (err) {
-                console.error("Erro Supabase:", err);
-                loader.innerText = "Erro ao conectar.";
+                console.error(err);
+                loader.innerText = "Erro ao carregar dados.";
             }
         }
 
-        // Inicia e atualiza a cada 30 segundos
-        fetchLive();
-        setInterval(fetchLive, 30000);
+        // Inicia e atualiza a cada 30 seg
+        carregarPlacares();
+        setInterval(carregarPlacares, 30000);
     </script>
 </body>
 </html>
