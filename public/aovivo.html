@@ -37,36 +37,41 @@
         /* LIGAS */
         .league-section { margin-bottom: 30px; }
         .league-header { 
-            background: #111; padding: 10px 15px; border-radius: 8px; 
+            background: #111; padding: 12px 15px; border-radius: 8px; 
             font-size: 0.7rem; font-weight: 800; text-transform: uppercase; 
             color: var(--accent); border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
         }
 
         /* CARDS */
         .match-card {
             background: var(--panel); border: 1px solid var(--border);
-            border-radius: 12px; padding: 15px; display: grid;
-            grid-template-columns: 1fr 80px 1fr; align-items: center;
+            border-radius: 12px; padding: 18px 15px; display: grid;
+            grid-template-columns: 1fr 85px 1fr; align-items: center;
             margin-bottom: 8px; transition: 0.2s; cursor: pointer;
         }
-        .match-card:hover { background: #0f0f0f; border-color: #333; }
+        .match-card:hover { background: #0f0f0f; border-color: #333; transform: scale(1.01); }
 
-        .team { display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
-        .team img { width: 32px; height: 32px; object-fit: contain; }
-        .team span { font-size: 0.75rem; font-weight: 700; }
+        .team { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+        .team img { width: 38px; height: 38px; object-fit: contain; border-radius: 4px; }
+        .team span { font-size: 0.75rem; font-weight: 700; color: #fff; }
 
         .score-box { text-align: center; }
-        .score { font-size: 1.4rem; font-weight: 900; color: #fff; letter-spacing: 2px; }
-        .time-badge { font-size: 0.6rem; color: var(--live); font-weight: 800; display: block; margin-top: 4px; }
+        .score { font-size: 1.6rem; font-weight: 900; color: #fff; letter-spacing: 2px; line-height: 1; }
+        .time-badge { font-size: 0.65rem; color: var(--live); font-weight: 800; display: block; margin-top: 8px; text-transform: uppercase; }
 
         /* MODAL */
         .modal { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(5px);
             display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
         }
-        .modal-inner { background: #0f0f0f; width: 100%; max-width: 400px; padding: 25px; border-radius: 15px; border: 1px solid #222; position: relative; }
-        .close { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #555; }
+        .modal-inner { background: #0f0f0f; width: 100%; max-width: 400px; padding: 30px; border-radius: 20px; border: 1px solid #222; position: relative; }
+        .close { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; cursor: pointer; color: #555; }
+        
+        .stat-bar-container { margin: 15px 0; }
+        .stat-info { display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 700; margin-bottom: 5px; color: #aaa; text-transform: uppercase; }
+        .stat-bg { height: 6px; background: #1a1a1a; border-radius: 3px; overflow: hidden; display: flex; }
+        .stat-fill { height: 100%; transition: width 0.8s ease; }
     </style>
 </head>
 <body>
@@ -77,14 +82,15 @@
             <nav class="nav-links">
                 <a href="classificacao.html">Tabelas</a>
                 <a href="arena.html">Arena</a>
-                <a href="aovivo.html" style="color:#fff">Ao Vivo</a>
+                <a href="aovivo.html" style="color:#fff; border-bottom: 1px solid #fff">Ao Vivo</a>
+                <a href="paulistao.html">Paulistão</a>
             </nav>
         </div>
     </header>
 
     <main class="page-content">
         <h2 class="cyber-title">Live Feeds</h2>
-        <div id="loading" style="text-align: center; color: #444; font-size: 0.8rem;">CONECTANDO AO BANCO...</div>
+        <div id="loading" style="text-align: center; color: #444; font-size: 0.8rem; padding: 40px;">CARREGANDO DADOS DO SUPABASE...</div>
         <div id="lista-jogos"></div>
     </main>
 
@@ -100,8 +106,12 @@
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
+        // Tradução manual para garantir compatibilidade total
         function getDataPT() {
-            return new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+            const agora = new Date();
+            const dias = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+            const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            return `${dias[agora.getDay()]}, ${agora.getDate()} de ${meses[agora.getMonth()]}`;
         }
 
         async function fetchLive() {
@@ -117,11 +127,11 @@
                 container.innerHTML = "";
 
                 if (!data || data.length === 0) {
-                    container.innerHTML = "<p style='text-align:center; color:#555;'>Nenhum jogo no momento.</p>";
+                    container.innerHTML = "<p style='text-align:center; color:#555; margin-top: 50px;'>Nenhum jogo ao vivo disponível no momento.</p>";
                     return;
                 }
 
-                // Agrupar e Prevenir Undefined
+                // Agrupamento por Liga
                 const grupos = {};
                 data.forEach(j => {
                     const ligaNome = j.liga || "Outras Competições";
@@ -134,32 +144,35 @@
                         <div class="league-section">
                             <div class="league-header">
                                 <span>${liga}</span>
-                                <span style="opacity:0.5">${getDataPT()}</span>
+                                <span style="opacity:0.5; font-size: 0.6rem;">${getDataPT()}</span>
                             </div>
                     `;
 
                     grupos[liga].forEach(j => {
-                        // Proteção contra nomes de colunas diferentes (ex: time_casa vs timeCasa)
-                        const nomeCasa = j.time_casa || j.timeCasa || "Time A";
-                        const nomeFora = j.time_fora || j.timeFora || "Time B";
-                        const gCasa = j.gols_casa ?? j.golsCasa ?? 0;
-                        const gFora = j.gols_fora ?? j.golsFora ?? 0;
-                        const tempo = j.tempo || j.status || "0'";
-                        const escCasa = j.escudo_casa || j.escudoCasa || "";
-                        const escFora = j.escudo_fora || j.escudoFora || "";
+                        const nomeCasa = j.time_casa || "Time A";
+                        const nomeFora = j.time_fora || "Time B";
+                        
+                        // Lógica de Escudo Blindada
+                        const logoCasa = (j.escudo_casa && j.escudo_casa.length > 10) 
+                            ? j.escudo_casa 
+                            : `https://ui-avatars.com/api/?name=${nomeCasa}&background=222&color=fff&bold=true`;
+                            
+                        const logoFora = (j.escudo_fora && j.escudo_fora.length > 10) 
+                            ? j.escudo_fora 
+                            : `https://ui-avatars.com/api/?name=${nomeFora}&background=222&color=fff&bold=true`;
 
                         html += `
                             <div class="match-card" onclick='showStats(${JSON.stringify(j)})'>
                                 <div class="team">
-                                    <img src="${escCasa}" onerror="this.src='https://via.placeholder.com/30?text=?'">
+                                    <img src="${logoCasa}" onerror="this.src='https://ui-avatars.com/api/?name=${nomeCasa}&background=333&color=fff'">
                                     <span>${nomeCasa}</span>
                                 </div>
                                 <div class="score-box">
-                                    <div class="score">${gCasa} - ${gFora}</div>
-                                    <span class="time-badge">${tempo}</span>
+                                    <div class="score">${j.gols_casa ?? 0} - ${j.gols_fora ?? 0}</div>
+                                    <span class="time-badge">${j.tempo || "0'"}</span>
                                 </div>
                                 <div class="team">
-                                    <img src="${escFora}" onerror="this.src='https://via.placeholder.com/30?text=?'">
+                                    <img src="${logoFora}" onerror="this.src='https://ui-avatars.com/api/?name=${nomeFora}&background=333&color=fff'">
                                     <span>${nomeFora}</span>
                                 </div>
                             </div>
@@ -172,7 +185,7 @@
 
             } catch (err) {
                 console.error(err);
-                loader.innerText = "Erro na conexão. Verifique o console.";
+                loader.innerText = "Falha ao conectar ao banco de dados.";
             }
         }
 
@@ -180,19 +193,36 @@
             const modal = document.getElementById('modal-stats');
             const body = document.getElementById('modal-body');
             
+            const posseCasa = parseInt(j.posse_casa) || 50;
+            const posseFora = 100 - posseCasa;
+
             body.innerHTML = `
-                <div style="text-align:center; margin-bottom:20px">
-                    <h3 style="margin:0; font-size:1rem">${j.time_casa || 'Casa'} vs ${j.time_fora || 'Fora'}</h3>
-                    <small style="color:var(--live)">${j.tempo || ''}</small>
+                <div style="text-align:center; margin-bottom:30px">
+                    <h3 style="margin:0; font-size:1.1rem; letter-spacing:1px">${j.time_casa} VS ${j.time_fora}</h3>
+                    <div style="color:var(--live); font-weight:900; font-size:0.8rem; margin-top:5px">${j.tempo || "AO VIVO"}</div>
                 </div>
-                <div style="display:grid; gap:15px; font-size:0.8rem">
-                    <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding-bottom:5px">
-                        <span>Posse:</span>
-                        <span>${j.posse_casa || 50}% - ${j.posse_fora || 50}%</span>
+                
+                <div class="stat-bar-container">
+                    <div class="stat-info">
+                        <span>${posseCasa}%</span>
+                        <span>Posse de Bola</span>
+                        <span>${posseFora}%</span>
                     </div>
-                    <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding-bottom:5px">
-                        <span>Chutes:</span>
-                        <span>${j.chutes_casa || 0} - ${j.chutes_fora || 0}</span>
+                    <div class="stat-bg">
+                        <div class="stat-fill" style="width: ${posseCasa}%; background: var(--accent)"></div>
+                        <div class="stat-fill" style="width: ${posseFora}%; background: #333"></div>
+                    </div>
+                </div>
+
+                <div class="stat-bar-container">
+                    <div class="stat-info">
+                        <span>${j.chutes_casa || 0}</span>
+                        <span>Finalizações</span>
+                        <span>${j.chutes_fora || 0}</span>
+                    </div>
+                    <div class="stat-bg">
+                        <div class="stat-fill" style="width: 50%; background: #fff; opacity: 0.8"></div>
+                        <div class="stat-fill" style="width: 50%; background: #222"></div>
                     </div>
                 </div>
             `;
@@ -202,8 +232,9 @@
         document.querySelector('.close').onclick = () => document.getElementById('modal-stats').style.display = 'none';
         window.onclick = (e) => { if(e.target.className === 'modal') document.getElementById('modal-stats').style.display = 'none'; }
 
+        // Inicializar e definir intervalo de 30 segundos
         fetchLive();
-        setInterval(fetchLive, 30000); // Atualiza a cada 30 segundos
+        setInterval(fetchLive, 30000);
     </script>
 </body>
 </html>
