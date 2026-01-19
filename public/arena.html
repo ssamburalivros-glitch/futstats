@@ -5,19 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FutStats | Arena H2H Global</title>
     
-    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         :root {
             --bg: #050505;
             --panel: #0a0a0a;
-            --card: #0f0f0f;
-            --border: #1a1a1a;
+            --card: #111111;
+            --border: #222;
             --text: #f0f0f0;
-            --accent: #ffffff;
+            --accent: #2563eb; /* Azul padrão */
+            --accent-glow: rgba(37, 99, 235, 0.5);
+            --danger: #ef4444;
+            --success: #10b981;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -30,51 +32,176 @@
             padding-bottom: 40px;
         }
 
-        header { background: #000; border-bottom: 1px solid var(--border); padding: 15px 6%; }
-        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1250px; margin: 0 auto; }
-        .brand-container { display: flex; align-items: center; text-decoration: none; color: white; gap: 10px; }
-        .site-logo-img { width: 30px; }
-        .logo { font-weight: 900; font-size: 1.2rem; margin: 0; }
-        .nav-links a { color: #888; text-decoration: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-left: 15px; }
+        /* HEADER */
+        header { background: #000; border-bottom: 1px solid var(--border); padding: 15px 5%; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .brand { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-weight: 900; font-size: 1.2rem; }
+        .nav-links a { color: #888; text-decoration: none; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-left: 20px; transition: 0.3s; }
         .nav-links a:hover { color: #fff; }
 
-        .arena-wrapper { max-width: 900px; margin: 30px auto; padding: 0 15px; }
-        .box-arena { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 30px; text-align: center; }
-        .cyber-title { font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
-        .subtitle { color: #555; font-size: 0.75rem; margin-bottom: 30px; text-transform: uppercase; }
-
-        .h2h-grid { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 20px; align-items: center; margin-bottom: 40px; }
-        .selector-group { display: flex; flex-direction: column; gap: 10px; }
-        .selector-group label { font-size: 0.6rem; color: #444; text-transform: uppercase; text-align: left; font-weight: 700; }
+        /* ARENA CONTAINER */
+        .arena-wrapper { max-width: 900px; margin: 40px auto; padding: 0 20px; }
         
-        select { background: #111; border: 1px solid #222; color: #fff; padding: 12px; border-radius: 8px; font-family: 'Montserrat'; font-size: 0.8rem; outline: none; cursor: pointer; width: 100%; }
-        select:disabled { opacity: 0.3; cursor: not-allowed; }
+        .box-arena {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+        }
 
-        .vs-divider { font-weight: 900; font-style: italic; color: #222; font-size: 1.2rem; }
+        /* Efeito de fundo sutil */
+        .box-arena::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(37,99,235,0.05) 0%, rgba(0,0,0,0) 70%);
+            z-index: 0; pointer-events: none;
+        }
 
-        #h2h-result { display: none; border-top: 1px solid #1a1a1a; padding-top: 40px; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .cyber-title { font-weight: 900; text-transform: uppercase; letter-spacing: 3px; margin: 0; font-size: 1.8rem; position: relative; z-index: 1; }
+        .subtitle { color: #666; font-size: 0.8rem; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 1px; position: relative; z-index: 1; }
 
-        .battle-display { display: flex; justify-content: space-around; align-items: center; margin-bottom: 40px; }
-        .gladiator img { height: 90px; width: auto; margin-bottom: 15px; }
-        .gladiator h3 { font-size: 0.9rem; margin: 0; font-weight: 800; }
+        /* SELETORES */
+        .h2h-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 50px 1fr; 
+            gap: 20px; 
+            align-items: center; 
+            position: relative; 
+            z-index: 2; 
+        }
 
-        .stats-table { max-width: 500px; margin: 0 auto; }
-        .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #111; align-items: center; }
-        .val { font-weight: 900; font-size: 1rem; color: #fff; width: 60px; }
-        .label { font-size: 0.65rem; color: #555; text-transform: uppercase; font-weight: 700; }
-        .val.right { text-align: right; }
-        .val.left { text-align: left; }
+        .selector-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+        .selector-card:hover { border-color: #333; }
 
-        .prob-container { margin-top: 40px; }
-        .prob-bar { height: 10px; background: #111; border-radius: 5px; overflow: hidden; display: flex; margin: 10px 0; }
-        #bar-a { background: #fff; width: 50%; transition: width 0.8s ease; }
-        #bar-b { background: #333; width: 50%; transition: width 0.8s ease; }
-        .prob-texts { display: flex; justify-content: space-between; font-weight: 900; font-size: 0.9rem; }
+        .selector-group { display: flex; flex-direction: column; gap: 15px; }
+        .selector-group label { font-size: 0.7rem; color: #555; text-transform: uppercase; font-weight: 700; text-align: left; }
+        
+        select { 
+            background: #080808; 
+            border: 1px solid #333; 
+            color: #fff; 
+            padding: 14px; 
+            border-radius: 8px; 
+            font-family: 'Montserrat'; 
+            font-size: 0.85rem; 
+            outline: none; 
+            width: 100%; 
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        select:focus { border-color: var(--accent); }
+        select:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        .vs-badge { 
+            background: #222; color: #fff; 
+            width: 50px; height: 50px; 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: 900; font-style: italic; 
+            margin: 0 auto;
+        }
+
+        /* BOTÃO DE AÇÃO */
+        .action-area { margin-top: 40px; position: relative; z-index: 2; }
+        .btn-duelo {
+            background: linear-gradient(135deg, var(--accent), #1d4ed8);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 0 20px var(--accent-glow);
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+        }
+        .btn-duelo:hover { transform: translateY(-2px); box-shadow: 0 0 30px var(--accent-glow); }
+        .btn-duelo:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; transform: none; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: all 0.4s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+
+        .modal-card {
+            background: #0f0f0f;
+            width: 90%; max-width: 550px;
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 30px;
+            transform: scale(0.9);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        .modal-overlay.active .modal-card { transform: scale(1); }
+
+        .close-modal {
+            position: absolute; top: 15px; right: 20px;
+            background: none; border: none; color: #666;
+            font-size: 2rem; cursor: pointer; transition: 0.2s;
+        }
+        .close-modal:hover { color: #fff; }
+
+        /* CONTEÚDO DO MODAL */
+        .matchup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .team-display { text-align: center; flex: 1; }
+        .team-logo-lg { width: 70px; height: 70px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
+        .team-name-lg { font-size: 0.8rem; font-weight: 700; color: #fff; text-transform: uppercase; }
+        .versus-text { font-weight: 900; font-size: 1.5rem; color: #333; margin: 0 10px; }
+
+        /* BARRA DE PROBABILIDADE */
+        .prediction-box { margin-bottom: 30px; text-align: center; }
+        .pred-label { font-size: 0.7rem; text-transform: uppercase; color: #888; letter-spacing: 2px; margin-bottom: 10px; }
+        .prob-bar-container {
+            height: 12px; background: #222; border-radius: 6px; overflow: hidden; display: flex;
+        }
+        .bar-segment { height: 100%; transition: width 1s ease-out; }
+        .bar-a { background: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+        .bar-b { background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+
+        .prob-values { display: flex; justify-content: space-between; margin-top: 8px; font-weight: 900; font-size: 1.1rem; }
+        .val-a { color: #3b82f6; }
+        .val-b { color: #ef4444; }
+
+        /* TABELA DE STATS COMPARATIVA */
+        .stats-grid { display: flex; flex-direction: column; gap: 12px; }
+        .stat-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; }
+        .stat-val { width: 40px; font-weight: 700; }
+        .stat-val.left { text-align: left; color: #ccc; }
+        .stat-val.right { text-align: right; color: #ccc; }
+        .stat-name { flex: 1; text-align: center; font-size: 0.7rem; text-transform: uppercase; color: #555; font-weight: 600; }
+        
+        .stat-visual { flex: 1; height: 4px; background: #222; border-radius: 2px; position: relative; margin: 0 10px; overflow: hidden; display: flex; }
+        .stat-fill { height: 100%; transition: width 0.5s ease; }
+        .fill-left { background: #3b82f6; margin-left: auto; } /* Enche da direita pra esquerda visualmente se usar flex-end, mas aqui controlamos width */
+        .fill-right { background: #ef4444; }
+
+        /* MOBILE */
         @media (max-width: 600px) {
-            .h2h-grid { grid-template-columns: 1fr; }
-            .battle-display { flex-direction: column; gap: 20px; }
+            .h2h-grid { grid-template-columns: 1fr; gap: 30px; }
+            .vs-badge { transform: rotate(90deg); margin: -15px auto; z-index: 5; border: 4px solid var(--panel); }
+            .box-arena { padding: 30px 20px; }
         }
     </style>
 </head>
@@ -82,200 +209,348 @@
 
     <header>
         <div class="header-content">
-            <a href="index.html" class="brand-container">
-                <img src="logos/logo.png" alt="FS" class="site-logo-img">
-                <h1 class="logo">FutStats</h1>
+            <a href="index.html" class="brand">
+                <span>FUTSTATS</span>
             </a>
-            <div class="nav-container">
-                <nav class="nav-links">
-                    <a href="classificacao.html">Classificação</a>
-                    <a href="arena.html">Arena H2H</a>
-                    <a href="aovivo.html">Jogos ao Vivo</a>
-                    <a href="paulistao.html">Paulistão 2026</a>
-                </nav>
-            </div>
+            <nav class="nav-links">
+                <a href="classificacao.html">Tabelas</a>
+                <a href="paulistao.html">Paulistão</a>
+            </nav>
         </div>
     </header>
 
     <div class="arena-wrapper">
         <div class="box-arena">
-            <h2 class="cyber-title">Arena de Batalha</h2>
-            <p class="subtitle">Multi-Ligas: Compare qualquer time</p>
+            <h2 class="cyber-title">Arena H2H</h2>
+            <p class="subtitle">Simulador Neural de Confrontos</p>
 
             <div class="h2h-grid">
-                <div class="selector-group">
-                    <label>Liga Desafiante A</label>
-                    <select id="liga-a">
-                        <option value="">Escolha a Liga</option>
-                        <option value="SP">Paulistão 2026</option>
-                        <option value="BR">Brasileirão Série A</option>
-                        <option value="PL">Premier League (Ing)</option>
-                        <option value="ES">La Liga (Esp)</option>
-                        <option value="IT">Serie A (Ita)</option>
-                        <option value="DE">Bundesliga (Ale)</option>
-                        <option value="FR">Ligue 1 (Fra)</option>
-                        <option value="PT">Liga Portugal</option>
-                    </select>
-                    <select id="time-a" disabled><option value="">Selecione o Time</option></select>
+                <div class="selector-card">
+                    <div class="selector-group">
+                        <label>Desafiante 01</label>
+                        <select id="liga-a">
+                            <option value="">Selecione a Liga</option>
+                            <option value="SP">Paulistão 2026</option>
+                            <option value="BR">Brasileirão Série A</option>
+                            <option value="PL">Premier League</option>
+                            <option value="ES">La Liga</option>
+                            <option value="IT">Serie A</option>
+                            <option value="DE">Bundesliga</option>
+                            <option value="FR">Ligue 1</option>
+                        </select>
+                        <select id="time-a" disabled>
+                            <option value="">Aguardando Liga...</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="vs-divider">VS</div>
+                <div class="vs-badge">VS</div>
 
-                <div class="selector-group">
-                    <label>Liga Desafiante B</label>
-                    <select id="liga-b">
-                        <option value="">Escolha a Liga</option>
-                        <option value="SP">Paulistão 2026</option>
-                        <option value="BR">Brasileirão Série A</option>
-                        <option value="PL">Premier League (Ing)</option>
-                        <option value="ES">La Liga (Esp)</option>
-                        <option value="IT">Serie A (Ita)</option>
-                        <option value="DE">Bundesliga (Ale)</option>
-                        <option value="FR">Ligue 1 (Fra)</option>
-                        <option value="PT">Liga Portugal</option>
-                    </select>
-                    <select id="time-b" disabled><option value="">Selecione o Time</option></select>
+                <div class="selector-card">
+                    <div class="selector-group">
+                        <label>Desafiante 02</label>
+                        <select id="liga-b">
+                            <option value="">Selecione a Liga</option>
+                            <option value="SP">Paulistão 2026</option>
+                            <option value="BR">Brasileirão Série A</option>
+                            <option value="PL">Premier League</option>
+                            <option value="ES">La Liga</option>
+                            <option value="IT">Serie A</option>
+                            <option value="DE">Bundesliga</option>
+                            <option value="FR">Ligue 1</option>
+                        </select>
+                        <select id="time-b" disabled>
+                            <option value="">Aguardando Liga...</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div id="h2h-result">
-                <div class="battle-display">
-                    <div class="gladiator"><img id="img-a" src=""><h3 id="name-a">--</h3></div>
-                    <div style="font-weight: 900; font-size: 2rem;">X</div>
-                    <div class="gladiator"><img id="img-b" src=""><h3 id="name-b">--</h3></div>
+            <div class="action-area">
+                <button id="btn-simular" class="btn-duelo" onclick="simularDuelo()" disabled>
+                    Simular Duelo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-duelo" class="modal-overlay">
+        <div class="modal-card">
+            <button class="close-modal" onclick="fecharModal()">&times;</button>
+            
+            <div class="matchup-header">
+                <div class="team-display">
+                    <img id="modal-img-a" class="team-logo-lg" src="">
+                    <div id="modal-name-a" class="team-name-lg">Time A</div>
+                </div>
+                <div class="versus-text">X</div>
+                <div class="team-display">
+                    <img id="modal-img-b" class="team-logo-lg" src="">
+                    <div id="modal-name-b" class="team-name-lg">Time B</div>
+                </div>
+            </div>
+
+            <div class="prediction-box">
+                <div class="pred-label">Probabilidade de Vitória (IA)</div>
+                <div class="prob-bar-container">
+                    <div id="bar-a" class="bar-segment bar-a" style="width: 50%"></div>
+                    <div id="bar-b" class="bar-segment bar-b" style="width: 50%"></div>
+                </div>
+                <div class="prob-values">
+                    <span id="val-prob-a" class="val-a">50%</span>
+                    <span id="val-prob-b" class="val-b">50%</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-row">
+                    <span class="stat-val left" id="s-pts-a">0</span>
+                    <div class="stat-visual">
+                        <div id="vis-pts-a" class="stat-fill fill-left" style="width: 50%"></div>
+                    </div>
+                    <span class="stat-name">Pontos</span>
+                    <div class="stat-visual">
+                        <div id="vis-pts-b" class="stat-fill fill-right" style="width: 50%"></div>
+                    </div>
+                    <span class="stat-val right" id="s-pts-b">0</span>
                 </div>
 
-                <div class="stats-table">
-                    <div class="stat-row"><span id="pts-a" class="val left">--</span><span class="label">Pontos</span><span id="pts-b" class="val right">--</span></div>
-                    <div class="stat-row"><span id="vit-a" class="val left">--</span><span class="label">Vitórias</span><span id="vit-b" class="val right">--</span></div>
-                    <div class="stat-row"><span id="sg-a" class="val left">--</span><span class="label">Saldo de Gols</span><span id="sg-b" class="val right">--</span></div>
-                    <div class="stat-row"><span id="jog-a" class="val left">--</span><span class="label">Jogos Realizados</span><span id="jog-b" class="val right">--</span></div>
+                <div class="stat-row">
+                    <span class="stat-val left" id="s-pos-a">0º</span>
+                    <span class="stat-name">Posição na Tabela</span>
+                    <span class="stat-val right" id="s-pos-b">0º</span>
                 </div>
 
-                <div class="prob-container">
-                    <span class="label">Probabilidade FutStats Neural</span>
-                    <div class="prob-bar"><div id="bar-a"></div><div id="bar-b"></div></div>
-                    <div class="prob-texts"><span id="perc-a">50%</span><span id="perc-b">50%</span></div>
+                <div class="stat-row">
+                    <span class="stat-val left" id="s-gp-a">0</span>
+                    <div class="stat-visual"><div id="vis-gp-a" class="stat-fill fill-left"></div></div>
+                    <span class="stat-name">Gols Marcados</span>
+                    <div class="stat-visual"><div id="vis-gp-b" class="stat-fill fill-right"></div></div>
+                    <span class="stat-val right" id="s-gp-b">0</span>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-val left" id="s-gc-a">0</span>
+                    <div class="stat-visual"><div id="vis-gc-a" class="stat-fill fill-left"></div></div>
+                    <span class="stat-name">Gols Sofridos</span>
+                    <div class="stat-visual"><div id="vis-gc-b" class="stat-fill fill-right"></div></div>
+                    <span class="stat-val right" id="s-gc-b">0</span>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-val left" id="s-sg-a">0</span>
+                    <span class="stat-name">Saldo de Gols</span>
+                    <span class="stat-val right" id="s-sg-b">0</span>
                 </div>
             </div>
         </div>
     </div>
 
-   <script>
-    const SB_URL = "https://sihunefyfkecumbiyxva.supabase.co";
-    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
-    const client = supabase.createClient(SB_URL, SB_KEY);
+    <script>
+        const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Verifique se os nomes das tabelas no seu Supabase são EXATAMENTE esses:
-   const ligasMap = {
-    "SP": "paulistao_classificacao", // Tabela separada
-    "BR": "tabelas_ligas", // Tabela única do crawler
-    "PL": "tabelas_ligas",
-    "ES": "tabelas_ligas",
-    "IT": "tabelas_ligas",
-    "DE": "tabelas_ligas",
-    "FR": "tabelas_ligas",
-    "PT": "tabelas_ligas"
-};
-
-async function atualizarTimes(selectLiga, selectTime) {
-    const ligaID = selectLiga.value;
-    if (!ligaID) return;
-
-    const tabela = ligasMap[ligaID];
-    let query = client.from(tabela).select('*');
-
-    // Se for uma liga do crawler (tabela única), filtramos pela coluna 'liga'
-    if (tabela === "tabelas_ligas") {
-        query = query.eq('liga', ligaID);
-    }
-
-    const { data } = await query.order('time');
-
-    if (data) {
-        // O crawler usa a coluna 'time', o paulistão usa 'time_nome'
-        const colNome = data[0].time_nome ? 'time_nome' : 'time';
-        selectTime.innerHTML = '<option value="">Selecione o Time</option>' + 
-            data.map(t => `<option value="${t[colNome]}">${t[colNome]}</option>`).join('');
-        selectTime.disabled = false;
-    }
-}
-
-    async function calcular() {
-        const lA = document.getElementById('liga-a').value;
-        const tA = document.getElementById('time-a').value;
-        const lB = document.getElementById('liga-b').value;
-        const tB = document.getElementById('time-b').value;
-
-        if (!tA || !tB) return;
-
-        // Busca dados dinamicamente descobrindo o nome da coluna
-        const buscarDados = async (liga, nomeTime) => {
-            const { data } = await client.from(ligasMap[liga]).select('*');
-            const colNome = Object.keys(data[0]).find(key => ['time_nome', 'name', 'nome', 'equipe'].includes(key.toLowerCase()));
-            return data.find(item => item[colNome] === nomeTime);
+        // Mapeamento para saber qual tabela buscar
+        const ligasMap = {
+            "SP": "paulistao_classificacao", // Tabela específica
+            "BR": "tabelas_ligas", "PL": "tabelas_ligas", "ES": "tabelas_ligas",
+            "IT": "tabelas_ligas", "DE": "tabelas_ligas", "FR": "tabelas_ligas"
         };
 
-        const dA = await buscarDados(lA, tA);
-        const dB = await buscarDados(lB, tB);
+        // Cache dos dados para simulação
+        let timeA_Data = null;
+        let timeB_Data = null;
 
-        if (dA && dB) {
-            document.getElementById('h2h-result').style.display = 'block';
+        // 1. CARREGAR TIMES AO SELECIONAR A LIGA
+        async function atualizarTimes(selectLiga, selectTime) {
+            const ligaID = selectLiga.value;
+            selectTime.innerHTML = '<option value="">Carregando...</option>';
+            selectTime.disabled = true;
+
+            if (!ligaID) {
+                selectTime.innerHTML = '<option value="">Aguardando Liga...</option>';
+                return;
+            }
+
+            const tabela = ligasMap[ligaID];
+            let query = supabaseClient.from(tabela).select('*');
+
+            if (tabela === "tabelas_ligas") {
+                query = query.eq('liga', ligaID);
+            }
+
+            const { data, error } = await query;
             
-            // Ajuste de nomes de colunas para os números (pontos, vitorias, saldo_gols, jogos)
-            const getVal = (obj, keys) => {
-                const found = Object.keys(obj).find(k => keys.includes(k.toLowerCase()));
-                return obj[found] || 0;
-            };
+            if (error) {
+                console.error(error);
+                selectTime.innerHTML = '<option value="">Erro ao carregar</option>';
+                return;
+            }
 
-            const statsA = {
-                nome: tA,
-                pts: getVal(dA, ['pontos', 'points', 'pts']),
-                vit: getVal(dA, ['vitorias', 'wins', 'v']),
-                sg: getVal(dA, ['saldo_gols', 'goals_diff', 'sg', 'gd']),
-                jog: getVal(dA, ['jogos', 'matches', 'j', 'played'])
-            };
-
-            const statsB = {
-                nome: tB,
-                pts: getVal(dB, ['pontos', 'points', 'pts']),
-                vit: getVal(dB, ['vitorias', 'wins', 'v']),
-                sg: getVal(dB, ['saldo_gols', 'goals_diff', 'sg', 'gd']),
-                jog: getVal(dB, ['jogos', 'matches', 'j', 'played'])
-            };
-
-            // Atualiza UI
-            document.getElementById('img-a').src = `https://logodetimes.com/times/${getSlug(statsA.nome)}/logo-${getSlug(statsA.nome)}-256.png`;
-            document.getElementById('img-b').src = `https://logodetimes.com/times/${getSlug(statsB.nome)}/logo-${getSlug(statsB.nome)}-256.png`;
-            document.getElementById('name-a').innerText = statsA.nome;
-            document.getElementById('name-b').innerText = statsB.nome;
-
-            document.getElementById('pts-a').innerText = statsA.pts;
-            document.getElementById('pts-b').innerText = statsB.pts;
-            document.getElementById('vit-a').innerText = statsA.vit;
-            document.getElementById('vit-b').innerText = statsB.vit;
-            document.getElementById('sg-a').innerText = statsA.sg;
-            document.getElementById('sg-b').innerText = statsB.sg;
-            document.getElementById('jog-a').innerText = statsA.jog;
-            document.getElementById('jog-b').innerText = statsB.jog;
-
-            // Probabilidade
-            const pA = (statsA.pts * 2) + statsA.sg;
-            const pB = (statsB.pts * 2) + statsB.sg;
-            const total = (pA + pB) || 1;
-            let percA = Math.round((pA / total) * 100);
-            if(percA > 88) percA = 88; if(percA < 12) percA = 12;
-            let percB = 100 - percA;
-
-            document.getElementById('bar-a').style.width = percA + '%';
-            document.getElementById('bar-b').style.width = percB + '%';
-            document.getElementById('perc-a').innerText = percA + '%';
-            document.getElementById('perc-b').innerText = percB + '%';
+            // Normaliza o nome do time dependendo da tabela
+            selectTime.innerHTML = '<option value="">Selecione o Time</option>' + 
+                data.map(item => {
+                    const nome = item.time_nome || item.time; 
+                    return `<option value="${nome}">${nome}</option>`;
+                }).sort().join('');
+            
+            selectTime.disabled = false;
         }
-    }
 
-    document.getElementById('liga-a').addEventListener('change', () => atualizarTimes(document.getElementById('liga-a'), document.getElementById('time-a')));
-    document.getElementById('liga-b').addEventListener('change', () => atualizarTimes(document.getElementById('liga-b'), document.getElementById('time-b')));
-    document.getElementById('time-a').addEventListener('change', calcular);
-    document.getElementById('time-b').addEventListener('change', calcular);
-</script>
+        // Event Listeners para selects
+        document.getElementById('liga-a').addEventListener('change', (e) => atualizarTimes(e.target, document.getElementById('time-a')));
+        document.getElementById('liga-b').addEventListener('change', (e) => atualizarTimes(e.target, document.getElementById('time-b')));
+
+        // Habilita botão se ambos estiverem selecionados
+        function checkReady() {
+            const tA = document.getElementById('time-a').value;
+            const tB = document.getElementById('time-b').value;
+            document.getElementById('btn-simular').disabled = !(tA && tB);
+        }
+        document.getElementById('time-a').addEventListener('change', checkReady);
+        document.getElementById('time-b').addEventListener('change', checkReady);
+
+        // 2. FUNÇÃO PRINCIPAL: SIMULAR
+        async function simularDuelo() {
+            const btn = document.getElementById('btn-simular');
+            btn.innerText = "Calculando...";
+            
+            const lA = document.getElementById('liga-a').value;
+            const tA = document.getElementById('time-a').value;
+            const lB = document.getElementById('liga-b').value;
+            const tB = document.getElementById('time-b').value;
+
+            // Busca dados completos
+            timeA_Data = await fetchTeamData(lA, tA);
+            timeB_Data = await fetchTeamData(lB, tB);
+
+            if(timeA_Data && timeB_Data) {
+                popularModal(timeA_Data, timeB_Data);
+                document.getElementById('modal-duelo').classList.add('active');
+            }
+
+            btn.innerText = "Simular Duelo";
+        }
+
+        async function fetchTeamData(liga, nomeTime) {
+            const tabela = ligasMap[liga];
+            let query = supabaseClient.from(tabela).select('*');
+            
+            if (tabela === "tabelas_ligas") query = query.eq('liga', liga);
+            
+            // Filtro dinâmico (algumas tabelas usam time_nome, outras time)
+            const { data } = await query;
+            if(!data) return null;
+
+            const raw = data.find(i => (i.time || i.time_nome) === nomeTime);
+            return normalizeData(raw);
+        }
+
+        // 3. NORMALIZA DADOS PARA O FORMATO PADRÃO DO MODAL
+        function normalizeData(item) {
+            // Tenta pegar o escudo do banco. Se não tiver, usa API fallback
+            let logo = item.escudo || item.time_escudo;
+            const nome = item.time || item.time_nome;
+
+            if (!logo || logo.includes('base64')) {
+                logo = `https://api.dicebear.com/7.x/initials/svg?seed=${nome}`;
+            }
+
+            return {
+                nome: nome,
+                logo: logo,
+                pontos: item.pontos || 0,
+                posicao: item.posicao || 0,
+                vitorias: item.vitorias || 0,
+                gp: (item.gols_pro || item.gp) || 0,
+                gc: (item.gols_contra || item.gc) || 0,
+                sg: (item.saldo_gols || item.sg) || 0,
+                jogos: (item.jogos || item.j) || 1 // Evita divisão por zero
+            };
+        }
+
+        // 4. POPULAR E CALCULAR ESTATÍSTICAS
+        function popularModal(dA, dB) {
+            // Header
+            document.getElementById('modal-img-a').src = dA.logo;
+            document.getElementById('modal-name-a').innerText = dA.nome;
+            document.getElementById('modal-img-b').src = dB.logo;
+            document.getElementById('modal-name-b').innerText = dB.nome;
+
+            // Stats Numéricos
+            document.getElementById('s-pts-a').innerText = dA.pontos;
+            document.getElementById('s-pts-b').innerText = dB.pontos;
+            document.getElementById('s-pos-a').innerText = dA.posicao + 'º';
+            document.getElementById('s-pos-b').innerText = dB.posicao + 'º';
+            document.getElementById('s-gp-a').innerText = dA.gp;
+            document.getElementById('s-gp-b').innerText = dB.gp;
+            document.getElementById('s-gc-a').innerText = dA.gc;
+            document.getElementById('s-gc-b').innerText = dB.gc;
+            document.getElementById('s-sg-a').innerText = dA.sg;
+            document.getElementById('s-sg-b').innerText = dB.sg;
+
+            // Barras Visuais (Lógica de % relativa entre os dois)
+            const setBar = (id, valA, valB) => {
+                const total = valA + valB;
+                const pct = total === 0 ? 0 : (valA / total) * 100;
+                document.getElementById(id).style.width = pct + '%';
+            };
+
+            setBar('vis-pts-a', dA.pontos, dB.pontos);
+            setBar('vis-pts-b', dB.pontos, dA.pontos);
+            
+            setBar('vis-gp-a', dA.gp, dB.gp);
+            setBar('vis-gp-b', dB.gp, dA.gp);
+            
+            setBar('vis-gc-a', dA.gc, dB.gc); // Nota: Em Gols contra, quem tem MENOS deveria ter barra "melhor", mas visualmente mantive volume
+            setBar('vis-gc-b', dB.gc, dA.gc);
+
+            // CÁLCULO DE PROBABILIDADE
+            // Fórmula: (Pontos * 3) + (SG * 2) + (Vitorias * 4) + (GP * 0.5)
+            // Ajuste por número de jogos para ser justo
+            const scoreA = ((dA.pontos/dA.jogos)*3) + ((dA.vitorias/dA.jogos)*4) + ((dA.sg/dA.jogos)*2);
+            const scoreB = ((dB.pontos/dB.jogos)*3) + ((dB.vitorias/dB.jogos)*4) + ((dB.sg/dB.jogos)*2);
+            
+            // Normalizar scores positivos
+            const sA = Math.max(0, scoreA);
+            const sB = Math.max(0, scoreB);
+            
+            const totalScore = sA + sB || 1;
+            let probA = Math.round((sA / totalScore) * 100);
+            
+            // Limites de realidade (ninguém tem 0% ou 100% no futebol)
+            if(probA > 90) probA = 90;
+            if(probA < 10) probA = 10;
+            const probB = 100 - probA;
+
+            // Atualiza barra principal
+            document.getElementById('bar-a').style.width = probA + '%';
+            document.getElementById('bar-b').style.width = probB + '%';
+            document.getElementById('val-prob-a').innerText = probA + '%';
+            document.getElementById('val-prob-b').innerText = probB + '%';
+
+            // Cores dinâmicas para a probabilidade
+            if(probA > probB) {
+                document.getElementById('val-prob-a').style.color = '#3b82f6'; // Azul ganha
+                document.getElementById('val-prob-b').style.color = '#555';
+            } else {
+                document.getElementById('val-prob-a').style.color = '#555';
+                document.getElementById('val-prob-b').style.color = '#ef4444'; // Vermelho ganha
+            }
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-duelo').classList.remove('active');
+        }
+
+        // Fechar ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal-duelo');
+            if (event.target == modal) {
+                fecharModal();
+            }
+        }
+    </script>
+</body>
+</html>
