@@ -1,175 +1,141 @@
 <!DOCTYPE html>
+
 <html lang="pt-br">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Ao Vivo</title>
+
+    <title>FutStats | Jogos Ao Vivo Organizado</title>
+
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    
+
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-    <style>
-        :root {
-            --bg: #050505;
-            --panel: #0a0a0a;
-            --border: #1a1a1a;
-            --text: #f0f0f0;
-            --accent: #2563eb;
-            --live: #ef4444;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif; }
-
-        /* HEADER */
-        header { background: #000; border-bottom: 1px solid var(--border); padding: 15px 5%; }
-        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
-        .brand-container { display: flex; align-items: center; text-decoration: none; color: white; gap: 10px; }
-        .logo { font-weight: 900; font-size: 1.2rem; text-transform: uppercase; letter-spacing: -1px; }
-        .nav-links a { color: #888; text-decoration: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-left: 15px; }
-
-        .page-content { max-width: 800px; margin: 30px auto; padding: 0 15px; }
-        .cyber-title { font-weight: 900; text-transform: uppercase; letter-spacing: 3px; font-size: 1.5rem; border-left: 4px solid var(--accent); padding-left: 15px; margin-bottom: 30px; text-align: left; }
-
-        /* ORGANIZAÇÃO POR LIGA */
-        .league-group { margin-bottom: 30px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-        .league-name { 
-            background: #111; padding: 12px 15px; font-size: 0.7rem; font-weight: 800; 
-            text-transform: uppercase; color: var(--accent); border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between;
-        }
-
-        /* CARD CENTRALIZADO */
-        .match-card {
-            background: var(--panel);
-            padding: 25px 15px;
-            display: grid;
-            grid-template-columns: 1fr 100px 1fr; /* Centraliza o placar no meio */
-            align-items: center;
-            border-bottom: 1px solid #111;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-        .match-card:last-child { border-bottom: none; }
-        .match-card:hover { background: #0e0e0e; }
-
-        /* TIMES */
-        .team { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
-        .team img { width: 45px; height: 45px; object-fit: contain; }
-        .team span { font-size: 0.8rem; font-weight: 700; color: #fff; }
-
-        /* PLACAR */
-        .score-container { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .score { font-size: 1.8rem; font-weight: 900; color: #fff; letter-spacing: 2px; }
-        .time-badge { font-size: 0.65rem; color: var(--live); font-weight: 800; margin-top: 8px; text-transform: uppercase; }
-
-        #loading { text-align: center; padding: 50px; color: #555; font-weight: bold; text-transform: uppercase; font-size: 0.8rem; }
-    </style>
 </head>
+
 <body>
 
+
+
     <header>
+
         <div class="header-content">
+
             <a href="index.html" class="brand-container">
+
+                <img src="logos/logo.png" alt="FS" class="site-logo-img">
+
                 <h1 class="logo">FutStats</h1>
+
             </a>
-            <nav class="nav-links">
-                <a href="classificacao.html">Tabelas</a>
-                <a href="arena.html">Arena</a>
-                <a href="aovivo.html" style="color: #fff;">Ao Vivo</a>
-                <a href="paulistao.html">Paulistão</a>
-            </nav>
+
+            <div class="nav-container">
+
+                <nav class="nav-links">
+
+                    <a href="classificacao.html">Classificação</a>
+
+                    <a href="arena.html">Arena H2H</a>
+
+                    <a href="aovivo.html">Jogos ao Vivo</a>
+
+                    <a href="paulistao.html">Paulistão 2026</a>
+
+                </nav>
+
+                <button class="btn-download">Baixar APP</button>
+
+            </div>
+
         </div>
+
     </header>
 
+
+
     <main class="page-content">
+
         <h2 class="cyber-title">Live Feeds</h2>
-        <div id="loading">Sincronizando Jogos...</div>
-        <div id="lista-ao-vivo"></div>
+
+
+
+        <div id="lista-ao-vivo" class="ao-vivo-grid">
+
+            </div>
+
     </main>
 
-    <script>
-        // CONFIGURAÇÃO SUPABASE
-        const SB_URL = "https://sihunefyfkecumbiyxva.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // Tradução da Data para Português
-        function dataFormatada() {
-            const dias = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-            const d = new Date();
-            return `${dias[d.getDay()]}, ${d.getDate()}/${d.getMonth() + 1}`;
-        }
 
-        async function carregarJogos() {
-            const container = document.getElementById('lista-ao-vivo');
-            const loader = document.getElementById('loading');
+    <div id="modal-live" class="modal-time-overlay" style="display: none;">
 
-            try {
-                // Busca os dados exatamente como estavam no início
-                const { data: jogos, error } = await supabaseClient.from('jogos_ao_vivo').select('*');
+        <div class="modal-time-content" style="max-width: 500px;">
 
-                if (error) throw error;
+            <span class="close-btn close-modal-live" style="cursor: pointer; float: right; font-size: 1.5rem; color: #555;">&times;</span>
 
-                loader.style.display = 'none';
-                container.innerHTML = "";
+            
 
-                if (!jogos || jogos.length === 0) {
-                    container.innerHTML = "<p style='text-align:center; color:#555; padding: 20px;'>Nenhum jogo ao vivo.</p>";
-                    return;
-                }
+            <div style="text-align: center; margin-bottom: 20px; margin-top: 15px;">
 
-                // Agrupar por Ligas
-                const ligas = {};
-                jogos.forEach(jogo => {
-                    const nomeLiga = jogo.liga || "Outras Competições";
-                    if (!ligas[nomeLiga]) ligas[nomeLiga] = [];
-                    ligas[nomeLiga].push(jogo);
-                });
+                <h2 id="live-teams" style="font-size: 1rem; color: #fff; text-transform: uppercase; letter-spacing: 1px;">--</h2>
 
-                // Renderizar
-                for (const liga in ligas) {
-                    let leagueHTML = `
-                        <div class="league-group">
-                            <div class="league-name">
-                                <span>${liga}</span>
-                                <span style="opacity: 0.5;">${dataFormatada()}</span>
-                            </div>
-                    `;
+                <p id="live-chutes" style="font-size: 0.6rem; color: var(--text-dim); margin-top: 8px;"></p>
 
-                    ligas[liga].forEach(j => {
-                        leagueHTML += `
-                            <div class="match-card">
-                                <div class="team">
-                                    <img src="${j.escudo_casa}" onerror="this.src='https://ui-avatars.com/api/?name=${j.time_casa}&background=222&color=fff'">
-                                    <span>${j.time_casa}</span>
-                                </div>
-                                <div class="score-container">
-                                    <div class="score">${j.gols_casa} - ${j.gols_fora}</div>
-                                    <span class="time-badge">${j.tempo || 'AO VIVO'}</span>
-                                </div>
-                                <div class="team">
-                                    <img src="${j.escudo_fora}" onerror="this.src='https://ui-avatars.com/api/?name=${j.time_fora}&background=222&color=fff'">
-                                    <span>${j.time_fora}</span>
-                                </div>
-                            </div>
-                        `;
-                    });
+            </div>
 
-                    leagueHTML += `</div>`;
-                    container.innerHTML += leagueHTML;
-                }
 
-            } catch (err) {
-                console.error(err);
-                loader.innerText = "Erro ao carregar dados.";
-            }
-        }
 
-        // Iniciar
-        carregarJogos();
-        // Atualizar a cada 30 segundos
-        setInterval(carregarJogos, 30000);
-    </script>
+            <div style="margin-bottom: 25px; background: #0a0a0a; padding: 15px;">
+
+                <div style="display: flex; justify-content: space-between; font-size: 0.5rem; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+
+                    <span>Time Casa</span>
+
+                    <span>Posse de Bola</span>
+
+                    <span>Time Fora</span>
+
+                </div>
+
+                <div style="display: flex; height: 6px; background: #1a1a1a; border-radius: 3px; overflow: hidden;">
+
+                    <div id="live-posse-casa" style="width: 50%; background: #fff; transition: width 0.8s ease;"></div>
+
+                    <div id="live-posse-fora" style="width: 50%; background: #444; transition: width 0.8s ease;"></div>
+
+                </div>
+
+            </div>
+
+
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
+
+                <h4 id="nome-casa-modal" style="font-size: 0.65rem; color: var(--text-dim);">CASA</h4>
+
+                <h4 id="nome-fora-modal" style="font-size: 0.65rem; color: var(--text-dim);">FORA</h4>
+
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+
+
+    <script src="script.js"></script>
+
 </body>
+
 </html>
