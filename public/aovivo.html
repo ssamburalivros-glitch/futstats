@@ -9,7 +9,6 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
-        /* --- CONFIGURAÇÕES GERAIS (Igual ao Index) --- */
         :root {
             --bg: #050505;
             --panel: #0a0a0a;
@@ -26,13 +25,12 @@
             background-color: var(--bg); 
             color: var(--text-main); 
             font-family: 'Montserrat', sans-serif; 
-            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        /* --- HEADER (Consistente) --- */
+        /* HEADER - BOTÃO NO CANTO */
         header { 
             background: #000; 
             border-bottom: 1px solid var(--border); 
@@ -48,161 +46,74 @@
         .nav-links { display: flex; gap: 20px; margin-left: 40px; }
         .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; transition: 0.3s; }
         .nav-links a:hover, .nav-links a.active { color: #fff; }
-        .nav-right { margin-left: auto; display: flex; align-items: center; }
-        .btn-download { background: #fff; color: #000; border: none; padding: 10px 22px; font-weight: 900; font-size: 0.7rem; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.3s; white-space: nowrap; }
-        .btn-download:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+        .nav-right { margin-left: auto; }
+        .btn-download { background: #fff; color: #000; border: none; padding: 10px 22px; font-weight: 900; font-size: 0.7rem; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn-download:hover { background: var(--accent); color: #fff; }
 
-        /* --- LAYOUT DA PÁGINA AO VIVO --- */
+        /* LISTA DE JOGOS */
         main { flex: 1; padding: 40px 5%; max-width: 1200px; margin: 0 auto; width: 100%; }
-        
-        .page-title {
-            font-size: 1.8rem;
-            font-weight: 900;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .live-indicator {
-            width: 12px;
-            height: 12px;
-            background-color: var(--live-red);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--live-red);
-            animation: blink 1.5s infinite;
-        }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .page-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .live-dot { width: 12px; height: 12px; background: var(--live-red); border-radius: 50%; box-shadow: 0 0 10px var(--live-red); animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        /* Grid de Jogos */
-        #lista-ao-vivo {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
+        #lista-ao-vivo { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
 
-        /* Cartão do Jogo */
-        .card-hero {
+        /* CARD CORRIGIDO */
+        .card-live {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 20px;
             cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
-            position: relative;
-            overflow: hidden;
+            transition: 0.2s;
         }
-        .card-hero:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
-        }
+        .card-live:hover { border-color: var(--accent); transform: translateY(-3px); }
 
-        .status-tag {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.6rem;
-            color: var(--live-red);
-            font-weight: 800;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-        .pulse-dot { width: 6px; height: 6px; background: var(--live-red); border-radius: 50%; }
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; }
+        .status-badge { color: var(--live-red); }
 
-        .live-score-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .team-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .match-row { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
             gap: 10px;
-            width: 35%;
+        }
+
+        .team-info { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 100px; 
             text-align: center;
         }
-        .img-mini { width: 40px; height: 40px; object-fit: contain; }
-        .team-name-live { font-size: 0.8rem; font-weight: 700; color: #fff; }
-        
-        .score-box-live {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: #fff;
-            background: #222;
-            padding: 5px 15px;
-            border-radius: 5px;
-        }
+        .team-logo { width: 40px; height: 40px; object-fit: contain; margin-bottom: 8px; }
+        .team-name { font-size: 0.75rem; font-weight: 700; color: #fff; }
 
-        /* --- MODAL DETALHES --- */
-        .modal-overlay {
-            display: none; /* Hidden by default */
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
+        /* PLACAR CORRIGIDO - FLEX FIXO */
+        .scoreboard {
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 900;
+            padding: 10px 20px;
+            border-radius: 8px;
+            min-width: 100px;
+            text-align: center;
+            display: flex;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px);
+            gap: 10px; /* Garante que o "-" fique perto dos números */
         }
 
-        .modal-content {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            width: 90%;
-            max-width: 500px;
-            padding: 30px;
-            border-radius: 12px;
-            position: relative;
-            text-align: center;
-        }
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--panel); border: 1px solid var(--border); width: 90%; max-width: 450px; padding: 30px; border-radius: 15px; text-align: center; position: relative; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: #fff; cursor: pointer; }
 
-        .close-modal-live {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 1.5rem;
-            color: #fff;
-            cursor: pointer;
-        }
-
-        .modal-teams-title { font-size: 1.2rem; font-weight: 900; color: #fff; margin-bottom: 30px; }
-        
-        /* Barras de Estatística */
-        .stat-group { margin-bottom: 25px; }
-        .stat-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: #aaa; margin-bottom: 8px; font-weight: 600; }
-        
-        .progress-bar-container {
-            width: 100%;
-            height: 10px;
-            background: #333;
-            border-radius: 5px;
-            overflow: hidden;
-            display: flex;
-        }
-        
-        .bar-home { height: 100%; background: var(--accent); transition: width 0.5s ease; }
-        .bar-away { height: 100%; background: var(--live-red); transition: width 0.5s ease; }
-
-        .stat-value-text {
-            color: #fff;
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin-top: 10px;
-            display: block;
-        }
-
-        /* --- FOOTER --- */
-        footer { background: #000; border-top: 1px solid var(--border); padding: 40px 6%; margin-top: auto; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; }
-        
-        @media (max-width: 900px) {
-            .nav-links { display: none; }
-        }
+        footer { padding: 30px; text-align: center; font-size: 0.7rem; color: #444; border-top: 1px solid var(--border); }
     </style>
 </head>
-<body id="page-ao-vivo">
+<body>
 
     <header>
         <div class="header-content">
@@ -223,184 +134,73 @@
     </header>
 
     <main>
-        <div class="page-title">
-            <span class="live-indicator"></span>
+        <div class="page-header">
+            <div class="live-dot"></div>
             <h2>EM TEMPO REAL</h2>
         </div>
-
         <div id="lista-ao-vivo">
-            <p style="color: #666;">Conectando ao satélite...</p>
+            <p style="color: #666;">Carregando jogos...</p>
         </div>
     </main>
 
     <div id="modal-live" class="modal-overlay">
         <div class="modal-content">
-            <span class="close-modal-live">&times;</span>
-            <h3 id="live-teams" class="modal-teams-title">TIME A x TIME B</h3>
-            
-            <div class="stat-group">
-                <div class="stat-label">
-                    <span id="nome-casa-modal">CASA</span>
-                    <span>POSSE DE BOLA</span>
-                    <span id="nome-fora-modal">FORA</span>
-                </div>
-                <div class="progress-bar-container">
-                    <div id="live-posse-casa" class="bar-home" style="width: 50%"></div>
-                    <div id="live-posse-fora" class="bar-away" style="width: 50%"></div>
-                </div>
-            </div>
-
-            <div class="stat-group">
-                <div class="stat-label">
-                    <span>ESTATÍSTICAS AVANÇADAS</span>
-                </div>
-                <span id="live-chutes" class="stat-value-text">Carregando dados...</span>
-            </div>
+            <span class="close-btn" onclick="fecharModal()">&times;</span>
+            <h3 id="m-title" style="margin-bottom: 20px;">DETALHES</h3>
+            <div id="m-stats" style="color: #aaa;">Estatísticas avançadas disponíveis no App.</div>
         </div>
     </div>
 
-    <footer>
-        <div class="footer-grid">
-            <div>
-                <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px;">FUTSTATS</h4>
-                <p style="color: #666; font-size: 0.75rem;">Dados neurais em tempo real.</p>
-            </div>
-            <div>
-                <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px;">LINKS</h4>
-                <ul style="list-style: none; font-size: 0.75rem; color: #a0a0a0; line-height: 2;">
-                    <li><a href="index.html" style="color:inherit;text-decoration:none;">Home</a></li>
-                    <li><a href="arena.html" style="color:inherit;text-decoration:none;">Arena</a></li>
-                </ul>
-            </div>
-        </div>
-        <div style="margin-top: 30px; text-align: center; font-size: 0.6rem; color: #444;">
-            © 2026 FUTSTATS NEURAL TECHNOLOGY.
-        </div>
-    </footer>
+    <footer>© 2026 FUTSTATS NEURAL TECHNOLOGY</footer>
 
     <script>
-        // --- CONFIGURAÇÃO ---
         const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co"; 
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const ESCUDO_PADRAO = "https://cdn-icons-png.flaticon.com/512/53/53244.png";
 
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarAoVivo();
-            
-            // Configurar fechamento do modal
-            const modal = document.getElementById('modal-live');
-            const closeBtn = document.querySelector('.close-modal-live');
-            
-            if (closeBtn) closeBtn.onclick = fecharModalLive;
-            window.onclick = (e) => {
-                if (e.target == modal) fecharModalLive();
-            };
-
-            // Atualização automática a cada 30 segundos
-            setInterval(carregarAoVivo, 30000);
-        });
-
-        // --- FUNÇÃO CARREGAR LISTA ---
-        async function carregarAoVivo() {
+        async function carregarJogos() {
             const container = document.getElementById('lista-ao-vivo');
-            if (!container) return;
-            
-            // Não limpamos o HTML imediatamente para evitar "piscar" se já tiver dados, 
-            // mas para este exemplo simples, vamos atualizar direto.
-            
             try {
                 const { data, error } = await _supabase.from('jogos_ao_vivo').select('*');
-                
-                if (error) {
-                    console.error("Erro Supabase:", error);
-                    container.innerHTML = "<p style='color:red'>Erro de conexão com o satélite.</p>";
-                    return;
-                }
+                if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    container.innerHTML = "<div style='grid-column: 1/-1; text-align:center; color:var(--text-dim); padding: 40px;'>NENHUM JOGO AO VIVO AGORA</div>";
+                    container.innerHTML = "<p>Nenhum jogo ao vivo no momento.</p>";
                     return;
                 }
 
-                container.innerHTML = data.map(jogo => {
-                    const casaNome = jogo.time_casa || "Time A";
-                    const foraNome = jogo.time_fora || "Time B";
-                    const imgC = (jogo.logo_casa && jogo.logo_casa !== "null") ? jogo.logo_casa : ESCUDO_PADRAO;
-                    const imgF = (jogo.logo_fora && jogo.logo_fora !== "null") ? jogo.logo_fora : ESCUDO_PADRAO;
-
-                    // Passando strings seguras para o onclick
-                    return `
-                        <div class="card-hero" onclick="abrirDetalhesAoVivo('${jogo.id}', '${casaNome}', '${foraNome}')">
-                            <div class="status-tag">
-                                <span class="pulse-dot"></span>
-                                <span>${jogo.status || "LIVE"}</span>
+                container.innerHTML = data.map(j => `
+                    <div class="card-live" onclick="abrirModal('${j.time_casa} x ${j.time_fora}')">
+                        <div class="card-header">
+                            <span class="status-badge">• ${j.status || 'LIVE'}</span>
+                            <span style="color: #555;">${j.campeonato || 'Futebol'}</span>
+                        </div>
+                        <div class="match-row">
+                            <div class="team-info">
+                                <img src="${j.logo_casa || ''}" class="team-logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53244.png'">
+                                <span class="team-name">${j.time_casa}</span>
                             </div>
-                            <div class="live-score-row">
-                                <div class="team-box">
-                                    <img src="${imgC}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'" alt="casa">
-                                    <span class="team-name-live">${casaNome}</span>
-                                </div>
-                                <div class="score-box-live">${jogo.placar || "0 - 0"}</div>
-                                <div class="team-box">
-                                    <img src="${imgF}" class="img-mini" onerror="this.src='${ESCUDO_PADRAO}'" alt="fora">
-                                    <span class="team-name-live">${foraNome}</span>
-                                </div>
+                            <div class="scoreboard">
+                                ${j.placar.replace(' - ', ' <span>-</span> ')}
+                            </div>
+                            <div class="team-info">
+                                <img src="${j.logo_fora || ''}" class="team-logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53244.png'">
+                                <span class="team-name">${j.time_fora}</span>
                             </div>
                         </div>
-                    `;
-                }).join('');
-            } catch (e) { 
-                console.error(e); 
-                container.innerHTML = "<p>Erro ao processar dados.</p>"; 
-            }
+                    </div>
+                `).join('');
+            } catch (e) { container.innerHTML = "<p>Erro ao carregar.</p>"; }
         }
 
-        // --- FUNÇÕES DO MODAL ---
-        async function abrirDetalhesAoVivo(idJogo, casa, fora) {
-            const modal = document.getElementById('modal-live');
-            if (!modal) return;
-
-            // Limpa dados anteriores
-            document.getElementById('live-teams').innerText = `${casa} x ${fora}`;
-            document.getElementById('nome-casa-modal').innerText = casa;
-            document.getElementById('nome-fora-modal').innerText = fora;
-            document.getElementById('live-chutes').innerText = "Carregando telemetria...";
-            
-            // Reseta barras
-            document.getElementById('live-posse-casa').style.width = "50%";
-            document.getElementById('live-posse-fora').style.width = "50%";
-
-            modal.style.display = 'flex';
-
-            try {
-                const { data, error } = await _supabase
-                    .from('detalhes_partida')
-                    .select('*')
-                    .eq('jogo_id', idJogo)
-                    .single();
-
-                if (error || !data) {
-                    document.getElementById('live-chutes').innerText = "Dados detalhados indisponíveis no momento.";
-                    return;
-                }
-
-                // Atualiza Posse
-                const pCasa = data.posse_casa || 50;
-                const pFora = data.posse_fora || 50; // O ideal seria 100 - pCasa se tiver só um dado
-                
-                document.getElementById('live-posse-casa').style.width = `${pCasa}%`;
-                document.getElementById('live-posse-fora').style.width = `${pFora}%`;
-
-                // Atualiza Chutes
-                document.getElementById('live-chutes').innerText = `CHUTES NO ALVO: ${data.chutes_casa || 0} - ${data.chutes_fora || 0}`;
-            } catch (e) { console.error(e); }
+        function abrirModal(titulo) {
+            document.getElementById('m-title').innerText = titulo;
+            document.getElementById('modal-live').style.display = 'flex';
         }
+        function fecharModal() { document.getElementById('modal-live').style.display = 'none'; }
 
-        function fecharModalLive() {
-            const modal = document.getElementById('modal-live');
-            if (modal) modal.style.display = 'none';
-        }
+        carregarJogos();
+        setInterval(carregarJogos, 30000);
     </script>
 </body>
 </html>
