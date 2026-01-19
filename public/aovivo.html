@@ -12,10 +12,8 @@
         :root {
             --bg: #050505;
             --panel: #0a0a0a;
-            --card: #111;
             --border: #1a1a1a;
             --text: #f0f0f0;
-            --text-dim: #666;
             --accent: #2563eb;
             --live: #ef4444;
         }
@@ -26,10 +24,8 @@
         /* HEADER */
         header { background: #000; border-bottom: 1px solid var(--border); padding: 15px 5%; }
         .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
-        .brand-container { display: flex; align-items: center; text-decoration: none; color: white; gap: 10px; }
-        .logo { font-weight: 900; font-size: 1.2rem; margin: 0; text-transform: uppercase; letter-spacing: -1px; }
-        .nav-links a { color: #888; text-decoration: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-left: 15px; transition: 0.3s; }
-        .nav-links a:hover { color: #fff; }
+        .logo { font-weight: 900; font-size: 1.2rem; margin: 0; text-transform: uppercase; letter-spacing: -1px; color: #fff; text-decoration: none; }
+        .nav-links a { color: #888; text-decoration: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-left: 15px; }
 
         .page-content { max-width: 800px; margin: 30px auto; padding: 0 15px; }
         .cyber-title { font-weight: 900; text-transform: uppercase; letter-spacing: 3px; font-size: 1.5rem; border-left: 4px solid var(--accent); padding-left: 15px; margin-bottom: 30px; }
@@ -50,47 +46,38 @@
             grid-template-columns: 1fr 85px 1fr; align-items: center;
             margin-bottom: 8px; transition: 0.2s; cursor: pointer;
         }
-        .match-card:hover { background: #0f0f0f; border-color: #333; transform: scale(1.01); }
+        .match-card:hover { border-color: #333; transform: scale(1.01); }
 
         .team { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
-        .team img { width: 38px; height: 38px; object-fit: contain; border-radius: 4px; }
+        .team img { width: 40px; height: 40px; object-fit: contain; }
         .team span { font-size: 0.75rem; font-weight: 700; color: #fff; }
 
         .score-box { text-align: center; }
-        .score { font-size: 1.6rem; font-weight: 900; color: #fff; letter-spacing: 2px; line-height: 1; }
-        .time-badge { font-size: 0.65rem; color: var(--live); font-weight: 800; display: block; margin-top: 8px; text-transform: uppercase; }
+        .score { font-size: 1.6rem; font-weight: 900; color: #fff; letter-spacing: 2px; }
+        .time-badge { font-size: 0.65rem; color: var(--live); font-weight: 800; display: block; margin-top: 5px; }
 
         /* MODAL */
-        .modal { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(5px);
-            display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
-        }
-        .modal-inner { background: #0f0f0f; width: 100%; max-width: 400px; padding: 30px; border-radius: 20px; border: 1px solid #222; position: relative; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-inner { background: #0f0f0f; width: 90%; max-width: 400px; padding: 30px; border-radius: 20px; border: 1px solid #222; position: relative; }
         .close { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; cursor: pointer; color: #555; }
-        
-        .stat-bar-container { margin: 15px 0; }
-        .stat-info { display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 700; margin-bottom: 5px; color: #aaa; text-transform: uppercase; }
-        .stat-bg { height: 6px; background: #1a1a1a; border-radius: 3px; overflow: hidden; display: flex; }
-        .stat-fill { height: 100%; transition: width 0.8s ease; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-content">
-            <a href="index.html" class="brand-container"><h1 class="logo">FutStats</h1></a>
+            <a href="index.html" class="logo">FutStats</a>
             <nav class="nav-links">
                 <a href="classificacao.html">Tabelas</a>
                 <a href="arena.html">Arena</a>
-                <a href="aovivo.html" style="color:#fff; border-bottom: 1px solid #fff">Ao Vivo</a>
-                <a href="paulistao.html">Paulistão</a>
+                <a href="aovivo.html" style="color:#fff">Ao Vivo</a>
             </nav>
         </div>
     </header>
 
     <main class="page-content">
-        <h2 class="cyber-title">Live Feeds</h2>
-        <div id="loading" style="text-align: center; color: #444; font-size: 0.8rem; padding: 40px;">CARREGANDO DADOS DO SUPABASE...</div>
+        <h2 class="cyber-title">Jogos Ao Vivo</h2>
+        <div id="loading" style="text-align: center; padding: 40px; color: #444;">BUSCANDO TRANSMISSÕES...</div>
         <div id="lista-jogos"></div>
     </main>
 
@@ -106,12 +93,13 @@
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // Tradução manual para garantir compatibilidade total
-        function getDataPT() {
-            const agora = new Date();
-            const dias = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
-            const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            return `${dias[agora.getDay()]}, ${agora.getDate()} de ${meses[agora.getMonth()]}`;
+        // FUNÇÃO PARA PEGAR LOGO (Se falhar no banco, gera um automático limpo)
+        function getLogo(url, timeNome) {
+            if (url && url.length > 10 && !url.includes("undefined")) {
+                return url;
+            }
+            // Se não tiver logo no banco, gera um escudo com a inicial do time
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(timeNome)}&background=111&color=fff&bold=true&font-size=0.5&rounded=true`;
         }
 
         async function fetchLive() {
@@ -119,110 +107,72 @@
             const loader = document.getElementById('loading');
 
             try {
-                const { data, error } = await supabaseClient.from('jogos_ao_vivo').select('*');
-
+                // Puxa jogos ao vivo
+                const { data: jogos, error } = await supabaseClient.from('jogos_ao_vivo').select('*');
                 if (error) throw error;
 
                 loader.style.display = 'none';
                 container.innerHTML = "";
 
-                if (!data || data.length === 0) {
-                    container.innerHTML = "<p style='text-align:center; color:#555; margin-top: 50px;'>Nenhum jogo ao vivo disponível no momento.</p>";
+                if (!jogos || jogos.length === 0) {
+                    container.innerHTML = "<p style='text-align:center; color:#555;'>Nenhum jogo rolando agora.</p>";
                     return;
                 }
 
-                // Agrupamento por Liga
+                // Agrupar por liga
                 const grupos = {};
-                data.forEach(j => {
-                    const ligaNome = j.liga || "Outras Competições";
-                    if (!grupos[ligaNome]) grupos[ligaNome] = [];
-                    grupos[ligaNome].push(j);
+                jogos.forEach(j => {
+                    const liga = j.liga || "Outros";
+                    if (!grupos[liga]) grupos[liga] = [];
+                    grupos[liga].push(j);
                 });
 
                 for (const liga in grupos) {
                     let html = `
                         <div class="league-section">
-                            <div class="league-header">
-                                <span>${liga}</span>
-                                <span style="opacity:0.5; font-size: 0.6rem;">${getDataPT()}</span>
-                            </div>
+                            <div class="league-header"><span>${liga}</span></div>
                     `;
 
                     grupos[liga].forEach(j => {
-                        const nomeCasa = j.time_casa || "Time A";
-                        const nomeFora = j.time_fora || "Time B";
-                        
-                        // Lógica de Escudo Blindada
-                        const logoCasa = (j.escudo_casa && j.escudo_casa.length > 10) 
-                            ? j.escudo_casa 
-                            : `https://ui-avatars.com/api/?name=${nomeCasa}&background=222&color=fff&bold=true`;
-                            
-                        const logoFora = (j.escudo_fora && j.escudo_fora.length > 10) 
-                            ? j.escudo_fora 
-                            : `https://ui-avatars.com/api/?name=${nomeFora}&background=222&color=fff&bold=true`;
+                        const imgCasa = getLogo(j.escudo_casa, j.time_casa);
+                        const imgFora = getLogo(j.escudo_fora, j.time_fora);
 
                         html += `
                             <div class="match-card" onclick='showStats(${JSON.stringify(j)})'>
                                 <div class="team">
-                                    <img src="${logoCasa}" onerror="this.src='https://ui-avatars.com/api/?name=${nomeCasa}&background=333&color=fff'">
-                                    <span>${nomeCasa}</span>
+                                    <img src="${imgCasa}" onerror="this.src='https://via.placeholder.com/40?text=?'">
+                                    <span>${j.time_casa}</span>
                                 </div>
                                 <div class="score-box">
-                                    <div class="score">${j.gols_casa ?? 0} - ${j.gols_fora ?? 0}</div>
-                                    <span class="time-badge">${j.tempo || "0'"}</span>
+                                    <div class="score">${j.gols_casa} - ${j.gols_fora}</div>
+                                    <span class="time-badge">${j.tempo || "AO VIVO"}</span>
                                 </div>
                                 <div class="team">
-                                    <img src="${logoFora}" onerror="this.src='https://ui-avatars.com/api/?name=${nomeFora}&background=333&color=fff'">
-                                    <span>${nomeFora}</span>
+                                    <img src="${imgFora}" onerror="this.src='https://via.placeholder.com/40?text=?'">
+                                    <span>${j.time_fora}</span>
                                 </div>
                             </div>
                         `;
                     });
-
                     html += `</div>`;
                     container.innerHTML += html;
                 }
-
             } catch (err) {
-                console.error(err);
-                loader.innerText = "Falha ao conectar ao banco de dados.";
+                loader.innerText = "Erro ao carregar.";
             }
         }
 
         function showStats(j) {
             const modal = document.getElementById('modal-stats');
             const body = document.getElementById('modal-body');
-            
-            const posseCasa = parseInt(j.posse_casa) || 50;
-            const posseFora = 100 - posseCasa;
-
             body.innerHTML = `
-                <div style="text-align:center; margin-bottom:30px">
-                    <h3 style="margin:0; font-size:1.1rem; letter-spacing:1px">${j.time_casa} VS ${j.time_fora}</h3>
-                    <div style="color:var(--live); font-weight:900; font-size:0.8rem; margin-top:5px">${j.tempo || "AO VIVO"}</div>
-                </div>
-                
-                <div class="stat-bar-container">
-                    <div class="stat-info">
-                        <span>${posseCasa}%</span>
-                        <span>Posse de Bola</span>
-                        <span>${posseFora}%</span>
+                <div style="text-align:center">
+                    <h3 style="margin-bottom:20px">${j.time_casa} vs ${j.time_fora}</h3>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px">
+                        <span>Posse:</span> <span>${j.posse_casa || 50}% - ${j.posse_fora || 50}%</span>
                     </div>
-                    <div class="stat-bg">
-                        <div class="stat-fill" style="width: ${posseCasa}%; background: var(--accent)"></div>
-                        <div class="stat-fill" style="width: ${posseFora}%; background: #333"></div>
-                    </div>
-                </div>
-
-                <div class="stat-bar-container">
-                    <div class="stat-info">
-                        <span>${j.chutes_casa || 0}</span>
-                        <span>Finalizações</span>
-                        <span>${j.chutes_fora || 0}</span>
-                    </div>
-                    <div class="stat-bg">
-                        <div class="stat-fill" style="width: 50%; background: #fff; opacity: 0.8"></div>
-                        <div class="stat-fill" style="width: 50%; background: #222"></div>
+                    <div style="display:flex; justify-content:space-between">
+                        <span>Chutes:</span> <span>${j.chutes_casa || 0} - ${j.chutes_fora || 0}</span>
                     </div>
                 </div>
             `;
@@ -230,9 +180,7 @@
         }
 
         document.querySelector('.close').onclick = () => document.getElementById('modal-stats').style.display = 'none';
-        window.onclick = (e) => { if(e.target.className === 'modal') document.getElementById('modal-stats').style.display = 'none'; }
-
-        // Inicializar e definir intervalo de 30 segundos
+        
         fetchLive();
         setInterval(fetchLive, 30000);
     </script>
