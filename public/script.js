@@ -33,7 +33,7 @@ const noticiasCarrossel = [
     },
 	{
 		id: 4, 
-		img:'img/carrosel4.webp',
+		img:'img/carrossel4.webp',
 		categoria: 'Novidade',
 		titulo:'Paulistão 2026 Acompanhamento Ao Vivo', 
 		descricao:'Tabela, jogos e horários do Campeonato Paulista 2026',
