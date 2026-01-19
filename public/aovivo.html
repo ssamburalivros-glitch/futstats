@@ -3,36 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutStats | Jogos Ao Vivo Organizado</title>
+    <title>FutStats | Jogos Ao Vivo</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
-        /* CSS PARA CENTRALIZAÇÃO E ESTILO */
+        /* RESET E CORES */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
             --bg: #050505;
             --panel: #0a0a0a;
             --border: #1a1a1a;
-            --text-dim: #666;
             --accent: #2563eb;
             --live: #ef4444;
         }
 
-        body { background-color: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; margin: 0; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; }
         
-        /* HEADER IGUAL AO SEU */
+        /* HEADER ORIGINAL */
         header { background: #000; border-bottom: 1px solid var(--border); padding: 15px 5%; }
         .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
         .brand-container { display: flex; align-items: center; text-decoration: none; color: white; gap: 10px; }
-        .logo { font-weight: 900; font-size: 1.2rem; text-transform: uppercase; margin: 0; }
+        .site-logo-img { width: 30px; height: auto; }
+        .logo { font-weight: 900; font-size: 1.2rem; text-transform: uppercase; }
         .nav-links a { color: #888; text-decoration: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-left: 15px; }
 
         .page-content { max-width: 800px; margin: 30px auto; padding: 0 15px; }
         .cyber-title { font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border-left: 4px solid var(--accent); padding-left: 15px; margin-bottom: 30px; }
 
         /* GRID CENTRALIZADA */
-        .ao-vivo-grid { display: flex; flex-direction: column; gap: 12px; }
+        .ao-vivo-grid { display: flex; flex-direction: column; gap: 15px; }
 
         .match-card {
             background: var(--panel);
@@ -40,27 +41,36 @@
             border-radius: 12px;
             padding: 20px 0;
             display: grid;
-            grid-template-columns: 1fr 120px 1fr; /* PLACAR CENTRALIZADO COM 120PX */
+            grid-template-columns: 1fr 120px 1fr; /* PLACAR NO MEIO */
             align-items: center;
             cursor: pointer;
             transition: 0.2s;
         }
         .match-card:hover { border-color: #333; background: #0e0e0e; }
 
+        /* ALINHAMENTO DOS TIMES */
         .team { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
-        .team img { width: 40px; height: 40px; object-fit: contain; }
-        .team span { font-size: 0.75rem; font-weight: 700; }
+        
+        /* ESTA É A PARTE DOS LOGOS */
+        .team img { 
+            width: 45px; 
+            height: 45px; 
+            object-fit: contain; 
+            display: block; /* Garante que a imagem apareça */
+        }
+        .team span { font-size: 0.8rem; font-weight: 700; color: #fff; }
 
-        .score-box { text-align: center; border-left: 1px solid #111; border-right: 1px solid #111; }
-        .score-num { font-size: 1.6rem; font-weight: 900; letter-spacing: 2px; }
-        .status-badge { font-size: 0.6rem; color: var(--live); font-weight: 800; text-transform: uppercase; display: block; margin-top: 5px; }
+        /* PLACAR CENTRAL */
+        .score-box { text-align: center; }
+        .score-num { font-size: 1.8rem; font-weight: 900; letter-spacing: 2px; line-height: 1; }
+        .status-badge { font-size: 0.6rem; color: var(--live); font-weight: 800; text-transform: uppercase; margin-top: 8px; display: block; }
 
-        /* MODAL ESTILIZAÇÃO */
+        /* MODAL */
         .modal-time-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
             display: none; align-items: center; justify-content: center; z-index: 1000;
         }
-        .modal-time-content { background: #0f0f0f; padding: 30px; border-radius: 15px; border: 1px solid #222; width: 90%; }
+        .modal-time-content { background: #0f0f0f; padding: 30px; border-radius: 15px; border: 1px solid #222; width: 90%; max-width: 450px; position: relative;}
     </style>
 </head>
 <body>
@@ -68,17 +78,15 @@
     <header>
         <div class="header-content">
             <a href="index.html" class="brand-container">
-                <img src="logos/logo.png" alt="FS" class="site-logo-img" style="width:30px;">
+                <img src="logos/logo.png" alt="FS" class="site-logo-img">
                 <h1 class="logo">FutStats</h1>
             </a>
-            <div class="nav-container">
-                <nav class="nav-links">
-                    <a href="classificacao.html">Classificação</a>
-                    <a href="arena.html">Arena H2H</a>
-                    <a href="aovivo.html">Jogos ao Vivo</a>
-                    <a href="paulistao.html">Paulistão 2026</a>
-                </nav>
-            </div>
+            <nav class="nav-links">
+                <a href="classificacao.html">Classificação</a>
+                <a href="arena.html">Arena H2H</a>
+                <a href="aovivo.html">Jogos ao Vivo</a>
+                <a href="paulistao.html">Paulistão 2026</a>
+            </nav>
         </div>
     </header>
 
@@ -90,31 +98,25 @@
 
     <div id="modal-live" class="modal-time-overlay">
         <div class="modal-time-content">
-            <span class="close-modal-live" style="cursor: pointer; float: right; font-size: 1.5rem; color: #555;">&times;</span>
-            <div style="text-align: center; margin-bottom: 20px; margin-top: 15px;">
-                <h2 id="live-teams" style="font-size: 1rem; color: #fff; text-transform: uppercase; letter-spacing: 1px;">--</h2>
-                <p id="live-chutes" style="font-size: 0.6rem; color: #666; margin-top: 8px;"></p>
+            <span class="close-modal-live" style="position:absolute; top:15px; right:20px; cursor: pointer; font-size: 1.5rem; color: #555;">&times;</span>
+            <div style="text-align: center; margin-top: 15px;">
+                <h2 id="live-teams" style="font-size: 1rem; color: #fff; text-transform: uppercase;">--</h2>
+                <p id="live-chutes" style="font-size: 0.7rem; color: #666; margin-top: 10px;"></p>
             </div>
-            <div style="margin-bottom: 25px; background: #0a0a0a; padding: 15px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.5rem; color: #666; margin-bottom: 8px; text-transform: uppercase;">
-                    <span>Casa</span>
-                    <span>Posse de Bola</span>
-                    <span>Fora</span>
+            <div style="margin: 25px 0; background: #0a0a0a; padding: 20px; border-radius: 10px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.6rem; color: #666; margin-bottom: 10px; text-transform: uppercase;">
+                    <span>Posse Casa</span>
+                    <span>Posse Fora</span>
                 </div>
-                <div style="display: flex; height: 6px; background: #1a1a1a; border-radius: 3px; overflow: hidden;">
-                    <div id="live-posse-casa" style="width: 50%; background: #fff; transition: width 0.8s ease;"></div>
-                    <div id="live-posse-fora" style="width: 50%; background: #444; transition: width 0.8s ease;"></div>
+                <div style="display: flex; height: 8px; background: #1a1a1a; border-radius: 4px; overflow: hidden;">
+                    <div id="live-posse-casa" style="width: 50%; background: #fff; transition: 0.5s;"></div>
+                    <div id="live-posse-fora" style="width: 50%; background: #333; transition: 0.5s;"></div>
                 </div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
-                <h4 id="nome-casa-modal" style="font-size: 0.65rem; color: #666;">CASA</h4>
-                <h4 id="nome-fora-modal" style="font-size: 0.65rem; color: #666;">FORA</h4>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO SUPABASE
         const SB_URL = "https://sihunefyfkecumbiyxva.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
@@ -129,11 +131,22 @@
                 jogos.forEach(j => {
                     const card = document.createElement('div');
                     card.className = 'match-card';
-                    card.onclick = () => abrirModal(j);
+                    
+                    // IMPORTANTE: Usei exatamente os nomes das colunas do seu banco
+                    const imgCasa = j.escudo_casa || j.escudoCasa || "";
+                    const imgFora = j.escudo_fora || j.escudoFora || "";
+
+                    card.onclick = () => {
+                        document.getElementById('modal-live').style.display = 'flex';
+                        document.getElementById('live-teams').innerText = `${j.time_casa} x ${j.time_fora}`;
+                        document.getElementById('live-chutes').innerText = `Placar: ${j.gols_casa} - ${j.gols_fora}`;
+                        document.getElementById('live-posse-casa').style.width = (j.posse_casa || 50) + "%";
+                        document.getElementById('live-posse-fora').style.width = (100 - (j.posse_casa || 50)) + "%";
+                    };
                     
                     card.innerHTML = `
                         <div class="team">
-                            <img src="${j.escudo_casa}" onerror="this.src='https://ui-avatars.com/api/?name=${j.time_casa}&background=222&color=fff'">
+                            <img src="${imgCasa}" onerror="this.src='https://ui-avatars.com/api/?name=${j.time_casa}&background=222&color=fff'">
                             <span>${j.time_casa}</span>
                         </div>
                         <div class="score-box">
@@ -141,36 +154,17 @@
                             <span class="status-badge">${j.tempo || 'AO VIVO'}</span>
                         </div>
                         <div class="team">
-                            <img src="${j.escudo_fora}" onerror="this.src='https://ui-avatars.com/api/?name=${j.time_fora}&background=222&color=fff'">
+                            <img src="${imgFora}" onerror="this.src='https://ui-avatars.com/api/?name=${j.time_fora}&background=222&color=fff'">
                             <span>${j.time_fora}</span>
                         </div>
                     `;
                     container.appendChild(card);
                 });
-            } catch (err) { console.error("Erro:", err); }
+            } catch (err) { console.error(err); }
         }
 
-        function abrirModal(j) {
-            document.getElementById('modal-live').style.display = 'flex';
-            document.getElementById('live-teams').innerText = `${j.time_casa} ${j.gols_casa} x ${j.gols_fora} ${j.time_fora}`;
-            document.getElementById('live-chutes').innerText = `Chutes: ${j.chutes_casa || 0} - ${j.chutes_fora || 0}`;
-            document.getElementById('nome-casa-modal').innerText = j.time_casa;
-            document.getElementById('nome-fora-modal').innerText = j.time_fora;
-            
-            const posse = j.posse_casa || 50;
-            document.getElementById('live-posse-casa').style.width = posse + "%";
-            document.getElementById('live-posse-fora').style.width = (100 - posse) + "%";
-        }
-
-        document.querySelector('.close-modal-live').onclick = () => {
-            document.getElementById('modal-live').style.display = 'none';
-        }
-
-        window.onclick = (event) => {
-            if (event.target == document.getElementById('modal-live')) {
-                document.getElementById('modal-live').style.display = 'none';
-            }
-        }
+        document.querySelector('.close-modal-live').onclick = () => document.getElementById('modal-live').style.display = 'none';
+        window.onclick = (e) => { if(e.target.id == 'modal-live') document.getElementById('modal-live').style.display = 'none'; }
 
         carregarJogos();
         setInterval(carregarJogos, 30000);
