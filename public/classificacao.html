@@ -7,10 +7,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: #050505; color: #eee; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #050505; color: #eee; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; }
+        
+        /* HEADER STYLE (Igual à Arena) */
+        header { background: #000; border-bottom: 1px solid #1a1a1a; padding: 15px 5%; width: 100%; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .brand { font-weight: 900; font-size: 1.2rem; color: #fff; text-decoration: none; letter-spacing: -1px; }
+        .nav-links a { color: #888; text-decoration: none; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-left: 20px; transition: 0.3s; }
+        .nav-links a:hover { color: #fff; }
+
         .glass-card { background: #111; border: 1px solid #222; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .tab-btn { border-bottom: 3px solid transparent; transition: 0.3s; color: #888; cursor: pointer; }
         .tab-btn.active { border-bottom: 3px solid #2563eb; color: #fff; font-weight: bold; }
+        
         tr { border-bottom: 1px solid #1a1a1a; transition: 0.2s; cursor: pointer; }
         tr:hover { background: #161616; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -22,9 +31,20 @@
         #modal-detalhes.active .modal-content { transform: scale(1); }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="pb-10">
 
-    <div class="max-w-6xl mx-auto">
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="brand">FUTSTATS</a>
+            <nav class="nav-links">
+                <a href="arena.html">Arena H2H</a>
+                <a href="paulistao.html">Paulistão 2026</a>
+                <a href="classificacao.html" style="color: #fff; border-bottom: 1px solid #fff;">Tabelas</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-4 pt-10">
         <h1 class="text-3xl font-bold text-center mb-10 text-white tracking-tight">Estatísticas de Futebol</h1>
 
         <nav class="flex overflow-x-auto gap-6 mb-8 border-b border-zinc-800 justify-start md:justify-center scrollbar-hide">
@@ -127,7 +147,7 @@
                         const bugEscudoBr = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                         const imgEscudo = (clube.escudo && clube.escudo !== bugEscudoBr) 
                             ? clube.escudo 
-                            : `https://via.placeholder.com/30/222/fff?text=${clube.time.charAt(0)}`;
+                            : `https://api.dicebear.com/7.x/initials/svg?seed=${clube.time}`;
 
                         corpo.innerHTML += `
                             <tr onclick="abrirModal(${index})">
@@ -177,7 +197,6 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        // Fechar ao clicar fora do conteúdo
         window.onclick = (event) => {
             const modal = document.getElementById('modal-detalhes');
             if (event.target == modal) fecharModal();
