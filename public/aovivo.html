@@ -4,47 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FutStats | Central Ao Vivo</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
     <style>
         :root {
-            --bg: #050505; --panel: #0a0a0a; --card-bg: #111;
-            --border: #1a1a1a; --accent: #2563eb; --live-red: #ef4444;
-            --text-main: #f0f0f0; --text-dim: #888;
+            --bg: #050505;
+            --panel: #0a0a0a;
+            --card-bg: #111;
+            --border: #1a1a1a;
+            --accent: #2563eb;
+            --live-red: #ef4444;
+            --text-main: #f0f0f0;
+            --text-dim: #888;
         }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: var(--text-main); font-family: 'Montserrat', sans-serif; min-height: 100vh; }
-        
-        header { background: #000; border-bottom: 1px solid var(--border); padding: 15px 5%; position: sticky; top: 0; z-index: 1000; }
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: 'Montserrat', sans-serif; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- HEADER --- */
+        header { 
+            background: #000; 
+            border-bottom: 1px solid var(--border); 
+            padding: 15px 5%; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+        }
         .header-content { display: flex; align-items: center; max-width: 1400px; margin: 0 auto; width: 100%; }
         .brand { display: flex; align-items: center; text-decoration: none; color: white; gap: 10px; }
-        .logo-img { width: 30px; height: 30px; }
+        .logo-img { width: 35px; height: 35px; object-fit: contain; }
         .nav-links { display: flex; gap: 20px; margin-left: 40px; }
         .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
         .nav-links a.active { color: #fff; }
         .nav-right { margin-left: auto; }
-        .btn-app { background: #fff; color: #000; border: none; padding: 8px 18px; font-weight: 900; font-size: 0.7rem; border-radius: 4px; cursor: pointer; }
+        .btn-app { background: #fff; color: #000; border: none; padding: 10px 20px; font-weight: 900; font-size: 0.7rem; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
 
-        main { padding: 40px 5%; max-width: 1200px; margin: 0 auto; }
-        .page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
-        .live-dot { width: 10px; height: 10px; background: var(--live-red); border-radius: 50%; animation: blink 1.5s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        /* --- GRID DE JOGOS --- */
+        main { flex: 1; padding: 40px 5%; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
+        .live-dot { width: 12px; height: 12px; background: var(--live-red); border-radius: 50%; box-shadow: 0 0 10px var(--live-red); animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
         #lista-ao-vivo { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-        .card-live { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; cursor: pointer; transition: 0.3s; }
-        .card-live:hover { border-color: var(--accent); }
-        .card-top { display: flex; justify-content: space-between; font-size: 0.65rem; margin-bottom: 15px; font-weight: 800; color: #555; }
-        
-        .match-row { display: flex; align-items: center; justify-content: space-between; }
-        .team { width: 30%; text-align: center; }
-        .team img { width: 40px; height: 40px; object-fit: contain; margin-bottom: 8px; }
-        .team span { display: block; font-size: 0.75rem; font-weight: 700; }
-        
-        .scoreboard { background: #1a1a1a; padding: 10px 20px; border-radius: 8px; font-size: 1.5rem; font-weight: 900; min-width: 100px; text-align: center; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--panel); border: 1px solid var(--border); width: 90%; max-width: 400px; padding: 30px; border-radius: 15px; position: relative; }
-        .close { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: #fff; cursor: pointer; }
+        /* --- CARD --- */
+        .card-live {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .card-live:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .card-top { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; }
+        
+        .match-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .team { width: 32%; text-align: center; }
+        .team img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 8px; }
+        .team span { display: block; font-size: 0.75rem; font-weight: 700; color: #fff; line-height: 1.2; }
+        
+        .scoreboard { 
+            background: #1a1a1a; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            font-size: 1.6rem; 
+            font-weight: 900; 
+            min-width: 110px; 
+            text-align: center; 
+            letter-spacing: 2px;
+        }
+
+        /* --- MODAL --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .modal-content { background: var(--panel); border: 1px solid var(--border); width: 90%; max-width: 420px; padding: 35px; border-radius: 20px; position: relative; }
+        .close { position: absolute; top: 20px; right: 25px; font-size: 2rem; color: #fff; cursor: pointer; line-height: 1; }
+        
+        /* Barra de Posse no Modal */
+        .stat-container { margin-top: 25px; }
+        .stat-label { text-align: center; font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
+        .bar-labels { display: flex; justify-content: space-between; font-weight: 900; font-size: 1.1rem; margin-bottom: 8px; }
+        .bar-bg { width: 100%; height: 12px; background: #222; border-radius: 6px; display: flex; overflow: hidden; border: 1px solid #333; }
+        .bar-fill-casa { background: var(--accent); transition: width 1s ease-out; }
+        .bar-fill-fora { background: var(--live-red); transition: width 1s ease-out; }
+
+        footer { padding: 30px; text-align: center; font-size: 0.7rem; color: #444; border-top: 1px solid var(--border); margin-top: auto; }
     </style>
 </head>
 <body>
@@ -53,71 +106,34 @@
         <div class="header-content">
             <a href="index.html" class="brand">
                 <img src="logos/logo.png" class="logo-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53244.png'">
-                <h1 style="font-size: 1.1rem; text-transform: uppercase;">FutStats</h1>
+                <h1 style="font-size: 1.2rem; font-weight: 900; text-transform: uppercase; color: #fff; letter-spacing: 1px;">FutStats</h1>
             </a>
             <nav class="nav-links">
                 <a href="classificacao.html">Tabelas</a>
                 <a href="aovivo.html" class="active">Ao Vivo</a>
+                <a href="arena.html">Arena</a>
             </nav>
-            <div class="nav-right"><button class="btn-app">BAIXAR APP</button></div>
+            <div class="nav-right">
+                <button class="btn-app">BAIXAR APP</button>
+            </div>
         </div>
     </header>
 
     <main>
-        <div class="page-header"><div class="live-dot"></div><h2>JOGOS AGORA</h2></div>
-        <div id="lista-ao-vivo"></div>
+        <div class="page-header">
+            <div class="live-dot"></div>
+            <h2 style="font-size: 1.5rem; font-weight: 900; text-transform: uppercase;">Central Ao Vivo</h2>
+        </div>
+        
+        <div id="lista-ao-vivo">
+            <p style="color: #666; font-weight: 600;">Sincronizando com satélites ESPN...</p>
+        </div>
     </main>
 
     <div id="modal-live" class="modal">
         <div class="modal-content">
             <span class="close" onclick="fecharModal()">&times;</span>
-            <h3 id="m-title" style="text-align:center; margin-bottom: 25px; font-size: 1rem;"></h3>
-            <div id="m-stats"></div>
-        </div>
-    </div>
-
-    <script>
-        const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co"; 
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        async function carregar() {
-            const { data } = await _supabase.from('jogos_ao_vivo').select('*');
-            if (!data) return;
-
-            document.getElementById('lista-ao-vivo').innerHTML = data.map(j => {
-                const dados = JSON.stringify(j).replace(/"/g, '&quot;');
-                return `
-                <div class="card-live" onclick="abrirModal(${dados})">
-                    <div class="card-top"><span style="color:var(--live-red)">• ${j.status}</span><span>${j.campeonato}</span></div>
-                    <div class="match-row">
-                        <div class="team"><img src="${j.logo_casa}"><span class="team-name">${j.time_casa}</span></div>
-                        <div class="scoreboard">${j.placar}</div>
-                        <div class="team"><img src="${j.logo_fora}"><span class="team-name">${j.time_fora}</span></div>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        function abrirModal(j) {
-            document.getElementById('m-title').innerText = `${j.time_casa} x ${j.time_fora}`;
-            document.getElementById('m-stats').innerHTML = `
-                <div style="font-size: 0.7rem; color: #888; text-align: center; margin-bottom: 10px;">POSSE DE BOLA</div>
-                <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px;">
-                    <span>${j.posse_casa}%</span><span>${j.posse_fora}%</span>
-                </div>
-                <div style="width: 100%; height: 10px; background: #222; border-radius: 5px; display: flex; overflow: hidden;">
-                    <div style="width: ${j.posse_casa}%; background: var(--accent); transition: 0.5s;"></div>
-                    <div style="width: ${j.posse_fora}%; background: var(--live-red); transition: 0.5s;"></div>
-                </div>
-            `;
-            document.getElementById('modal-live').style.display = 'flex';
-        }
-
-        function fecharModal() { document.getElementById('modal-live').style.display = 'none'; }
-        
-        carregar();
-        setInterval(carregar, 30000);
-    </script>
-</body>
-</html>
+            <h3 id="m-title" style="text-align:center; font-size: 1.1rem; font-weight: 900; margin-bottom: 10px;"></h3>
+            <p id="m-camp" style="text-align: center; font-size: 0.6rem; color: #555; text-transform: uppercase; margin-bottom: 20px;"></p>
+            
+            <div
