@@ -27,11 +27,11 @@
             overflow-x: hidden;
         }
 
-        /* --- HEADER COM BOTÃO NO CANTO DIREITO --- */
+        /* --- HEADER RESPONSIVO --- */
         header { 
             background: #000; 
             border-bottom: 1px solid var(--border); 
-            padding: 15px 5%; 
+            padding: 10px 5%; 
             position: sticky; 
             top: 0; 
             z-index: 1000; 
@@ -40,6 +40,7 @@
         .header-content { 
             display: flex; 
             align-items: center; 
+            justify-content: space-between;
             max-width: 1400px; 
             margin: 0 auto; 
             width: 100%;
@@ -51,23 +52,21 @@
             text-decoration: none; 
             color: white; 
             gap: 10px; 
-            flex-shrink: 0;
         }
 
-        .site-logo-img { width: 35px; height: 35px; object-fit: contain; }
-        .logo { font-weight: 900; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+        .site-logo-img { width: 30px; height: 30px; object-fit: contain; }
+        .logo { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Menu centralizado/esquerda */
+        /* MENU MOBILE / DESKTOP */
         .nav-links {
             display: flex;
             gap: 20px;
-            margin-left: 40px;
         }
 
         .nav-links a { 
             color: var(--text-dim); 
             text-decoration: none; 
-            font-size: 0.75rem; 
+            font-size: 0.7rem; 
             font-weight: 700; 
             text-transform: uppercase; 
             transition: 0.3s; 
@@ -75,78 +74,85 @@
 
         .nav-links a:hover, .nav-links a.active { color: #fff; }
 
-        /* Container do botão empurrado para a direita */
-        .nav-right {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
         }
 
-        .btn-download { 
-            background: #fff; 
-            color: #000; 
-            border: none; 
-            padding: 10px 22px; 
-            font-weight: 900; 
-            font-size: 0.7rem; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            text-transform: uppercase;
-            transition: 0.3s;
-            white-space: nowrap;
-        }
-
-        .btn-download:hover {
-            background: var(--accent);
-            color: #fff;
-            transform: translateY(-2px);
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: #fff;
+            border-radius: 2px;
         }
 
         /* --- IA NEURAL INSIGHTS --- */
-        #ia-insights-container { padding: 20px 5%; background: linear-gradient(90deg, #000, #0a0a0a); border-bottom: 1px solid var(--border); }
-        .ia-wrapper { display: flex; align-items: center; gap: 20px; max-width: 1200px; margin: 0 auto; }
-        .ia-icon-box { position: relative; display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; background: #111; border-radius: 50%; border: 1px solid #222; flex-shrink: 0; }
-        .ia-status-pulse { position: absolute; width: 100%; height: 100%; border: 2px solid var(--accent); border-radius: 50%; animation: pulse 2s infinite; opacity: 0; }
-        @keyframes pulse { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
-        .ia-robot-icon { font-size: 1.5rem; }
-        .ia-label { font-size: 0.6rem; color: var(--accent); font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
-        #ia-output { font-size: 0.85rem; color: #ccc; margin-top: 4px; font-weight: 400; }
+        #ia-insights-container { padding: 15px 5%; background: linear-gradient(90deg, #000, #0a0a0a); border-bottom: 1px solid var(--border); }
+        .ia-wrapper { display: flex; align-items: center; gap: 15px; max-width: 1200px; margin: 0 auto; }
+        .ia-icon-box { position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #111; border-radius: 50%; flex-shrink: 0; }
+        .ia-robot-icon { font-size: 1.2rem; }
+        .ia-label { font-size: 0.55rem; color: var(--accent); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        #ia-output { font-size: 0.75rem; color: #ccc; margin-top: 2px; line-height: 1.4; }
 
         /* --- CARROSSEL --- */
-        .hero-carousel { position: relative; width: 100%; height: 550px; overflow: hidden; }
-        .carousel-slides { display: flex; height: 100%; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+        .hero-carousel { position: relative; width: 100%; height: 500px; overflow: hidden; }
+        .carousel-slides { display: flex; height: 100%; transition: transform 0.6s ease; }
         .slide { min-width: 100%; height: 100%; position: relative; }
-        .slide img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4); }
-        .slide-overlay { position: absolute; bottom: 100px; left: 8%; max-width: 600px; opacity: 0; transform: translateY(30px); transition: 0.8s 0.3s; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.35); }
+        
+        .slide-overlay { 
+            position: absolute; 
+            bottom: 60px; 
+            left: 5%; 
+            right: 5%;
+            max-width: 600px; 
+            opacity: 0; 
+            transform: translateY(20px); 
+            transition: 0.8s; 
+        }
         .slide.active .slide-overlay { opacity: 1; transform: translateY(0); }
-        .news-category { background: var(--accent); color: white; padding: 5px 12px; font-size: 0.65rem; font-weight: 900; text-transform: uppercase; border-radius: 3px; }
-        .news-title { font-size: 2.8rem; font-weight: 900; margin: 15px 0; line-height: 1.1; }
-        .news-description { font-size: 1rem; color: #bbb; line-height: 1.6; margin-bottom: 25px; }
-        .btn-saiba-mais { background: transparent; border: 2px solid #fff; color: #fff; padding: 12px 30px; font-weight: 900; cursor: pointer; transition: 0.3s; }
-        .btn-saiba-mais:hover { background: #fff; color: #000; }
+        .news-title { font-size: 2rem; font-weight: 900; margin: 10px 0; line-height: 1.2; }
+        .news-description { font-size: 0.9rem; color: #bbb; margin-bottom: 20px; }
 
-        .carousel-controls { position: absolute; bottom: 40px; right: 8%; display: flex; align-items: center; gap: 20px; z-index: 10; }
-        .control-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-family: monospace; }
-        .carousel-dots { display: flex; gap: 8px; }
-        .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; cursor: pointer; }
-        .dot.active { background: #fff; width: 25px; border-radius: 10px; }
+        /* --- MEDIA QUERIES (MOBILE) --- */
+        @media (max-width: 768px) {
+            .menu-toggle { display: flex; }
+            
+            .nav-links {
+                display: none; /* Escondido por padrão no mobile */
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                background: #000;
+                padding: 20px;
+                border-bottom: 1px solid var(--border);
+                text-align: center;
+                gap: 15px;
+            }
 
-        /* --- PAINEL DETALHES --- */
-        #news-details-panel { display: none; padding: 60px 8%; background: #0a0a0a; border-top: 1px solid var(--border); }
+            .nav-links.show { display: flex; }
+
+            .nav-right { display: none; } /* Esconde botão de download no mobile */
+
+            .news-title { font-size: 1.6rem; }
+            .hero-carousel { height: 400px; }
+            
+            .ia-wrapper { flex-direction: row; }
+            #ia-output { font-size: 0.7rem; }
+        }
 
         /* --- FOOTER --- */
-        footer { background: #000; border-top: 1px solid var(--border); padding: 60px 6%; margin-top: 50px; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; }
-        
-        /* Mobile */
-        @media (max-width: 900px) {
-            .nav-links { display: none; }
-            .news-title { font-size: 1.8rem; }
-            .hero-carousel { height: 450px; }
-        }
+        footer { background: #000; border-top: 1px solid var(--border); padding: 40px 6%; margin-top: 30px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; }
     </style>
 </head>
-<body id="home-page">
+<body>
 
     <header>
         <div class="header-content">
@@ -155,11 +161,15 @@
                 <h1 class="logo">FutStats</h1>
             </a>
             
-            <nav class="nav-links">
-                <a href="classificacao.html">Classificação</a>
+            <button class="menu-toggle" id="mobile-menu-btn">
+                <span></span><span></span><span></span>
+            </button>
+
+            <nav class="nav-links" id="nav-menu">
+                <a href="classificacao.html">Tabelas</a>
                 <a href="arena.html">Arena H2H</a>
-                <a href="aovivo.html">Jogos ao Vivo</a>
-                <a href="paulistao.html">Paulistão 2026</a>
+                <a href="aovivo.html">Ao Vivo</a>
+                <a href="paulistao.html">Paulistão</a>
             </nav>
 
             <div class="nav-right">
@@ -171,11 +181,10 @@
     <section id="ia-insights-container">
         <div class="ia-wrapper">
             <div class="ia-icon-box">
-                <span class="ia-status-pulse"></span>
                 <span class="ia-robot-icon">🤖</span>
             </div>
             <div class="ia-text-content">
-                <span class="ia-label">FutStats Neural Insight:</span>
+                <span class="ia-label">Neural Insight:</span>
                 <p id="ia-output">Carregando análise...</p>
             </div>
         </div>
@@ -184,109 +193,91 @@
     <main>
         <section class="hero-carousel">
             <div class="carousel-slides" id="carousel-slides"></div>
-            <div class="carousel-controls">
-                <button class="control-btn" id="prev-slide">&lt;</button>
-                <div class="carousel-dots" id="carousel-dots"></div>
-                <button class="control-btn" id="next-slide">&gt;</button>
-            </div>
         </section>
 
-        <section id="news-details-panel">
-            <h3 id="details-title" style="color: #fff; margin-bottom: 20px; font-weight: 800; font-size: 1.5rem; text-transform: uppercase;"></h3>
-            <p id="details-content" style="color: #aaa; line-height: 1.8; font-size: 1rem; max-width: 800px;"></p>
-            <button onclick="document.getElementById('news-details-panel').style.display='none'" style="margin-top: 30px; background: var(--accent); color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold;">FECHAR</button>
+        <section id="news-details-panel" style="display: none; padding: 40px 5%; background: #0a0a0a;">
+            <h3 id="details-title" style="color: #fff; margin-bottom: 15px;"></h3>
+            <p id="details-content" style="color: #aaa; font-size: 0.95rem;"></p>
+            <button onclick="document.getElementById('news-details-panel').style.display='none'" style="margin-top: 20px; background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px;">Fechar</button>
         </section>
     </main>
 
     <footer>
         <div class="footer-grid">
             <div>
-                <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase;">FUTSTATS</h4>
-                <p style="color: #666; font-size: 0.75rem; line-height: 2;">A vanguarda da análise de futebol. Tecnologia neural aplicada ao desempenho esportivo.</p>
+                <h4 style="color: #fff; font-size: 0.7rem; margin-bottom: 15px;">FUTSTATS</h4>
+                <p style="color: #666; font-size: 0.7rem;">Tecnologia neural aplicada ao futebol.</p>
             </div>
-            <div>
-                <h4 style="color: #fff; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase;">NAVEGAÇÃO</h4>
-                <ul style="list-style: none; font-size: 0.75rem; color: #a0a0a0; line-height: 2.5; padding: 0;">
-                    <li><a href="classificacao.html" style="text-decoration: none; color: inherit;">Tabelas Oficiais</a></li>
-                    <li><a href="arena.html" style="text-decoration: none; color: inherit;">Comparador H2H</a></li>
-                    <li><a href="aovivo.html" style="text-decoration: none; color: inherit;">Central Ao Vivo</a></li>
-                </ul>
+            <div style="text-align: center; color: #444; font-size: 0.6rem; margin-top: 20px;">
+                © 2026 FUTSTATS NEURAL.
             </div>
-        </div>
-        <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #111; text-align: center; color: #444; font-size: 0.6rem;">
-            © 2026 FUTSTATS NEURAL TECHNOLOGY.
         </div>
     </footer>
 
     <script>
-        const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co"; 
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaHVuZWZ5ZmtlY3VtYml5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDg5MzgsImV4cCI6MjA4MTk4NDkzOH0.qgjbdCe1hfzcuglS6AAj6Ua0t45C2GOKH4r3JCpRn_A";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // --- LOGICA MENU MOBILE ---
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const navMenu = document.getElementById('nav-menu');
 
-        const noticiasCarrossel = [
-            { id: 1, img: 'img/carrossel1.webp', categoria: 'Inteligência Neural', titulo: 'O Futuro é Orientado por Dados', descricao: 'Processamos 10.000 variáveis para sua melhor análise.', detalhes: 'Modelos de regressão avançados para prever o domínio de campo.' },
-            { id: 2, img: 'img/carrossel2.webp', categoria: 'Arena H2H', titulo: 'Duelos Lendários, Análises Exatas', descricao: 'Compare gigantes com precisão científica.', detalhes: 'Análise de xG, posse e solidez defensiva.' },
-            { id: 3, img: 'img/carrossel3.webp', categoria: 'Ao Vivo', titulo: 'Live Feeds Refinados', descricao: 'Acompanhe o tempo real com gráficos de pressão.', detalhes: 'Latência reduzida e estatísticas em tempo real.' },
-            { id: 4, img: 'img/carrossel4.webp', categoria: 'Novidade', titulo: 'Paulistão 2026', descricao: 'Tabela e jogos do Campeonato Paulista.', detalhes: 'Acompanhe seu time na liga mais antiga do Brasil.' }
-        ];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarIA();
-            inicializarCarrossel();
+        menuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('show');
         });
 
-        async function carregarIA() {
-            const output = document.getElementById('ia-output');
-            try {
-                const { data, error } = await _supabase.from('site_info').select('comentario_ia').eq('id', 1).single();
-                if (data) output.innerText = data.comentario_ia;
-            } catch (e) { output.innerText = "Sincronizando dados neurais..."; }
-        }
+        // --- DADOS E CARROSSEL ---
+        const noticiasCarrossel = [
+            { id: 1, img: 'img/carrossel1.webp', categoria: 'IA', titulo: 'O Futuro dos Dados', descricao: 'Análise neural de alto desempenho.', detalhes: 'Modelos avançados de xG.' },
+            { id: 2, img: 'img/carrossel2.webp', categoria: 'Arena', titulo: 'Duelos H2H', descricao: 'Compare gigantes do futebol.', detalhes: 'Estatísticas de confronto direto.' },
+            { id: 3, img: 'img/carrossel3.webp', categoria: 'Live', titulo: 'Central Ao Vivo', descricao: 'Tempo real com precisão.', detalhes: 'Gráficos de pressão e posse.' }
+        ];
 
         function inicializarCarrossel() {
-            const slidesContainer = document.getElementById('carousel-slides');
-            const dotsContainer = document.getElementById('carousel-dots');
-            
-            slidesContainer.innerHTML = noticiasCarrossel.map((n, i) => `
+            const container = document.getElementById('carousel-slides');
+            container.innerHTML = noticiasCarrossel.map((n, i) => `
                 <div class="slide ${i === 0 ? 'active' : ''}">
-                    <img src="${n.img}" onerror="this.src='https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1000&auto=format&fit=crop'">
+                    <img src="${n.img}" onerror="this.src='https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800'">
                     <div class="slide-overlay">
-                        <span class="news-category">${n.categoria}</span>
                         <h2 class="news-title">${n.titulo}</h2>
                         <p class="news-description">${n.descricao}</p>
-                        <button class="btn-saiba-mais" onclick="mostrarDetalhesNoticia(${n.id})">SAIBA MAIS</button>
+                        <button class="btn-saiba-mais" onclick="mostrarNoticia(${n.id})" style="background: white; border:none; padding: 8px 20px; font-weight: bold; cursor:pointer;">VER MAIS</button>
                     </div>
                 </div>
             `).join('');
 
-            dotsContainer.innerHTML = noticiasCarrossel.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`).join('');
-
-            let current = 0;
-            const dots = document.querySelectorAll('.dot');
-            const slides = document.querySelectorAll('.slide');
-
-            function update() {
-                slidesContainer.style.transform = `translateX(-${current * 100}%)`;
-                dots.forEach(d => d.classList.remove('active'));
-                dots[current].classList.add('active');
-                slides.forEach(s => s.classList.remove('active'));
-                slides[current].classList.add('active');
-            }
-
-            document.getElementById('next-slide').onclick = () => { current = (current + 1) % noticiasCarrossel.length; update(); };
-            document.getElementById('prev-slide').onclick = () => { current = (current - 1 + noticiasCarrossel.length) % noticiasCarrossel.length; update(); };
-            dots.forEach(d => d.onclick = (e) => { current = parseInt(e.target.dataset.index); update(); });
-
-            setInterval(() => { current = (current + 1) % noticiasCarrossel.length; update(); }, 7000);
+            let idx = 0;
+            setInterval(() => {
+                idx = (idx + 1) % noticiasCarrossel.length;
+                container.style.transform = `translateX(-${idx * 100}%)`;
+                document.querySelectorAll('.slide').forEach((s, i) => {
+                    s.classList.toggle('active', i === idx);
+                });
+            }, 5000);
         }
 
-        function mostrarDetalhesNoticia(id) {
+        function mostrarNoticia(id) {
             const n = noticiasCarrossel.find(x => x.id === id);
             document.getElementById('details-title').innerText = n.titulo;
             document.getElementById('details-content').innerText = n.detalhes;
             document.getElementById('news-details-panel').style.display = 'block';
-            window.scrollTo({ top: document.getElementById('news-details-panel').offsetTop - 100, behavior: 'smooth' });
+            window.scrollTo({ top: document.getElementById('news-details-panel').offsetTop - 80, behavior: 'smooth' });
         }
+
+        const SUPABASE_URL = "https://sihunefyfkecumbiyxva.supabase.co"; 
+        const SUPABASE_KEY = "SUA_KEY_AQUI"; // Certifique-se de usar sua key real
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function carregarIA() {
+            try {
+                const { data } = await _supabase.from('site_info').select('comentario_ia').eq('id', 1).single();
+                if (data) document.getElementById('ia-output').innerText = data.comentario_ia;
+            } catch (e) { 
+                document.getElementById('ia-output').innerText = "Analisando tendências do mercado..."; 
+            }
+        }
+
+        window.onload = () => {
+            inicializarCarrossel();
+            carregarIA();
+        };
     </script>
 </body>
 </html>
